@@ -29,7 +29,7 @@ class SolomonEmployee(object):
         if not area:
             area = IArea(NULL)
             s_area = Solomon.getArea(self.dfltExpSub)
-            area.name = s_area['description']
+            area.name = s_area['Descr']
             area.sub = self.dfltExpSub
         return area
 
