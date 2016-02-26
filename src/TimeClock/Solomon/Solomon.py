@@ -17,6 +17,16 @@ def fetchone(cur):
     return r
 
 
+def fetchall(cur):
+    o = []
+    for i in cur:
+        if isinstance(i, str):
+            o.append(i.strip())
+        else:
+            o.append(i)
+    return o
+
+
 @contextmanager
 def context():
     with connect(host, user=user, database=db, password=pw) as con:
@@ -48,7 +58,7 @@ def getWorkLocation(dfltWrkloc: str) -> dict:
 def getBenefits(eid: str) -> [dict]:
     with context() as cur:
         cur.execute("SELECT * FROM benemp WHERE EmpID='%s'" % eid)
-        return cur.fetchall()
+        return fetchall(cur)
 
 
 @overload
@@ -65,14 +75,14 @@ def getBenefit(e: IEmployee, bid: str) -> [dict]:
 def getBenefit(eid: str, bid: str) -> dict:
     with context() as cur:
         cur.execute("SELECT * FROM benemp WHERE EmpID='%s' and BenId='%s'" % (eid, bid))
-        return cur.fetchone()
+        return fetchone(cur)
 
 
 @overload
 def getBenefit(bid: str) -> dict:
     with context() as cur:
         cur.execute("SELECT * FROM benefit WHERE BenId='%s'" % bid)
-        return cur.fetchone()
+        return fetchone(cur)
 
 
 @overload
