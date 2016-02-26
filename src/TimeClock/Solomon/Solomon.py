@@ -12,18 +12,14 @@ pw = os.environ['SOLOMONPW']
 
 def fetchone(cur):
     r = cur.fetchone()
-    if isinstance(r, str):
-        return r.strip()
+    r = {i:r[i].strip() if isinstance(r[i], str) else r[i] for i in r}
     return r
 
 
 def fetchall(cur):
     o = []
-    for i in cur:
-        if isinstance(i, str):
-            o.append(i.strip())
-        else:
-            o.append(i)
+    for r in cur:
+        o.append({i:r[i].strip() if isinstance(r[i], str) else r[i] for i in r})
     return o
 
 
