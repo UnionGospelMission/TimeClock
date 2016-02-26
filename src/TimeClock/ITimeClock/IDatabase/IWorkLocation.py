@@ -1,7 +1,7 @@
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
-from epsilon.descriptor import attribute
+from zope.interface import Attribute
 
 
 class IWorkLocation(IItem):
-    workLocationID = attribute("id")
-    description = attribute("description")
+    workLocationID = Attribute("id")
+    description = Attribute("description")
