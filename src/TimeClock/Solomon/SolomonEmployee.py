@@ -30,7 +30,7 @@ class SolomonEmployee(object):
             area = IArea(NULL)
             s_area = Solomon.getArea(self.dfltExpSub)
             area.name = s_area['Descr']
-            area.sub = self.dfltExpSub
+            area.sub = int(self.dfltExpSub)
         return area
 
     @property
