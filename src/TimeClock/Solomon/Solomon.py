@@ -25,7 +25,7 @@ def getEmployee(eid: str) -> dict:
 @coerce
 def getArea(eid: str) -> dict:
     with context() as cur:
-        cur.execute("SELECT * FROM subact WHERE EmpId='%s'"%eid)
+        cur.execute("SELECT * FROM subacct WHERE EmpId='%s'"%eid)
         return cur.fetchone()
 
 
