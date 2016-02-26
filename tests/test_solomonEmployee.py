@@ -1,7 +1,9 @@
 from unittest import TestCase
 
+from TimeClock.ITimeClock.IDatabase.IArea import IArea
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
+from TimeClock.Solomon.SolomonEmployee import SolomonEmployee
 from TimeClock.Util import NULL
 
 
