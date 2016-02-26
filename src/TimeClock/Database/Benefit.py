@@ -21,6 +21,7 @@ def findBenefit(code: str) -> IBenefit:
 
 
 def findOrCreateBenefit(benentry: dict) -> IBenefit:
+    print(list(benentry))
     return Store.findOrCreate(Benefit, code=benentry['BenId'], classId=benentry['ClassId'], description=benentry['Descr'])
 
 
