@@ -4,6 +4,8 @@ from TimeClock.Util.subclass import subclass
 
 
 def needs_coercing(Variable, Type):
+    if Variable is None:
+        return False
     if isinstance(Type, subclass):
         if issubclass(Variable, Type.cls):
             return False

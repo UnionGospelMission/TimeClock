@@ -22,12 +22,14 @@ class NewArea(Item):
     def hasPermission(self, permissions: [IPermission]):
         return Permissions.NewArea in permissions
     @overload
-    def execute(self, caller: IEmployee, name: str):
+    def execute(self, caller: IEmployee, name: str, sub: int):
         if self.hasPermission(caller.getPermissions()):
+            print(27, name, sub)
             area = IArea(name, None)
             if not area:
                 area = IArea(NULL)
                 area.name = name
+                area.sub = sub
                 return area
             else:
                 raise InvalidTransformation("Area named %s already exists"%name)

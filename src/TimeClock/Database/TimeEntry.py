@@ -16,9 +16,11 @@ from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
 @implementer(ITimeEntry, ITimePeriod)
 class TimeEntry(Item):
     area = reference()
+    workLocation = reference()
     type = reference()
     period = reference()
     approved = boolean(default=False)
+
     def startTime(self) -> IDateTime:
         return self.period.startTime()
 
@@ -51,7 +53,6 @@ class TimeEntry(Item):
 
     def duration(self) -> ITimeDelta:
         return self.period.duration()
-
 
 
 def newTimeEntry(x):

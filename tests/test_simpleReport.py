@@ -79,8 +79,8 @@ registerAdapter(ReportData, Item, IReportData)
 
 class ReportTester(TestCase):
     def test_simpleReport(self):
-        self.assertEqual(sr1.runReport(SimpleFormat), b"[('name', 'a1')][('name', 'a2')]")
-        self.assertEqual(sr2.runReport(SimpleFormat), b"[('name', 'a2')]")
+        self.assertEqual(sr1.runReport(SimpleFormat), b"[('sub', None), ('name', 'a1')][('sub', None), ('name', 'a2')]")
+        self.assertEqual(sr2.runReport(SimpleFormat), b"[('sub', None), ('name', 'a2')]")
     def testCSV(self):
         from TimeClock.Report.CSV import CSV
         print(sr3.runReport(CSV()).decode('charmap'))

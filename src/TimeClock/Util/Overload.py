@@ -172,6 +172,8 @@ class Overloaded(object):
 
             elif needs_coercing(retval, func.__annotations__['return']):
                 retval = func.__annotations__['return'](retval)
+            if retval is None:
+                return retval
             if issubclass(rettyp, Interface):
                 verifyObject(func.__annotations__['return'], retval)
         return retval
