@@ -10,18 +10,19 @@ db = os.environ['SOLOMONDATABASE']
 pw = os.environ['SOLOMONPW']
 
 
-def fetchone(self):
-    r = self.ofetchone()
-    if isinstance(r, str):
-        return r.strip()
-    return r
+
 
 
 @contextmanager
 def context():
     with connect(host, user=user, database=db, password=pw) as con:
         with con.cursor(as_dict = True) as cur:
-            cur.ofetchone = cur.fetchone
+            def fetchone(self):
+                r = ofetchone()
+                if isinstance(r, str):
+                    return r.strip()
+                return r
+            ofetchone = cur.fetchone
             cur.fetchone = fetchone
             yield cur
 
