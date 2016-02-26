@@ -30,7 +30,7 @@ class SolomonEmployee(object):
         if not area:
             area = IArea(NULL)
             s_area = Solomon.getArea(self.dfltExpSub)
-            area.name = s_area['Descr']
+            area.name = s_area['Descr'].strip()
             area.sub = int(self.dfltExpSub)
         return area
 
@@ -41,7 +41,7 @@ class SolomonEmployee(object):
         if not wl:
             wl = IWorkLocation(NULL)
             wl.workLocationID = self.dfltWrkloc
-            wl.description = Solomon.getWorkLocation(self.dfltWrkloc)['Descr']
+            wl.description = Solomon.getWorkLocation(self.dfltWrkloc)['Descr'].strip()
         return wl
 
     def __getattr__(self, item):
