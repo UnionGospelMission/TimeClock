@@ -3,5 +3,5 @@ from epsilon.descriptor import attribute
 
 
 class IWorkLocation(IItem):
-    id = attribute("id")
+    workLocationID = attribute("id")
     description = attribute("description")

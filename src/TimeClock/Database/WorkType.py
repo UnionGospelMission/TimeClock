@@ -12,12 +12,12 @@ from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 
 @implementer(IWorkLocation)
 class WorkType(Item):
-    id = text()
+    workLocationID = text()
     description = text()
 
 
 def findWorkType(i):
-    return Store.findFirst(WorkType, WorkType.id == i)
+    return Store.findFirst(WorkType, WorkType.workLocationID == i)
 
 registerAdapter(findWorkType, str, IWorkLocation)
 registerAdapter(lambda x: WorkType(store=Store), Null, IWorkLocation)

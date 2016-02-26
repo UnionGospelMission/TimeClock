@@ -39,7 +39,7 @@ class SolomonEmployee(object):
         wl = IWorkLocation(self.dfltWrkloc, None)
         if not wl:
             wl = IWorkLocation(NULL)
-            wl.id = self.dfltWrkloc
+            wl.workLocationID = self.dfltWrkloc
             wl.description = Solomon.getWorkLocation(self.dfltWrkloc)['Descr']
         return wl
 
