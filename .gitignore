@@ -1,0 +1,9 @@
+/bin
+/develop-eggs
+/downloads
+/eggs
+/parts
+/.installed.cfg
+/.idea
+*.pyc
+*__pycache__*
