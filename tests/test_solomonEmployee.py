@@ -10,5 +10,11 @@ class SolomonTester(TestCase):
         e = IEmployee(NULL)
         e.employee_id = 1001
         se = ISolomonEmployee(e)
-        print(13, se.defaultArea)
+        self.assertEqual(se.defaultArea.name == 'General and Administrative')
+
+    def testSEBenefits(self):
+        e = IEmployee(NULL)
+        e.employee_id = 1002
+        se = ISolomonEmployee(e)
+        print(19, se.getBenefits())
 

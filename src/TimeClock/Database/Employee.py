@@ -5,6 +5,7 @@ from TimeClock.API import AdministratorAPI, EmployeeAPI
 from TimeClock.API import SupervisorAPI
 from TimeClock.ITimeClock.IAPI import IAPI
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
+from TimeClock.ITimeClock.IDatabase.IBenefit import IBenefit
 from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
@@ -124,3 +125,5 @@ class Employee(Item):
     def viewAverageHours(self, area: IAbstractArea) -> ICalendarData:
         # TODO: Fix average hours
         raise NotImplementedError()
+
+

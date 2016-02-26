@@ -2,6 +2,7 @@ from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
 from TimeClock.ITimeClock.IDatabase.IArea import IArea
+from TimeClock.ITimeClock.IDatabase.IBenefit import IBenefit
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
@@ -47,5 +48,13 @@ class SolomonEmployee(object):
         for i in self.record:
             if i[0].lower() + i[1:] == item:
                 return self.record[i]
+        return object.__getattribute__(self, item)
+
+    def getBenefits(self) -> [IBenefit]:
+        return Solomon.getBenefits(self.employee)
+
+    def getAvailableBenefits(self) -> dict:
+        return {i: Solomon.getBenefitAvailable(i) for i in self.getBenefits()}
+
 
 registerAdapter(SolomonEmployee, IEmployee, ISolomonEmployee)
