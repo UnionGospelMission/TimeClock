@@ -62,6 +62,13 @@ def getBenefit(eid: str, bid: str) -> dict:
 
 
 @overload
+def getBenefit(bid: str) -> dict:
+    with context() as cur:
+        cur.execute("SELECT * FROM benefit WHERE BenId='%s'" % bid)
+        return cur.fetchone()
+
+
+@overload
 def getBenefitAvailable(eid: str, bid: str) -> float:
     z = getBenefit(eid, bid)
     return z['CurrBYTDAvail'] + z['BYBegBal'] - z['BYTDUsed']
@@ -70,3 +77,5 @@ def getBenefitAvailable(eid: str, bid: str) -> float:
 @overload
 def getBenefitAvailable(eid: IEmployee, bid: str) -> float:
     return getBenefitAvailable(eid.employee_id, bid)
+
+

@@ -1,7 +1,8 @@
 from twisted.python.components import registerAdapter
 
 from TimeClock.Axiom.Store import Store
-from TimeClock.Util import Null
+from TimeClock.Solomon import Solomon
+from TimeClock.Util import Null, NULL
 from axiom.attributes import text
 from zope.interface import implementer
 
@@ -17,12 +18,20 @@ class Benefit(Item):
 
 
 def findBenefit(code: str) -> IBenefit:
-    return Store.findFirst(Benefit, Benefit.code == code)
+    s = list(Store.query(Benefit, Benefit.code == code))
+    if s:
+        return s[0]
 
 
 def findOrCreateBenefit(benentry: dict) -> IBenefit:
-    print(list(benentry))
-    return Store.findOrCreate(Benefit, code=benentry['BenId'], classId=benentry['ClassId'], description=benentry['Descr'])
+    s = IBenefit(benentry['BenId'], None)
+    if not s:
+        b = Solomon.getBenefit(benentry['BenId'])
+        s = IBenefit(NULL)
+        s.code = benentry['BenId']
+        s.classId = b['ClassId']
+        s.description = b['Descr']
+    return s
 
 
 registerAdapter(findBenefit, str, IBenefit)
