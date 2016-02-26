@@ -47,6 +47,8 @@ class SolomonEmployee(object):
     def __getattr__(self, item):
         for i in self.record:
             if i[0].lower() + i[1:] == item:
+                if isinstance(self.record[i], str):
+                    return self.record[i].strip()
                 return self.record[i]
         return object.__getattribute__(self, item)
 
