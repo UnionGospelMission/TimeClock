@@ -52,6 +52,7 @@ class SolomonEmployee(object):
                 return self.record[i]
         return object.__getattribute__(self, item)
 
+    @coerce
     def getBenefits(self) -> [IBenefit]:
         return Solomon.getBenefits(self.employee)
 
