@@ -10,20 +10,17 @@ db = os.environ['SOLOMONDATABASE']
 pw = os.environ['SOLOMONPW']
 
 
-
+def fetchone(cur):
+    r = cur.fetchone()
+    if isinstance(r, str):
+        return r.strip()
+    return r
 
 
 @contextmanager
 def context():
     with connect(host, user=user, database=db, password=pw) as con:
         with con.cursor(as_dict = True) as cur:
-            def fetchone(self):
-                r = ofetchone()
-                if isinstance(r, str):
-                    return r.strip()
-                return r
-            ofetchone = cur.fetchone
-            cur.fetchone = fetchone
             yield cur
 
 
@@ -31,20 +28,20 @@ def context():
 def getEmployee(eid: str) -> dict:
     with context() as cur:
         cur.execute("SELECT * FROM employee WHERE EmpId='%s'"%eid)
-        return cur.fetchone()
+        return fetchone(cur)
 
 
 @coerce
 def getArea(eid: str) -> dict:
     with context() as cur:
         cur.execute("SELECT * FROM subacct WHERE Sub='%s'"%eid)
-        return cur.fetchone()
+        return fetchone(cur)
 
 
 def getWorkLocation(dfltWrkloc: str) -> dict:
     with context() as cur:
         cur.execute("SELECT * FROM workloc WHERE WrkLocId='%s'" % dfltWrkloc)
-        return cur.fetchone()
+        return fetchone(cur)
 
 
 @overload
