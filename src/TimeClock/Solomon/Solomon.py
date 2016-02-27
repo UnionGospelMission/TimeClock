@@ -4,22 +4,23 @@ from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.Utils import coerce, overload
 from pymssql import connect
 import os
-user = os.environ['SOLOMONUSER']
-host = os.environ['SOLOMONHOST']
-db = os.environ['SOLOMONDATABASE']
-pw = os.environ['SOLOMONPW']
+
+user = os.environ.get('SOLOMONUSER')
+host = os.environ.get('SOLOMONHOST')
+db = os.environ.get('SOLOMONDATABASE')
+pw = os.environ.get('SOLOMONPW')
 
 
 def fetchone(cur):
     r = cur.fetchone()
-    r = {i:r[i].strip() if isinstance(r[i], str) else r[i] for i in r}
+    r = {i: r[i].strip() if isinstance(r[i], str) else r[i] for i in r}
     return r
 
 
 def fetchall(cur):
     o = []
     for r in cur:
-        o.append({i:r[i].strip() if isinstance(r[i], str) else r[i] for i in r})
+        o.append({i: r[i].strip() if isinstance(r[i], str) else r[i] for i in r})
     return o
 
 

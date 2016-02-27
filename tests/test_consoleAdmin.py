@@ -7,6 +7,7 @@ from TimeClock.Exceptions import InvalidTransformation
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
+import TimeClock
 
 
 class ConsoleTester(TestCase):
@@ -50,7 +51,7 @@ class ConsoleTester(TestCase):
         self.assertEqual(am.exception.args[0], 'Area named Area 1 already exists')
 
         with self.assertRaises(InvalidTransformation) as am:
-             api.clockIn(john, area1)
+            api.clockIn(john, area1)
 
         self.assertEqual(am.exception.args[0], 'User not authorized to work in area')
 
