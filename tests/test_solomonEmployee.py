@@ -21,5 +21,5 @@ if 'SOLOMONUSER' in os.environ:
 
         def testSEBenefits(self):
             se = ISolomonEmployee(e)
-            print(19, se.getBenefits())
+            self.assertEqual(len(se.getBenefits()),3)
 
