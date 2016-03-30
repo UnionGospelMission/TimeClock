@@ -40,7 +40,7 @@ def fetchall(cur):
 @contextmanager
 def context():
     with connect(host, user=user, database=db, password=pw) as con:
-        with con.cursor(as_dict = True) as cur:
+        with con.cursor(as_dict=True) as cur:
             yield cur
 
 
@@ -49,7 +49,7 @@ def getEmployee(eid: str) -> dict:
     if not pymssql or eid == '1':
         return dummyEntry
     with context() as cur:
-        cur.execute("SELECT * FROM employee WHERE EmpId='%s'"%eid)
+        cur.execute("SELECT * FROM employee WHERE EmpId=%s", (eid,))
         return fetchone(cur)
 
 
@@ -69,7 +69,7 @@ def getSubAccount(eid: str) -> dict:
     if not pymssql:
         return {"Descr": "Dummy", "dfltExpSub": 1}
     with context() as cur:
-        cur.execute("SELECT * FROM subacct WHERE Sub='%s'"%eid)
+        cur.execute("SELECT * FROM subacct WHERE Sub=%s", (eid,))
         return fetchone(cur)
 
 
@@ -77,14 +77,14 @@ def getWorkLocation(dfltWrkloc: str) -> dict:
     if not pymssql:
         return {"Descr": "Dummy", "dfltExpSub": 1}
     with context() as cur:
-        cur.execute("SELECT * FROM workloc WHERE WrkLocId='%s'" % dfltWrkloc)
+        cur.execute("SELECT * FROM workloc WHERE WrkLocId=%s", (dfltWrkloc,))
         return fetchone(cur)
 
 
 @overload
 def getBenefits(eid: str) -> [dict]:
     with context() as cur:
-        cur.execute("SELECT * FROM benemp WHERE EmpID='%s'" % eid)
+        cur.execute("SELECT * FROM benemp WHERE EmpID=%s", (eid,))
         return fetchall(cur)
 
 
@@ -101,14 +101,14 @@ def getBenefit(e: IEmployee, bid: str) -> [dict]:
 @overload
 def getBenefit(eid: str, bid: str) -> dict:
     with context() as cur:
-        cur.execute("SELECT * FROM benemp WHERE EmpID='%s' and BenId='%s'" % (eid, bid))
+        cur.execute("SELECT * FROM benemp WHERE EmpID=%s and BenId=%s", (eid, bid))
         return fetchone(cur)
 
 
 @overload
 def getBenefit(bid: str) -> dict:
     with context() as cur:
-        cur.execute("SELECT * FROM benefit WHERE BenId='%s'" % bid)
+        cur.execute("SELECT * FROM benefit WHERE BenId=%s", (bid,))
         return fetchone(cur)
 
 
