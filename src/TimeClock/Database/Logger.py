@@ -1,3 +1,4 @@
+from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
 from TimeClock.Database.File import File
@@ -54,3 +55,6 @@ def findOrCreateLogger(lid: str):
     if Store.filesdir:
         logger.file = File(store=Store, path=Store.filesdir.child('%s.log' % lid).path)
     return logger
+
+
+registerAdapter(findOrCreateLogger, str, ILogger)

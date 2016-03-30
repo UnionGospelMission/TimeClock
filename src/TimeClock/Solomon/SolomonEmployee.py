@@ -26,7 +26,7 @@ class SolomonEmployee(object):
     @property
     @coerce
     def defaultSubAccount(self) -> ISubAccount:
-        area = ISubAccount(self.dfltExpSub, None)
+        area = ISubAccount(int(self.dfltExpSub), None)
         if not area:
             area = ISubAccount(NULL)
             s_area = Solomon.getSubAccount(self.dfltExpSub)
