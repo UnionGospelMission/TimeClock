@@ -27,7 +27,8 @@ def findWorkType(i):
     if ret:
         return ret[0]
     r = Solomon.getWorkLocation(i)
-    return Store.Store.findOrCreate(WorkLocation, workLocationID=i, description=r['Descr'])
+    if r:
+        return Store.Store.findOrCreate(WorkLocation, workLocationID=i, description=r['Descr'])
 
 registerAdapter(findWorkType, str, IWorkLocation)
 registerAdapter(lambda x: WorkLocation(store=Store.Store), Null, IWorkLocation)

@@ -44,7 +44,8 @@ def findSubAccount(s: str) -> ISubAccount:
     if ret:
         return ret[0]
     r = Solomon.getSubAccount(s)
-    return Store.findOrCreate(SubAccount, name=s, sub=r['Sub'])
+    if r:
+        return Store.findOrCreate(SubAccount, name=s, sub=r['Sub'])
 
 registerAdapter(newArea, Null, ISubAccount)
 registerAdapter(findSubAccount, str, ISubAccount)
