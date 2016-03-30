@@ -4,6 +4,7 @@ from zope.interface import implementer
 
 from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
+from TimeClock.Solomon import Solomon
 from TimeClock.Util import Null
 from TimeClock.Utils import coerce, overload
 from axiom.attributes import text, integer
@@ -33,6 +34,8 @@ def findArea(s: int) -> ISubAccount:
     ret = list(Store.query(SubAccount, SubAccount.sub == s))
     if ret:
         return ret[0]
+    r = Solomon.getSubAccount(s)
+    return Store.findOrCreate(SubAccount, sub=s, name=r['Descr'])
 
 @overload
 def findArea(s: str) -> ISubAccount:
@@ -40,6 +43,8 @@ def findArea(s: str) -> ISubAccount:
     ret = list(Store.query(SubAccount, SubAccount.name == s))
     if ret:
         return ret[0]
+    r = Solomon.getSubAccount(s)
+    return Store.findOrCreate(SubAccount, name=s, sub=r['Sub'])
 
 registerAdapter(newArea, Null, ISubAccount)
 registerAdapter(findArea, str, ISubAccount)

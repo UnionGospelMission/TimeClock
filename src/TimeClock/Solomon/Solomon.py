@@ -68,14 +68,30 @@ def getSubAccounts() -> [dict]:
         for i in fetchall(cur):
             yield i
 
-@coerce
-def getSubAccount(eid: str) -> dict:
+
+@overload
+def getSubAccount(eid: int) -> dict:
     if not pymssql:
         return {"Descr": "Dummy", "dfltExpSub": 1}
     with context() as cur:
         cur.execute("SELECT * FROM subacct WHERE Sub=%s", (eid,))
         return fetchone(cur)
 
+
+@overload
+def getSubAccount(eid: str) -> dict:
+    if not pymssql:
+        return {"Descr": "Dummy", "dfltExpSub": 1}
+    with context() as cur:
+        cur.execute("SELECT * FROM subacct WHERE Descr=%s", (eid,))
+        return fetchone(cur)
+
+
+def getWorkLocations() -> [dict]:
+    with context() as cur:
+        cur.execute("SELECT * FROM workloc")
+        for i in fetchall(cur):
+            yield i
 
 def getWorkLocation(dfltWrkloc: str) -> dict:
     if not pymssql:

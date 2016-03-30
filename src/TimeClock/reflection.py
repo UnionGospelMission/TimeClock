@@ -53,12 +53,7 @@ if not adm:
     adm1 = IAdministrator(NULL)
     adm1.employee = adm
     adm.powerUp(adm1, IAdministrator)
-    wl = IWorkLocation(NULL)
-    wl.description = 'test'
-    wl.workLocationID = "TST"
-    sa = ISubAccount(NULL)
-    sa.name = 'test'
-    sa.sub = 1
+
     if adm.store.filesdir:
         l = Logger(store=adm.store)
 
@@ -67,4 +62,16 @@ if not adm:
         l.name = "Command Logger"
         IEventBus("Commands").powerUp(l, ICommandEvent)
         if Solomon.pymssql:
+            for i in Solomon.getWorkLocations():
+                IWorkLocation(i['WrkLocId'])
+            for i in Solomon.getSubAccounts():
+                ISubAccount(int(i['Sub']))
+        else:
+            wl = IWorkLocation(NULL)
+            wl.description = 'test'
+            wl.workLocationID = "TST"
+            sa = ISubAccount(NULL)
+            sa.name = 'test'
+            sa.sub = 1
+
 
