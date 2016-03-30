@@ -27,6 +27,7 @@ from .Database.EntryType import EntryType
 from .Database.TimePeriod import TimePeriod
 from .API import CalendarData
 from .Solomon import SolomonEmployee
+from .Solomon import Solomon
 
 from .ITimeClock.IDateTime import IDateTime
 from nevow.inevow import IRendererFactory
@@ -65,3 +66,5 @@ if not adm:
         l.flags = 1 | 2 | 4 | 8
         l.name = "Command Logger"
         IEventBus("Commands").powerUp(l, ICommandEvent)
+        if Solomon.pymssql:
+

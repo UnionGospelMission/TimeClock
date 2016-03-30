@@ -31,10 +31,8 @@ def fetchone(cur):
 
 
 def fetchall(cur):
-    o = []
     for r in cur:
-        o.append({i: r[i].strip() if isinstance(r[i], str) else r[i] for i in r})
-    return o
+        yield {i: r[i].strip() if isinstance(r[i], str) else r[i] for i in r}
 
 
 @contextmanager
@@ -60,9 +58,15 @@ def getEmployees() -> [dict]:
     else:
         with context() as cur:
             cur.execute("SELECT * FROM employee")
-            for i in cur:
+            for i in fetchall(cur):
                 yield i
 
+
+def getSubAccounts() -> [dict]:
+    with context() as cur:
+        cur.execute("SELECT * FROM subacct")
+        for i in fetchall(cur):
+            yield i
 
 @coerce
 def getSubAccount(eid: str) -> dict:
