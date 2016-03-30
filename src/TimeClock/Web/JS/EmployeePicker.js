@@ -13,6 +13,7 @@ TimeClock.EmployeePicker.methods(
         self.callRemote('runCallback', args);
     },
     function loadEmployeeList(self, node){
+        node.disabled=true;
         self.callRemote("loadEmployeeList").addCallback(function(elist){
             self.addChildWidgetFromWidgetInfo(elist).addCallback(function(widget){
                 node.parentNode.replaceChild(widget.node, node);
