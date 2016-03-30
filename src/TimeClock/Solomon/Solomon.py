@@ -161,5 +161,6 @@ dummyEntry = {'DfltWrkloc': 'BRD   ',
               'Addr1': 'XXXXX E. XXXXXX Ave.                                       ',
               'SSN': '123456789',
               'City': 'Spokane                       ',
+              'State': 'WA'
               }
 
