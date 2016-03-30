@@ -1,7 +1,7 @@
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
-from TimeClock.ITimeClock.IDatabase.IArea import IArea
+from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IBenefit import IBenefit
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
@@ -25,11 +25,11 @@ class SolomonEmployee(object):
 
     @property
     @coerce
-    def defaultArea(self) -> IArea:
-        area = IArea(self.dfltExpSub, None)
+    def defaultSubAccount(self) -> ISubAccount:
+        area = ISubAccount(self.dfltExpSub, None)
         if not area:
-            area = IArea(NULL)
-            s_area = Solomon.getArea(self.dfltExpSub)
+            area = ISubAccount(NULL)
+            s_area = Solomon.getSubAccount(self.dfltExpSub)
             area.name = s_area['Descr'].strip()
             area.sub = int(self.dfltExpSub)
         return area

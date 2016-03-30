@@ -1,12 +1,12 @@
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
-from zope.interface.common.idatetime import IDateTime, ITimeDelta
+from TimeClock.ITimeClock.IDateTime import IDateTime, ITimeDelta
 
 from TimeClock.Axiom.Attributes import datetime
-from TimeClock.Axiom.Store import Store
+from TimeClock.Axiom import Store
 from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
 from TimeClock.Util import Null
-from TimeClock.Utils import overload
+from TimeClock.Utils import overload, coerce
 from axiom.item import Item
 
 import time
@@ -36,10 +36,14 @@ class TimePeriod(Item):
     def end(self, t: IDateTime):
         self._endTime = t
 
+    @coerce
     def startTime(self) -> IDateTime:
         return self._startTime
 
-    def endTime(self) -> IDateTime:
+    @coerce
+    def endTime(self, now: bool=True) -> IDateTime:
+        if now:
+            return self._endTime or time.time()
         return self._endTime
 
     def duration(self) -> ITimeDelta:
@@ -52,14 +56,14 @@ class TimePeriod(Item):
 
 @overload
 def newTimePeriod(n: Null) -> ITimePeriod:
-    tp = TimePeriod(store=Store)
+    tp = TimePeriod(store=Store.Store)
     tp._startTime = time.time()
     return tp
 
 
 @overload
 def newTimePeriod(n: float) -> ITimePeriod:
-    tp = TimePeriod(store=Store)
+    tp = TimePeriod(store=Store.Store)
     tp._startTime = n
     return tp
 

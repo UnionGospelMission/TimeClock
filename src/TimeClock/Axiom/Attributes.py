@@ -1,16 +1,16 @@
-from zope.interface.common.idatetime import IDateTime
+from ..ITimeClock.IDateTime import IDateTime
 
 from twisted.python.components import registerAdapter
 
 from axiom.attributes import integer, MICRO
 
-from datetime import datetime
+from ..Util.DateTime import DateTime, utc
 
 
-registerAdapter(datetime.fromtimestamp, float, IDateTime)
-registerAdapter(datetime.fromtimestamp, int, IDateTime)
+registerAdapter(DateTime.utcfromtimestamp, float, IDateTime)
+registerAdapter(DateTime.utcfromtimestamp, int, IDateTime)
 
-EPOCH = IDateTime(0.0)
+EPOCH = IDateTime(0.0).astimezone(utc)
 
 
 class datetime(integer):
@@ -33,4 +33,4 @@ class datetime(integer):
     def outfilter(self, dbval, oself):
         if dbval is None:
             return None
-        return IDateTime(dbval / MICRO)
+        return DateTime.fromtimestamp(dbval / MICRO, utc)

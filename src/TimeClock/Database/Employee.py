@@ -1,11 +1,12 @@
 from zope.interface import implementer
-from zope.interface.common.idatetime import IDateTime
 
-from TimeClock.API import AdministratorAPI, EmployeeAPI
-from TimeClock.API import SupervisorAPI
+from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
+from TimeClock.Util.InMemoryTimePeriod import InMemoryTimePeriod
+from ..ITimeClock.IDateTime import IDateTime
+
+from TimeClock import API
 from TimeClock.ITimeClock.IAPI import IAPI
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
-from TimeClock.ITimeClock.IDatabase.IBenefit import IBenefit
 from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
@@ -14,12 +15,11 @@ from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
 from TimeClock.Util import NULL
 from axiom.attributes import text, integer, reference
 from axiom.item import Item
-
-from ..ITimeClock.IDatabase.IArea import IArea, IAbstractArea
-from ..ITimeClock.IDatabase.ICalendarData import ICalendarData
-from ..ITimeClock.IDatabase.ITimeEntry import ITimeEntry
-from ..ITimeClock.IDatabase.IEmployee import IEmployee
 from ..Exceptions import InvalidTransformation
+from ..ITimeClock.IDatabase.ISubAccount import ISubAccount, IAbstractSubAccount
+from ..ITimeClock.IDatabase.ICalendarData import ICalendarData
+from ..ITimeClock.IDatabase.IEmployee import IEmployee
+from ..ITimeClock.IDatabase.ITimeEntry import ITimeEntry
 from ..Utils import coerce, overload
 
 
@@ -34,8 +34,12 @@ class Employee(Item):
     timeEntry = reference()
 
     @coerce
-    def getAreas(self) -> [IAbstractArea]:
-        return self.powerupsFor(IArea)
+    def getWorkLocations(self) -> [IWorkLocation]:
+        return self.powerupsFor(IWorkLocation)
+
+    @coerce
+    def getSubAccounts(self) -> [IAbstractSubAccount]:
+        return self.powerupsFor(ISubAccount)
 
     @coerce
     def getPermissions(self) -> [IPermission]:
@@ -48,31 +52,32 @@ class Employee(Item):
     def getAPI(self) -> IAPI:
         a = IAdministrator(self, None)
         if a:
-            return AdministratorAPI
+            return API.APIs.AdministratorAPI.apiFor(self)
         s = ISupervisor(self, None)
         if s:
-            return SupervisorAPI
-        return EmployeeAPI
+            return API.APIs.SupervisorAPI.apiFor(self)
+        return API.APIs.EmployeeAPI.apiFor(self)
 
-    def clockIn(self, area: IAbstractArea) -> ITimeEntry:
-        area = IArea(area)
-        if self not in area.getEmployees():
+    def clockIn(self, subAccount: IAbstractSubAccount, workLocation: IWorkLocation) -> ITimeEntry:
+        subAccount = ISubAccount(subAccount)
+        if self not in subAccount.getEmployees():
             raise InvalidTransformation('User not authorized to work in area')
         if self.timeEntry:
             raise InvalidTransformation('User already clocked in')
         timeEntry = ITimeEntry(NULL)
-        timeEntry.area = area
+        timeEntry.subAccount = subAccount
         timeEntry.type = IEntryType("Work")
         timeEntry.period = ITimePeriod(NULL)
+        timeEntry.workLocation = workLocation
         self.powerUp(timeEntry, ITimeEntry)
         self.timeEntry = timeEntry
         return timeEntry
 
     def clockOut(self) -> ITimeEntry:
         timeEntry = list(self.powerupsFor(ITimeEntry))
-        if not timeEntry:
+        if (not timeEntry) or timeEntry[-1].period._endTime!=None:
             raise InvalidTransformation("User not currently clocked in")
-        timeEntry = timeEntry[0]
+        timeEntry = timeEntry[-1]
         timeEntry.period.end()
         self.timeEntry = None
         return timeEntry
@@ -86,44 +91,72 @@ class Employee(Item):
         return ISupervisor(self, False)
 
     @overload
-    def getEntries(self, area: IArea, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
+    def getEntries(self, area: ISubAccount, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
         return [e for e in self.getEntries(area) if e.period.startTime() > startTime and e.period.endTime() > endTime]
 
     @overload
-    def getEntries(self, area: IArea) -> [ITimeEntry]:
+    def getEntries(self, entryType: IEntryType) -> [ITimeEntry]:
+        entries = self.powerupsFor(ITimeEntry)
+        return [e for e in entries if e.type == entryType]
+
+    @overload
+    def getEntries(self, area: ISubAccount) -> [ITimeEntry]:
         entries = self.powerupsFor(ITimeEntry)
         return [e for e in entries if e.area == area]
 
     @overload
-    def getEntries(self, area: IArea, entryType: IEntryType) -> [ITimeEntry]:
+    def getEntries(self, area: ISubAccount, entryType: IEntryType) -> [ITimeEntry]:
         return [e for e in self.getEntries(area) if e.type == entryType]
 
     @overload
-    def getEntries(self, area: IArea, entryType: IEntryType, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
+    def getEntries(self, area: ISubAccount, entryType: IEntryType, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
         return [e for e in self.getEntries(area, startTime, endTime) if e.type == entryType]
 
     @overload
-    def getEntries(self, area: IArea, approved: bool, entryType: IEntryType,
+    def getEntries(self, area: ISubAccount, approved: bool, entryType: IEntryType,
                    startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
         return [e for e in self.getEntries(area, entryType, startTime, endTime) if e.approved == approved]
 
     @overload
-    def getEntries(self, area: IArea, approved: bool, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
+    def getEntries(self, area: ISubAccount, approved: bool, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
         return [e for e in self.getEntries(area, startTime, endTime) if e.approved == approved]
 
     @overload
-    def getEntries(self, area: IArea, approved: bool) -> [ITimeEntry]:
+    def getEntries(self, area: ISubAccount, approved: bool) -> [ITimeEntry]:
         return [e for e in self.getEntries(area) if e.approved == approved]
 
     @overload
-    def getEntries(self, area: IArea, approved: bool, entryType: IEntryType) -> [ITimeEntry]:
+    def getEntries(self, area: ISubAccount, approved: bool, entryType: IEntryType) -> [ITimeEntry]:
         return [e for e in self.getEntries(area, entryType) if e.approved == approved]
 
-    def viewHours(self, area: IAbstractArea) -> ICalendarData:
+    @overload
+    def viewHours(self, area: IAbstractSubAccount) -> ICalendarData:
         return ICalendarData(self.getEntries(area, entryType="Work"))
 
-    def viewAverageHours(self, area: IAbstractArea) -> ICalendarData:
-        # TODO: Fix average hours
-        raise NotImplementedError()
+    @overload
+    def viewHours(self, area: IAbstractSubAccount, start: IDateTime, end: IDateTime) -> ICalendarData:
+        return ICalendarData(self.getEntries(area, entryType="Work")).between(start, end)
+
+    @overload
+    def viewHours(self, start: IDateTime, end: IDateTime) -> ICalendarData:
+        cd = ICalendarData(self.getEntries(entryType="Work"))
+        return cd.between(start, end)
+
+    @coerce
+    def viewAverageHours(self, startTime: IDateTime, endTime: IDateTime) -> ICalendarData:
+        endTime = endTime.replace(days=1)
+        avgStart = startTime.replace(days=-90)
+        hours = self.viewHours(start=avgStart, end=endTime)
+        if hours.startTime() > startTime:
+            startTime = hours.startTime().replace(seconds=-1)
+        outdata = ICalendarData([])
+        for day in startTime.daysBetween(startTime, endTime):
+            if isinstance(day, tuple):
+                continue
+            total = hours.sumBetween(day.replace(days=-90), day)
+            print(151, total)
+            outdata.addTime(InMemoryTimePeriod(day, day + total / 90))
+        return outdata
+
 
 

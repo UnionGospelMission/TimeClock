@@ -1,0 +1,5 @@
+<div class="EmployeePicker" id="EmployeePicker" n:pattern="EmployeePickerPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"></n:attr>
+    <invisible n:render="formArguments"/>
+    <input type="button"><n:attr name="value" n:render="actionName"/><athena:handler event="onclick" handler="pickEmployee"/></input>
+</div>

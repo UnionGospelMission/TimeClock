@@ -1,10 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:n="http://nevow.com/ns/nevow/0.1">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <n:invisible n:render="liveglue" />
+    <title>Time Clock</title>
 </head>
 <body>
-
+    <div n:render="MenuPane">Menu Pane</div>
+    <div class="menu" id="Menu" n:pattern="MenuPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7">
+        <ul id="menuList">
+            <li n:data="menuItem" n:render="menuItem"><athena:handler event="onclick" handler="menuClicked" /></li>
+        </ul>
+        <div id="greeter"><h3>Welcome <invisible n:render="employeeName"/></h3></div>
+    </div>
+    <div n:render="ActionPane">ActionPane</div>
+    <div class="ActionPane" id="ActionPane" n:pattern="ActionPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7">
+        <invisible n:render="ActionItems"/>
+    </div>
 </body>
 </html>

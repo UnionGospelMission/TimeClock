@@ -1,5 +1,5 @@
 from zope.interface import Interface
-from zope.interface.common.idatetime import IDateTime, ITimeDelta
+from TimeClock.ITimeClock.IDateTime import ITimeDelta, IDateTime
 
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
 from TimeClock.Util import fromFunction
@@ -10,7 +10,7 @@ class ITimePeriod(IItem):
     def startTime() -> IDateTime:
         pass
 
-    def endTime() -> IDateTime:
+    def endTime(now: bool=True) -> IDateTime:
         pass
 
     @overload

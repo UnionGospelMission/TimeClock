@@ -1,7 +1,7 @@
 from collections import defaultdict, OrderedDict
 
 from zope.interface import Interface
-from zope.interface.exceptions import BrokenImplementation, BrokenMethodImplementation
+from zope.interface.exceptions import BrokenImplementation, BrokenMethodImplementation, DoesNotImplement
 from zope.interface.interface import Attribute, Method
 from zope.interface.verify import verifyObject
 
@@ -108,13 +108,27 @@ class Overloaded(object):
                 if needs_coercing(args[label], annotations[label]):
                     if not should_coerce:
                         return False, None, None, None
-                    args[label] = annotations[label](args[label])
-                if issubclass(annotations[label], Interface):
+                    try:
+                        args[label] = annotations[label](args[label])
+                    except TypeError:
+                        return False, None, None, None
+                if isinstance(annotations[label], list):
+                    if issubclass(annotations[label][0], Interface):
+                        for v in args[label]:
+                            try:
+                                verifyObject(annotations[label][0], v)
+                            except BrokenImplementation:
+                                return False, None, None, None
+                            except BrokenMethodImplementation:
+                                return False, None, None, None
+                elif issubclass(annotations[label], Interface):
                     try:
                         verifyObject(annotations[label], args[label])
                     except BrokenImplementation:
                         return False, None, None, None
                     except BrokenMethodImplementation:
+                        return False, None, None, None
+                    except DoesNotImplement:
                         return False, None, None, None
             elif label in kwargs:
                 if isinstance(kwargs[label], Defalt):
@@ -127,6 +141,10 @@ class Overloaded(object):
                     try:
                         verifyObject(annotations[label], kwargs[label])
                     except BrokenImplementation:
+                        return False, None, None, None
+                    except BrokenMethodImplementation:
+                        return False, None, None, None
+                    except DoesNotImplement:
                         return False, None, None, None
             elif label == varkwarg:
                 for k, v in varkwargs.items():
@@ -146,6 +164,10 @@ class Overloaded(object):
                         try:
                             verifyObject(annotations[label], va)
                         except BrokenImplementation:
+                            return False, None, None, None
+                        except BrokenMethodImplementation:
+                            return False, None, None, None
+                        except DoesNotImplement:
                             return False, None, None, None
                 varargs = new_varargs
             else:

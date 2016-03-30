@@ -1,6 +1,7 @@
 // import Nevow.Athena
 // import Divmod.Runtime
 // import redirect
+// import TimeClock
 
 "use strict";
 
@@ -30,6 +31,16 @@ TimeClock.Commands.methods(
     },
     function onClose(self, node){
         self.node.parentNode.removeChild(self.node);
+        if (self.widgetParent){
+            self.widgetParent.removeChildWidget(self);
+        }
+    },
+    function replaceSelf(self, node){
+        self.node.parentNode.replaceChild(node, self.node);
+        if (self.widgetParent){
+            self.widgetParent.removeChildWidget(self);
+        }
+
     }
 
 );

@@ -2,13 +2,13 @@ from collections import defaultdict
 
 from zope.interface import implementer
 
-from TimeClock.Axiom.Store import Store
-from TimeClock.API import AdministratorAPI
+from TimeClock.Axiom import Store
+from TimeClock.API.APIs import AdministratorAPI
 from TimeClock.Database import Employee
 from TimeClock.Database.Permissions import Permission
 from TimeClock.ITimeClock.IAPI import IAPI
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
-from TimeClock.ITimeClock.IDatabase.IArea import IArea, IAbstractArea
+from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount, IAbstractSubAccount
 from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
@@ -45,17 +45,17 @@ class ConsoleAdministratorClass(object):
     @overload
     def unimplemented(self, other: object, other2: object, other3: object, other4: object, other5: object) -> object:
         self.unimplemented()
-    def clockIn(self, area: IAbstractArea) -> ITimeEntry:
+    def clockIn(self, area: IAbstractSubAccount) -> ITimeEntry:
         self.unimplemented()
-    def viewHours(self, area: IAbstractArea) -> ICalendarData:
+    def viewHours(self, area: IAbstractSubAccount) -> ICalendarData:
         self.unimplemented()
-    def getAreas(self) -> [IAbstractArea]:
+    def getAreas(self) -> [IAbstractSubAccount]:
         self.unimplemented()
     getEntries = unimplemented
     viewAverageHours = viewHours
     def addEmployee(self, e: IEmployee):
         self.unimplemented()
-    def clockOut(self) -> IAbstractArea:
+    def clockOut(self) -> IAbstractSubAccount:
         self.unimplemented()
     def isAdministrator(self) -> bool:
         return True
@@ -64,18 +64,18 @@ class ConsoleAdministratorClass(object):
     def powerUp(self, other, iface):
         self.powerups[iface].append(other)
     def getPermissions(self) -> [IPermission]:
-        return Store.query(Permission)
+        return Store.Store.query(Permission)
     def getAPI(self) -> IAPI:
         return AdministratorAPI
     def getEmployees(self) -> IEmployee:
-        return Store.query(Employee)
+        return Store.Store.query(Employee)
     @overload
     def getEmployee(self, name: str) -> IEmployee:
-        return next(Store.query(Employee, Employee.active_directory_name == name))
+        return next(Store.Store.query(Employee, Employee.active_directory_name == name))
     @overload
     def getEmployee(self, EmployeeID: int) -> IEmployee:
-        return next(Store.query(Employee, Employee.employee_id == EmployeeID))
-    def SetHoliday(self, time: ICalendarData, area: IArea):
+        return next(Store.Store.query(Employee, Employee.employee_id == EmployeeID))
+    def SetHoliday(self, time: ICalendarData, area: ISubAccount):
         #TODO
         raise NotImplementedError("Holidays not done yet")
 

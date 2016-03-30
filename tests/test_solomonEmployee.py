@@ -1,11 +1,8 @@
 import os
 from unittest import TestCase
 
-from TimeClock.ITimeClock.IDatabase.IArea import IArea
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
-from TimeClock.Solomon.SolomonEmployee import SolomonEmployee
-from TimeClock.Database.Benefit import Benefit
 from TimeClock.Util import NULL
 
 
@@ -21,5 +18,5 @@ if 'SOLOMONUSER' in os.environ:
 
         def testSEBenefits(self):
             se = ISolomonEmployee(e)
-            self.assertEqual(len(se.getBenefits()),3)
+            self.assertEqual(len(se.getBenefits()), 3)
 

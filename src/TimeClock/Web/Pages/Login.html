@@ -1,10 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:n="http://nevow.com/ns/nevow/0.1">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <n:invisible n:render="liveglue" />
+    <title>Login</title>
 </head>
 <body>
+    <div n:render="LoginPage">Login Frame</div>
+    <div class="login" id="login" n:pattern="LoginPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7">
+        <div id="loginForm">
+            Name: <input type="text" id="username"/><br/>
+            Password <input type="password" id="password"/><br/>
+            <input type="submit"><athena:handler event="onclick" handler="buttonClicked" /> </input>
 
+        </div>
+    </div>
 </body>
 </html>

@@ -1,7 +1,9 @@
 from twisted.python.components import registerAdapter
-from zope.interface.common.idatetime import IDateTime, ITimeDelta
+from TimeClock.ITimeClock.IDateTime import ITimeDelta
 
-from TimeClock.Axiom.Store import Store
+from ..ITimeClock.IDateTime import IDateTime
+
+from TimeClock.Axiom import Store
 from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
 from TimeClock.Util import Null
 from TimeClock.Utils import overload
@@ -15,7 +17,7 @@ from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
 
 @implementer(ITimeEntry, ITimePeriod)
 class TimeEntry(Item):
-    area = reference()
+    subAccount = reference()
     workLocation = reference()
     type = reference()
     period = reference()
@@ -24,8 +26,8 @@ class TimeEntry(Item):
     def startTime(self) -> IDateTime:
         return self.period.startTime()
 
-    def endTime(self) -> IDateTime:
-        return self.period.endTime()
+    def endTime(self, now: bool=True) -> IDateTime:
+        return self.period.endTime(now)
 
     @overload
     def start(self):
@@ -56,7 +58,7 @@ class TimeEntry(Item):
 
 
 def newTimeEntry(x):
-    te = TimeEntry(store=Store)
+    te = TimeEntry(store=Store.Store)
     return te
 
 registerAdapter(newTimeEntry, Null, ITimeEntry)

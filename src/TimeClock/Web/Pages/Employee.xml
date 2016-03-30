@@ -4,7 +4,7 @@
 
     <table id="EmployeeTable" border="1px" style="text-align:center" n:data="employeeData">
         <tr class="tableHeader">
-            <td colspan="2">Employee</td>
+            <td colspan="3">Employee</td>
         </tr>
         <tr>
             <td>

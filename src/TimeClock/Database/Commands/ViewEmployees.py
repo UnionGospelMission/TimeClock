@@ -1,8 +1,10 @@
 from zope.interface import implementer
 
+from TimeClock.Database.Employee import Employee
 from TimeClock.ITimeClock.ICommand import ICommand
-from TimeClock.ITimeClock.IDatabase.IArea import IArea
+from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
+from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
 from axiom.item import Item
 
 from axiom.attributes import text
@@ -21,41 +23,40 @@ from TimeClock.Utils import overload, coerce
 
 
 @implementer(ICommand, IItem)
-class ViewHours(Item):
-    def getArguments(self) -> [object]:
-        return ["caller", "Employee ID", "area", "start date", "end date"]
+class ViewEmployees(Item):
     name = text()
     @overload
-    def hasPermission(self, caller: IEmployee, employee: ISupervisee) -> bool:
-        return IAdministrator(caller, None) or (ISupervisor(caller, None) and employee in ISupervisor(caller).getEmployees()) or caller is employee
+    def hasPermission(self, caller: IAdministrator) -> bool:
+        return True
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return IAdministrator(caller, None) or ISupervisor(caller, None)
     @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return True
     @overload
-    def execute(self, caller: IEmployee, employee: ISupervisee, start: IDateTime,
-                end: IDateTime):
-        print(37, caller, employee, start, end)
-        if self.hasPermission(caller, employee):
-            c = CommandEvent(caller, self, employee, start, end)
+    def execute(self, caller: IPerson):
+        if self.hasPermission(caller):
+            c = CommandEvent(caller, self)
             if IEventBus("Commands").postEvent(c):
-                return employee.viewHours(start=start, end=end)
+                return list(ISupervisor(caller).powerupsFor(ISupervisee))
         else:
             raise PermissionDenied()
     @overload
-    def execute(self, caller: IEmployee, employee: ISupervisee, area: IArea, start: IDateTime=None, end: IDateTime=None):
-        print(46)
-        if self.hasPermission(caller, employee):
-            c = CommandEvent(caller, self, employee, area, start=start, end=end)
+    def execute(self, caller: IAdministrator, area: ISubAccount) -> object:
+        if self.hasPermission(caller):
+            c = CommandEvent(caller, self, area)
             if IEventBus("Commands").postEvent(c):
-                return employee.viewHours(area, start, end)
+                if area:
+                    return list(area.getEmployees())
         else:
             raise PermissionDenied()
-
     @overload
-    def execute(self, caller: IEmployee, start: IDateTime, end: IDateTime):
-        print(56, start, end)
-        return self.execute(caller, caller, start=start, end=end)
+    def execute(self, caller: IAdministrator, area: str) -> object:
+        if ISubAccount(area, None):
+            return self.execute(caller, ISubAccount(area))
+        return list(self.store.query(Employee))
     @overload
-    def execute(self, caller: IEmployee, *parameters: object):
+    def execute(self, caller: IPerson, *parameters: object):
         print(44, caller, parameters)
         raise NotImplementedError("%s called with invalid parameters" % self.name)

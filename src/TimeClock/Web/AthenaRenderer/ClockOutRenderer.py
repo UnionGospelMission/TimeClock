@@ -1,4 +1,8 @@
-from TimeClock.ITimeClock.IDatabase.IArea import IArea
+from TimeClock.Web.AthenaRenderer.AbstractCommandRenderer import AbstractCommandRenderer
+from nevow.athena import expose
+
+from TimeClock.Database.Commands.ClockOut import ClockOut
+from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from nevow.tags import select, option
 from nevow.loaders import xmlfile
 from twisted.python.components import registerAdapter
@@ -11,16 +15,21 @@ from TimeClock.Web.AthenaRenderer.AbstractRenderer import AbstractRenderer, path
 
 
 @implementer(IAthenaRenderable)
-class ClockInRenderer(AbstractRenderer):
-    docFactory = xmlfile(path + "/Pages/ClockIn.xml", 'ActionItemPattern')
-    jsClass = "CommandRenderer.Commands"
-    def __init__(self, command: ICommand):
-        self.command = command
+class ClockOutRenderer(AbstractCommandRenderer):
+    docFactory = xmlfile(path + "/Pages/ActionItem.xml", 'ActionItemPattern')
     def render_formArguments(self, ctx, idata):
-        s = select(name="area")
-        for a in self.employee.powerupsFor(IArea):
-            s[option(id=a.sub)[a.name]]
-        return s
+        return []
+    def render_actionName(self, ctx, idata):
+        return "Clock Out"
+    @expose
+    def runCommand(self, args):
+        super(ClockOutRenderer, self).runCommand(args)
+        self.hide()
+        self.parent.elements['clockIn'].show()
+        self.parent.selectedElement = self.parent.elements['clockIn']
+        if hasattr(self.parent, 'menu'):
+            self.parent.parent.menu.hideClockOut()
 
 
-registerAdapter(ClockInRenderer, ClockIn, IAthenaRenderable)
+
+registerAdapter(ClockOutRenderer, ClockOut, IAthenaRenderable)

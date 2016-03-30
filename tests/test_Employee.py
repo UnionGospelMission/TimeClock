@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from zope.interface.common.idatetime import ITimeDelta
+from TimeClock.ITimeClock.IDateTime import ITimeDelta
 import os
 
-from TimeClock.Database.Area import Area
+from TimeClock.Database.SubAccount import SubAccount
 from TimeClock.Database.Employee import Employee
 from TimeClock.Axiom.Store import Store
 
@@ -13,7 +13,7 @@ from TimeClock.Exceptions import InvalidTransformation
 
 s = Store
 
-a = Area(store=s, name="test area")
+a = SubAccount(store=s, name="test area")
 
 
 class EmployeeTester(TestCase):

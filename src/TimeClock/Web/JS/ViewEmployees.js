@@ -1,8 +1,8 @@
-// import CommandRenderer
+// import TimeClock.Commands
 
 "use strict";
 
-TimeClock.ViewEmployees = CommandRenderer.Commands.subclass("TimeClock.ViewEmployees");
+TimeClock.ViewEmployees = TimeClock.Commands.subclass("TimeClock.ViewEmployees");
 TimeClock.ViewEmployees.methods(
     function runCommand(self, node){
         self.callRemote('runCommand', self.getArgs(node)).addCallback(

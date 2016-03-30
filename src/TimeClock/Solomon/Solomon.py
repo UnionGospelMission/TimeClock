@@ -1,8 +1,17 @@
+import warnings, datetime
 from contextlib import contextmanager
 
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.Utils import coerce, overload
-from pymssql import connect
+try:
+    import pymssql
+    from pymssql import connect
+except ImportError:
+    warnings.warn("pymssql unavailable, Solomon database access unavailable")
+    def connect(*a):
+        raise RuntimeError("pymssql unavailable")
+    pymssql = None
+
 import os
 
 user = os.environ.get('SOLOMONUSER')
@@ -33,19 +42,34 @@ def context():
 
 @coerce
 def getEmployee(eid: str) -> dict:
+    if not pymssql or eid == '1':
+        return dummyEntry
     with context() as cur:
         cur.execute("SELECT * FROM employee WHERE EmpId='%s'"%eid)
         return fetchone(cur)
 
 
 @coerce
-def getArea(eid: str) -> dict:
+def getEmployees() -> [dict]:
+    if not pymssql:
+        return [dummyEntry]
+    with context() as cur:
+        cur.execute("SELECT * FROM employee")
+        return fetchall(cur)
+
+
+@coerce
+def getSubAccount(eid: str) -> dict:
+    if not pymssql:
+        return {"Descr": "Dummy", "dfltExpSub": 1}
     with context() as cur:
         cur.execute("SELECT * FROM subacct WHERE Sub='%s'"%eid)
         return fetchone(cur)
 
 
 def getWorkLocation(dfltWrkloc: str) -> dict:
+    if not pymssql:
+        return {"Descr": "Dummy", "dfltExpSub": 1}
     with context() as cur:
         cur.execute("SELECT * FROM workloc WHERE WrkLocId='%s'" % dfltWrkloc)
         return fetchone(cur)
@@ -92,4 +116,22 @@ def getBenefitAvailable(eid: str, bid: str) -> float:
 def getBenefitAvailable(eid: IEmployee, bid: str) -> float:
     return getBenefitAvailable(eid.employee_id, bid)
 
+
+dummyEntry = {'DfltWrkloc': 'BRD   ',
+              'StrtDate': datetime.datetime(2016, 6, 25, 0, 0),
+              'Phone': '5555555555                    ',
+              'Zip': '99206     ',
+              'BirthDate': datetime.datetime(2017, 11, 2, 0, 0),
+              'DfltExpSub': '011500                  ',
+              'CalYr': '2016',
+              'Addr2': '                                                            ',
+              'Department': 'xxxxxx    ',
+              'Status': 'I',
+              'CpnyID': 'UGM       ',
+              'EmpId': '1      ',
+              'Name': 'John D. Doe Administrator                                           ',
+              'Addr1': 'XXXXX E. XXXXXX Ave.                                       ',
+              'SSN': '123456789',
+              'City': 'Spokane                       ',
+              }
 

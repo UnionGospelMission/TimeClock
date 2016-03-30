@@ -4,10 +4,6 @@
 
 TimeClock.SetSupervisor = TimeClock.Commands.subclass("TimeClock.SetSupervisor");
 TimeClock.SetSupervisor.methods(
-    function runCommand(self, node) {
-        self.callRemote('runCommand', self.getArgs(node));
-        event.preventDefault();
-    },
     function setSup(self, val){
         self.nodeById("supervisorID").value = val;
 

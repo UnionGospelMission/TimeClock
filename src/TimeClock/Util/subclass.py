@@ -1,5 +1,6 @@
 _issubclass = issubclass
 
+
 class subclass(object):
     def __init__(self, cls):
         self.cls=cls

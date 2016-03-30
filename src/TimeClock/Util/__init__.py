@@ -1,17 +1,16 @@
 from types import MethodType
 
+import zope.interface.interface
+import zope.interface.verify
 from zope.interface import Interface
 from zope.interface.interface import fromFunction as _fromFunction
 from zope.interface.verify import _incompat
-import zope.interface.interface
-import zope.interface.verify
 
-from TimeClock.Axiom.Store import Store
 from .BoundFunction import BoundFunction
 from .Coerce import Coercer
 from .InterfaceMethod import OverloadedMethod, AnnotatedMethod
 from .Overload import Overloaded
-from .subclass import issubclass
+from .subclass import issubclass, subclass
 
 
 def getSignatureString(positional, optional, varargs, kwargs, annotations = None, **kw):
@@ -104,7 +103,10 @@ def incompat(required, implemented):
                 continue
             if issubclass(required_type, implemented_type):
                 continue
-            if issubclass(implemented_type, Interface):
+            if isinstance( required_type, subclass ):
+                if issubclass(implemented_type, required_type.cls):
+                    continue
+            elif issubclass(implemented_type, Interface):
                 if implemented_type.providedBy(required_type):
                     continue
                 if implemented_type.implementedBy(required_type):
@@ -127,7 +129,10 @@ class Null(object):
     def __repr__(self):
         return "<NULL>"
     def __conform__(self, iface):
+        from TimeClock.Axiom import Store
         if iface in self.ifaces:
-            return self.ifaces[iface](store=Store)
+            return self.ifaces[iface](store=Store.Store)
 
-NULL=Null()
+NULL = Null()
+
+

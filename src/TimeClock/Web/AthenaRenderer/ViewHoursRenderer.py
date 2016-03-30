@@ -1,35 +1,37 @@
+from TimeClock.Database.Commands.ViewHours import ViewHours
+from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderer.AbstractCommandRenderer import AbstractCommandRenderer
+from TimeClock.Web.AthenaRenderer.Calendar import Calendar
 from nevow.athena import expose
 
-from TimeClock.Database.Commands.ClockOut import ClockOut
-from TimeClock.ITimeClock.IDatabase.IArea import IArea
-from nevow.tags import select, option
 from nevow.loaders import xmlfile
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
-from TimeClock.Database.Commands.ClockIn import ClockIn
-from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
-from TimeClock.Web.AthenaRenderer.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderer.AbstractRenderer import path
+from nevow.tags import input
 
 
 @implementer(IAthenaRenderable)
-class ClockOutRenderer(AbstractCommandRenderer):
+class ViewHoursRenderer(AbstractCommandRenderer):
     docFactory = xmlfile(path + "/Pages/ActionItem.xml", 'ActionItemPattern')
-    jsClass = "CommandRenderer.Commands"
+    jsClass = "TimeClock.ViewHours"
     def render_formArguments(self, ctx, idata):
-        return []
-    def render_actionName(self, ctx, idata):
-        return "Clock Out"
+        return [input(type="date", name="startDate"), input(type="date", name="endDate")]
+
     @expose
     def runCommand(self, args):
-        super(ClockOutRenderer, self).runCommand(args)
-        self.hide()
-        self.parent.elements['clockIn'].show()
-        self.parent.selectedElement = self.parent.elements['clockIn']
-        self.parent.parent.menu.hideClockOut()
+        a = []
+        for i in args:
+            a.append(DateTime.get(i))
+        print(29, a)
+        iar = IAthenaRenderable(super(ViewHoursRenderer, self).execute(*a))
+        iar.prepare(self)
+        iar.visible = True
+        iar.setStartDate(a[0])
+        iar.setEndDate(a[1])
+        return iar
 
 
-
-registerAdapter(ClockOutRenderer, ClockOut, IAthenaRenderable)
+registerAdapter(ViewHoursRenderer, ViewHours, IAthenaRenderable)

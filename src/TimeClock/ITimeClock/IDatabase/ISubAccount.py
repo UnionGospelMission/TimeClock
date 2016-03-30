@@ -3,12 +3,12 @@ from zope.interface import Attribute
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
 
 
-class IAbstractArea(IItem):
+class IAbstractSubAccount(IItem):
     name = Attribute("name")
     sub = Attribute("sub")
 
 
-class ISubAccount(IAbstractArea):
+class ISubAccount(IAbstractSubAccount):
     from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 
     def getEmployees() -> [IEmployee]:

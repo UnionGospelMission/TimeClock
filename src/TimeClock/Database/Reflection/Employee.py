@@ -1,18 +1,27 @@
-from twisted.python.components import registerAdapter
-
 from TimeClock.Axiom.Store import Store
+from TimeClock.Database.Employee import Employee
+from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
+from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.Utils import overload
-from TimeClock.Database.Employee import Employee, IEmployee
+from ...ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 
 
 @overload
 def findEmployee(eid: int) -> IEmployee:
-    return Store.findFirst(Employee, Employee.employee_id==eid)
+    return Store.findFirst(Employee, Employee.employee_id == eid)
 
 
 @overload
 def findEmployee(adid: str) -> IEmployee:
-    return Store.findFirst(Employee, Employee.active_directory_name==adid)
+    return Store.findFirst(Employee, Employee.active_directory_name == adid)
 
-registerAdapter(findEmployee, int, IEmployee)
-registerAdapter(findEmployee, str, IEmployee)
+
+def newEmployee(_):
+    from TimeClock.Axiom.Store import Store
+    from TimeClock.API.Permissions import ClockIn
+    e = Employee(store=Store)
+    e.powerUp(ClockIn, IPermission)
+    return e
+
+
+IWorkLocation['getEmployees'].annotations['return'] = [IEmployee]

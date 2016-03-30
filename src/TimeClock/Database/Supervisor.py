@@ -1,4 +1,4 @@
-from TimeClock.Axiom.Store import Store
+from TimeClock.Axiom import Store
 from TimeClock.Database import Employee
 from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
@@ -42,7 +42,7 @@ class Supervisor(Item):
 
 
 def makeSupervisor(*n):
-    return Supervisor(store=Store)
+    return Supervisor(store=Store.Store)
 
 registerAdapter(makeSupervisor, Null, ISupervisor)
-
+registerAdapter(lambda n: n.employee, ISupervisor, IEmployee)

@@ -1,8 +1,8 @@
-// import CommandRenderer
+// import TimeClock.Commands
 
 "use strict";
 
-TimeClock.ViewHours = CommandRenderer.Commands.subclass("TimeClock.ViewHours");
+TimeClock.ViewHours = TimeClock.Commands.subclass("TimeClock.ViewHours");
 TimeClock.ViewHours.methods(
     function runCommand(self, node){
         self.callRemote('runCommand', self.getArgs(node)).addCallback(
@@ -17,8 +17,6 @@ TimeClock.ViewHours.methods(
         return false;
     },
     function getArgs(self, node){
-        window.node=node;
-        window.self=self;
         return [node.startDate.valueAsDate.toISOString(), node.endDate.valueAsDate.toISOString()];
     }
 );

@@ -4,7 +4,7 @@ from TimeClock.ITimeClock.IDatabase.IItem import IItem
 
 
 class ITimeEntry(IItem):
-    area = Attribute("area")
+    subAccount = Attribute("area")
     workLocation = Attribute("workLocation")
     type = Attribute("type")
     approved = Attribute("approved")

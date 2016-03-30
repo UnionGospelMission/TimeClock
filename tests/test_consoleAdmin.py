@@ -44,11 +44,11 @@ class ConsoleTester(TestCase):
 
         self.assertEqual(am.exception.args[0], 'User not currently clocked in')
 
-        area1 = api.newArea(ConsoleAdministrator, "Area 1", 1001)
+        area1 = api.newArea(ConsoleAdministrator, "SubAccount 1", 1001)
         with self.assertRaises(InvalidTransformation) as am:
-            api.newArea(ConsoleAdministrator, "Area 1", 1001)
+            api.newArea(ConsoleAdministrator, "SubAccount 1", 1001)
 
-        self.assertEqual(am.exception.args[0], 'Area named Area 1 already exists')
+        self.assertEqual(am.exception.args[0], 'SubAccount named SubAccount 1 already exists')
 
         with self.assertRaises(InvalidTransformation) as am:
             api.clockIn(john, area1)

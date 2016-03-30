@@ -1,29 +1,40 @@
-from TimeClock.ITimeClock.ICommand import ICommand
-from TimeClock.Web.ActionItem import path
+from nevow.athena import expose
+
 from TimeClock.Web.LiveFragment import LiveFragment
 from nevow.loaders import xmlfile
+from nevow.tags import br, input
 
 
-class ActionItem(LiveFragment):
-    docFactory = xmlfile(path + '/Pages/ActionItem.xml', 'ActionItemPattern', ignoreDocType=True)
-    def __init__(self, parent, command: ICommand):
-        self.parent=parent
-        self.setFragmentParent(parent.parent)
-        self.command = command
-    def render_formArguments(self, ctx, idata):
-        o = []
-        for arg in self.command.getArguments():
-            if arg is 'caller':
-                continue
-            t = input(type='text')
-            if isinstance(arg, dict):
-                arg, comment = list(arg.items())[0]
+path = __file__.rsplit('/', 2)[0]
+
+
+class AbstractRenderer(LiveFragment):
+    parent = None
+    employee = None
+    visible = False
+    def prepare(self, parent: LiveFragment):
+        self.parent = parent
+        self.employee = parent.employee
+        self.setFragmentParent(parent.fragmentParent)
+        self.visible = hasattr(self.parent, "selectedElement") and self.parent.selectedElement == self
+        return self
+    @expose
+    def getVisibility(self, Set=True):
+        if Set:
+            if self.visible:
+                self.show()
             else:
-                comment = None
-            t(id=arg)
-            t.value = arg if not comment else (arg + "(%s)" % comment)
-            t[arg]
-            o.append(t)
-            o.append(br())
+                self.hide()
+        return self.visible
+    def render_visibility(self, ctx, idata):
+        if self.visible:
+            return "display:block"
+        return "display:none"
+    def hide(self):
+        self.visible = False
+        self.callRemote("hide");
+    def show(self):
+        self.visible = True
+        self.callRemote("show");
 
-        return o
+

@@ -1,8 +1,9 @@
 from zope.interface import implementer
 
 from TimeClock.ITimeClock.ICommand import ICommand
-from TimeClock.ITimeClock.IDatabase.IArea import IArea
+from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
+from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
 from axiom.item import Item
 
 from axiom.attributes import text
@@ -21,9 +22,7 @@ from TimeClock.Utils import overload, coerce
 
 
 @implementer(ICommand, IItem)
-class ViewHours(Item):
-    def getArguments(self) -> [object]:
-        return ["caller", "Employee ID", "area", "start date", "end date"]
+class ViewAverageHours(Item):
     name = text()
     @overload
     def hasPermission(self, caller: IEmployee, employee: ISupervisee) -> bool:
@@ -32,22 +31,22 @@ class ViewHours(Item):
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return True
     @overload
-    def execute(self, caller: IEmployee, employee: ISupervisee, start: IDateTime,
+    def execute(self, caller: IPerson, employee: ISupervisee, start: IDateTime,
                 end: IDateTime):
         print(37, caller, employee, start, end)
         if self.hasPermission(caller, employee):
             c = CommandEvent(caller, self, employee, start, end)
             if IEventBus("Commands").postEvent(c):
-                return employee.viewHours(start=start, end=end)
+                return employee.viewAverageHours(startTime=start, endTime=end)
         else:
             raise PermissionDenied()
     @overload
-    def execute(self, caller: IEmployee, employee: ISupervisee, area: IArea, start: IDateTime=None, end: IDateTime=None):
+    def execute(self, caller: IPerson, employee: ISupervisee, area: ISubAccount, start: IDateTime=None, end: IDateTime=None):
         print(46)
         if self.hasPermission(caller, employee):
             c = CommandEvent(caller, self, employee, area, start=start, end=end)
             if IEventBus("Commands").postEvent(c):
-                return employee.viewHours(area, start, end)
+                return employee.viewAverageHours(area, start, end)
         else:
             raise PermissionDenied()
 

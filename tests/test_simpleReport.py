@@ -11,15 +11,15 @@ from TimeClock.ITimeClock.IReport.IFormat import IFormat
 from TimeClock.ITimeClock.IReport.IReportData import IReportData
 from axiom.store import Store
 
-from TimeClock.Database.Area import Area
+from TimeClock.Database.SubAccount import SubAccount
 from TimeClock.Database.Employee import Employee
 
 from TimeClock.Report.SimpleReport import SimpleReport
 
 s = Store()
 
-Area(name='a1', store=s)
-Area(name='a2', store=s)
+SubAccount(name='a1', store=s)
+SubAccount(name='a2', store=s)
 
 Employee(store=s,
          emergency_contact_name = "John Doe",
@@ -37,8 +37,8 @@ Employee(store=s,
          alternate_authentication=None,
          supervisor=None)
 
-sr1 = SimpleReport(store=s, name='test report', tableName='Area', description = 'test report 1')
-sr2 = SimpleReport(store=s, name='test report', tableName='Area', description = 'test report 2', columns=['a2'], filters=['name'])
+sr1 = SimpleReport(store=s, name='test report', tableName='SubAccount', description = 'test report 1')
+sr2 = SimpleReport(store=s, name='test report', tableName='SubAccount', description = 'test report 2', columns=['a2'], filters=['name'])
 
 sr3 = SimpleReport(store=s, name='test report', tableName='Employee', description = 'test report 3')
 

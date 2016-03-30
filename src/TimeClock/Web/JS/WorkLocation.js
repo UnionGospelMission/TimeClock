@@ -2,33 +2,30 @@
 
 "use strict";
 
-TimeClock.SetSupervisor = TimeClock.Commands.subclass("TimeClock.SetSupervisor");
-TimeClock.SetSupervisor.methods(
-    function runCommand(self, node) {
-        self.callRemote('runCommand', self.getArgs(node));
-        event.preventDefault();
-    },
-    function setSup(self, val){
-        self.nodeById("supervisorID").value = val;
-
-    },
-    function setEmp(self, val){
+TimeClock.WorkLocation = TimeClock.Commands.subclass("TimeClock.WorkLocation");
+TimeClock.WorkLocation.methods(
+    function setEmp(self, val, selected){
         self.nodeById("employeeID").value = val;
+        self.childWidgets[1].select(selected);
     },
     function runCommand(self, node){
-        self.callRemote("runCommand", [self.nodeById("employeeID").value, self.nodeById("supervisorID").value]);
+        var selected = [];
+        for (var idx=0;idx<self.childWidgets[1].selected.length; idx++){
+            selected.push(self.childWidgets[1].selected[idx].cells[1].innerHTML);
+        }
+        self.callRemote("runCommand", [self.nodeById("employeeID").value, selected]);
         event.preventDefault();
     },
     function runRefresh(self, node){
         self.callRemote("refresh");
     },
-    function refreshLists(self, suplist, emplist){
+    function refreshLists(self, emplist, wrkloclist){
         self.addChildWidgetFromWidgetInfo(emplist).addCallback(
                 function childAdded(widget){
                     self.childWidgets[0].replaceSelf(widget.node);
                 }
             );
-        self.addChildWidgetFromWidgetInfo(suplist).addCallback(
+        self.addChildWidgetFromWidgetInfo(wrkloclist).addCallback(
                 function childAdded(widget){
                     self.childWidgets[0].replaceSelf(widget.node);
                 }

@@ -1,5 +1,14 @@
-Multiple supervisors?
-Clocked in in multiple areas?
-@TODO: User Login
+Multiple supervisors? 
 @TODO: Approve Time
 @TODO: Reports
+
+@TODO: add tasklets
+@TODO: time display
+@TODO: time input
+@TODO: user time report
+
+
+TODO:  Command proxies for supervisors
+TODO:  admin/sup.getpermission should include user permissions
+How are average hours calculated?
+

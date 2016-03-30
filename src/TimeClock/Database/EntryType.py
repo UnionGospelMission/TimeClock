@@ -1,6 +1,6 @@
 from twisted.python.components import registerAdapter
 
-from TimeClock.Axiom.Store import Store
+from TimeClock.Axiom import Store
 from axiom.attributes import text
 
 from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
@@ -16,7 +16,7 @@ class EntryType(Item):
 
 
 def findEntry(s):
-    return Store.findOrCreate(EntryType, name=s)
+    return Store.Store.findOrCreate(EntryType, name=s)
 
 
 registerAdapter(findEntry, str, IEntryType)
