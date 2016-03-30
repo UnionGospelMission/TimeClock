@@ -24,9 +24,12 @@ class CheckForNewEmployees(Item):
     @overload
     def execute(self, caller: IPerson):
         caller = IAdministrator(caller)
-        o = []
+
         c = CommandEvent(caller, self)
         IEventBus("Commands").postEvent(c)
+        self.store.transact(self.doCheckForEmployees)
+    def doCheckForEmployees(self):
+        o = []
         for emp in getEmployees():
             n_emp = IEmployee(int(emp['EmpId']), None)
             if not n_emp:

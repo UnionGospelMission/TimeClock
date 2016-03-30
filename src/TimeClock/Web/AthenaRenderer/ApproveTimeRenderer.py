@@ -84,6 +84,7 @@ class ApproveTimeRenderer(AbstractCommandRenderer):
                 o.append(tags.br())
                 o.append("Duration: ")
                 o.append(str(entry.duration()).split('.')[0])
+            return o
 
 
 registerAdapter(ApproveTimeRenderer, ApproveTime, IAthenaRenderable)
