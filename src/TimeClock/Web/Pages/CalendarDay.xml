@@ -1,0 +1,18 @@
+<div class="Calendar" id="Calendar" n:pattern="CalendarDayPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <table id="day" border="1px">
+        <invisible n:render="day">
+            <tr n:pattern="date">
+                <invisible n:render="date">
+                    <td/>
+                    <td n:pattern="dateCell" n:render="mapping"><n:slot name="date" /></td>
+                </invisible>
+            </tr>
+            <tr n:pattern="hour">
+                <invisible n:render="hour">
+                    <td n:pattern="hourCell" n:render="mapping"><n:slot name="hour" /></td>
+                    <td/>
+                </invisible>
+            </tr>
+        </invisible>
+    </table>
+</div>

@@ -1,0 +1,9 @@
+<div class="SetSupervisor" id="SetSupervisor" n:pattern="SetSupervisorPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"/>
+    <form id="ssupForm">
+        <invisible n:render="formArguments"/>
+        <athena:handler event="onsubmit" handler="runCommand"/>
+        <input type="submit"><n:attr name="value" n:render="actionName"/></input>
+        <input type="button" value="Refresh"><athena:handler event="onclick" handler="runRefresh"/></input>
+    </form>
+</div>

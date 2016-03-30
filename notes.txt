@@ -1,0 +1,5 @@
+Multiple supervisors?
+Clocked in in multiple areas?
+@TODO: User Login
+@TODO: Approve Time
+@TODO: Reports

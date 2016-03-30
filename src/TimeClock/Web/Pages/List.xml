@@ -1,0 +1,47 @@
+<div class="List" id="List" n:pattern="ListPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"/>
+    <n:attr name="data-selectable" n:render="selectable"/>
+
+    <input type="button" value="Close">
+        <athena:handler event="onclick" handler="onClose"/>
+    </input>
+    <br/>
+    <input class="search" placeholder="Search"/>
+
+    <table id="ListTable" border="1px" style="text-align:center">
+        <thead n:data="tableHeader">
+            <tr>
+                <th><n:attr name="colspan"><n:slot name="titleWidth"/></n:attr><n:slot name="tableTitle" /></th>
+            </tr>
+            <tr>
+            <invisible n:render="header">
+                <invisible n:pattern="headerRow" n:render="headerRow">
+
+                        <th n:render="mapping" n:pattern="headerCell">
+                            <n:slot name="listHeader" />
+                            <athena:handler event="onclick" handler="headerClicked"/>
+                        </th>
+
+                </invisible>
+
+            </invisible>
+            </tr>
+        </thead>
+        <tbody class="list">
+            <invisible n:render="list">
+                <tr n:pattern="listRow">
+                    <invisible n:render="listRow">
+                        <td n:render="mapping" n:pattern="listCell">
+                            <n:attr name="class"><n:slot name="searchclass"/></n:attr>
+                            <n:attr name="data-index"><n:slot name="index"/></n:attr>
+                            <n:slot name="listItem" />
+
+                        </td>
+                    </invisible>
+                    <athena:handler event="ondblclick" handler="itemDblClicked"/>
+                    <athena:handler event="onclick" handler="itemClicked"/>
+                </tr>
+            </invisible>
+        </tbody>
+    </table>
+</div>

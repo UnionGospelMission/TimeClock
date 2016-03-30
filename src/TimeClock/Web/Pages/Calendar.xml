@@ -1,0 +1,36 @@
+<xml xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <div class="Calendar" id="Calendar" n:pattern="CalendarPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7">
+        <n:attr name="style" n:render="visibility"></n:attr>
+        <input type="button" value="Close"><athena:handler event="onclick" handler="onClose"/></input>
+        <br/>
+        <table id="CalendarTable" border="1px" style="text-align:center">
+            <invisible n:render="calendar">
+                <tr n:pattern="monthRow">
+                    <invisible n:render="month">
+                        <td colspan="7" n:pattern="monthCell" n:render="mapping"><n:slot name="month" /></td>
+                    </invisible>
+                </tr>
+                <tr n:pattern="weekDayRow">
+                        <invisible n:render="weekDay">
+                            <td n:pattern="day" n:render="mapping">
+                                <n:attr name="data-ordinal"><n:slot name="ordinal"/></n:attr>
+                                <n:slot name="day" />
+                                <athena:handler event="ondblclick" handler="dayDblClicked"/>
+                                <athena:handler event="onclick" handler="dayClicked"/>
+                            </td>
+                        </invisible>
+                </tr>
+                <tr n:pattern="weekDataRow">
+                    <invisible n:render="weekData">
+                        <td n:pattern="dayData" n:render="mapping">
+                            <n:attr name="data-ordinal"><n:slot name="ordinal"/></n:attr>
+                            <n:slot name="dayData" />
+                            <athena:handler event="ondblclick" handler="dayDblClicked"/>
+                            <athena:handler event="onclick" handler="dayClicked"/>
+                        </td>
+                    </invisible>
+                </tr>
+            </invisible>
+        </table>
+    </div>
+</xml>

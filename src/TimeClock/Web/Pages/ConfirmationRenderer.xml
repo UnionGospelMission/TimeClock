@@ -1,0 +1,8 @@
+<div class="Confirmation" id="Confirmation" n:pattern="ConfirmationPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"/>
+    <div class="confirmation" style="border:red 1px">
+        <invisible n:render="confirmationMsg"></invisible>
+        <invisible n:render="confirmationData"></invisible>
+        <input type="button" value="Confirm"><athena:handler event="onclick" handler="confirm"/></input>
+    </div>
+</div>
