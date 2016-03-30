@@ -8,6 +8,7 @@ from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
+from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.Util import NULL
 from TimeClock.Utils import overload
@@ -40,6 +41,10 @@ class CheckForNewEmployees(Item):
                 if a:
                     a.powerUp(n_emp, IEmployee)
                     n_emp.powerUp(a, ISubAccount)
+                w = IWorkLocation(emp['DfltWrkloc'], None)
+                if w:
+                    w.powerUp(n_emp, IEmployee)
+                    n_emp.powerUp(w, IWorkLocation)
                 o.append(n_emp)
             else:
                 print(45, n_emp)
