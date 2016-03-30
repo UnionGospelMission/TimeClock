@@ -44,6 +44,15 @@ registerAdapter(FlattenDate, datetime, inevow.IRenderer)
 registerFlattener(lambda x, y: str(x), datetime)
 
 
+def initializeDB():
+    for i in Solomon.getWorkLocations():
+        IWorkLocation(i['WrkLocId'])
+    for i in Solomon.getSubAccounts():
+        ISubAccount(int(i['Sub']))
+    from TimeClock.API.Commands import CheckForNewEmployees
+    CheckForNewEmployees.doCheckForEmployees
+
+
 adm = IEmployee(1, None)
 if not adm:
     adm = IEmployee(NULL)
@@ -62,12 +71,7 @@ if not adm:
         l.name = "Command Logger"
         IEventBus("Commands").powerUp(l, ICommandEvent)
         if Solomon.pymssql:
-            for i in Solomon.getWorkLocations():
-                IWorkLocation(i['WrkLocId'])
-            for i in Solomon.getSubAccounts():
-                ISubAccount(int(i['Sub']))
-            from TimeClock.API.Commands import CheckForNewEmployees
-            CheckForNewEmployees.doCheckForEmployees()
+            adm.store.transact(initializeDB)
         else:
             wl = IWorkLocation(NULL)
             wl.description = 'test'
