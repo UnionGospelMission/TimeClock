@@ -19,6 +19,10 @@ host = os.environ.get('SOLOMONHOST')
 db = os.environ.get('SOLOMONDATABASE')
 pw = os.environ.get('SOLOMONPW')
 
+if not user:
+    warnings.warn("Solomon environment variables undefined, Solomon database access unavailable")
+    pymssql = None
+
 
 def fetchone(cur):
     r = cur.fetchone()
@@ -53,9 +57,10 @@ def getEmployees() -> [dict]:
     if not pymssql:
         yield dummyEntry
         return
-    with context() as cur:
-        cur.execute("SELECT * FROM employee")
-        yield fetchone(cur)
+    else:
+        with context() as cur:
+            cur.execute("SELECT * FROM employee")
+            yield fetchone(cur)
 
 
 @coerce
