@@ -68,9 +68,13 @@ TimeClock.ListRenderer.methods(
         }
     },
     function itemDblClicked(self, node) {
-
+        if (self.noclick){
+            return;
+        }
+        self.noclick = true;
         self.callRemote("itemDblClicked", node.children[0].dataset.index).addCallback(
             function (newNode) {
+                self.noclick = false;
                 if (!newNode) {
                     return;
                 }
