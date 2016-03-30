@@ -60,7 +60,8 @@ def getEmployees() -> [dict]:
     else:
         with context() as cur:
             cur.execute("SELECT * FROM employee")
-            yield fetchone(cur)
+            for i in cur:
+                yield i
 
 
 @coerce
