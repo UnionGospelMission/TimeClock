@@ -33,7 +33,8 @@ class EmployeePicker(AbstractRenderer):
                                       limit=self.limit)
         lr.prepare(self, self.showDetails, "Employees")
         lr.visible = True
-        return tags.input(type='button', value='Load Employee List')[tags.Tag("athena:handler")(event="onclick", handler="loadEmployeeList")]
+        return self.preprocess(tags.input(type='button', value='Load Employee List')[tags.Tag("athena:handler")(event="onclick", handler="loadEmployeeList")])
+
     def render_actionName(self, ctx: WovenContext, data):
         return "Select Employee"
     def showDetails(self, idx):

@@ -37,4 +37,8 @@ class LiveFragment(LiveFragment):
         for c in root.children:
             LiveFragment.fixCheckboxes(c)
         return root
+    def preprocess(self, ret):
+        for p in self.preprocessors:
+            ret = p(ret)
+        return ret
 
