@@ -20,7 +20,7 @@ TimeClock.SetSupervisor.methods(
     },
     function loadEmployeeList(self, node){
         self.callRemote("loadEmployeeList").addCallback(function(emplist){
-            addChildWidgetFromWidgetInfo(emplist).addCallback(
+            self.addChildWidgetFromWidgetInfo(emplist).addCallback(
                 function childAdded(widget){
                     node.parentNode.replaceChild(widget.node, node);
                     self.childWidgets.reverse();
