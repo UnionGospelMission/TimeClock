@@ -11,6 +11,14 @@ TimeClock.EmployeePicker.methods(
             args.push(lst.selected[idx].children[0].dataset.index);
         }
         self.callRemote('runCallback', args);
+    },
+    function loadEmployeeList(self, node){
+        self.callRemote("loadEmployeeList").addCallback(function(elist){
+            self.addChildWidgetFromWidgetInfo(elist).addCallback(function(widget){
+                node.parentNode.replaceChild(widget.node, node);
+            });
+
+        });
     }
 
 );
