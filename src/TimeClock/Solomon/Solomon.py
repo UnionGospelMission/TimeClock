@@ -145,12 +145,12 @@ def getBenefitAvailable(eid: IEmployee, bid: str) -> float:
     return getBenefitAvailable(eid.employee_id, bid)
 
 
-dummyEntry = {'DfltWrkloc': 'BRD   ',
+dummyEntry = {'DfltWrkloc': 'OFF   ',
               'StrtDate': datetime.datetime(2016, 6, 25, 0, 0),
               'Phone': '5555555555                    ',
               'Zip': '99206     ',
               'BirthDate': datetime.datetime(2017, 11, 2, 0, 0),
-              'DfltExpSub': '011500                  ',
+              'DfltExpSub': '0                  ',
               'CalYr': '2016',
               'Addr2': '                                                            ',
               'Department': 'xxxxxx    ',

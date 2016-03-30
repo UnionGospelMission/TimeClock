@@ -16,9 +16,13 @@ TimeClock.SetSupervisor.methods(
         event.preventDefault();
     },
     function runRefresh(self, node){
+        if (!self.elist){
+            self.loadEmployeeList();
+        }
         self.callRemote("refresh");
     },
     function loadEmployeeList(self, node){
+        self.elist = true;
         self.callRemote("loadEmployeeList").addCallback(function(emplist){
             self.addChildWidgetFromWidgetInfo(emplist).addCallback(
                 function childAdded(widget){
