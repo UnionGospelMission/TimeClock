@@ -50,7 +50,7 @@ class SetWorkLocationRenderer(AbstractCommandRenderer):
             self.loclist.visible = True
             self.emplist.visible = True
             ret = [eimp, T.br(), T.input(type='button', value='Load Employee List')[
-                T.Tag('athena:handler')(event='onclick', handler='loadEmpoyeeList')], self.loclist]
+                T.Tag('athena:handler')(event='onclick', handler='loadEmployeeList')], self.loclist]
             for p in self.preprocessors:
                 ret = p(ret)
             return ret

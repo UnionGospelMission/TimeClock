@@ -47,7 +47,7 @@ class SetSupervisorRenderer(AbstractCommandRenderer):
                    simp,
                    T.br(),
                    T.input(type='button', value='Load Employee List')[
-                       T.Tag('athena:handler')(event='onclick', handler='loadEmpoyeeList')],
+                       T.Tag('athena:handler')(event='onclick', handler='loadEmployeeList')],
                    self.suplist]
             for p in self.preprocessors:
                 ret = p(ret)
