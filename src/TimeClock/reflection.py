@@ -66,6 +66,8 @@ if not adm:
                 IWorkLocation(i['WrkLocId'])
             for i in Solomon.getSubAccounts():
                 ISubAccount(int(i['Sub']))
+            from TimeClock.API.Commands import CheckForNewEmployees
+            CheckForNewEmployees.doCheckForEmployees()
         else:
             wl = IWorkLocation(NULL)
             wl.description = 'test'
