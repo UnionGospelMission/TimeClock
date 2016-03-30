@@ -1,3 +1,4 @@
+from TimeClock.Web.Favicon import Favicon
 from nevow import rend, inevow
 from zope.interface import implementer
 
@@ -16,6 +17,8 @@ class AthenaJS(object):
 
             return LoginPage()
         def locateChild(self, ctx, segments):
+            if segments and segments[0].startswith('favicon'):
+                return Favicon(), ()
             if segments == ['']:
                 return self, ()
             return TimeClockPage(None).locateChild(ctx, segments)
