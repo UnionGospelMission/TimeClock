@@ -33,7 +33,7 @@ class CheckForNewEmployees(Item):
         for emp in getEmployees():
             n_emp = IEmployee(int(emp['EmpId']), None)
             if not n_emp:
-                print("adding new employee", emp)
+                print("adding new employee", emp['EmpId'])
                 n_emp = IEmployee(NULL)
                 n_emp.employee_id = int(emp['EmpId'])
                 a = ISubAccount(emp['DfltExpSub'], None)
@@ -42,6 +42,7 @@ class CheckForNewEmployees(Item):
                     n_emp.powerUp(a, ISubAccount)
                 o.append(n_emp)
             else:
+                print(45, n_emp)
                 if n_emp.active_directory_name is None and n_emp.alternate_authentication is None:
                     o.append(n_emp)
         return o
