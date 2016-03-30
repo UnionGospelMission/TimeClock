@@ -26,6 +26,8 @@ if not user:
 
 def fetchone(cur):
     r = cur.fetchone()
+    if not r:
+        return
     r = {i: r[i].strip() if isinstance(r[i], str) else r[i] for i in r}
     return r
 

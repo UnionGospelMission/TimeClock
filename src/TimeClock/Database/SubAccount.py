@@ -29,7 +29,7 @@ def newArea(_) -> ISubAccount:
 
 
 @overload
-def findArea(s: int) -> ISubAccount:
+def findSubAccount(s: int) -> ISubAccount:
     from TimeClock.Axiom.Store import Store
     ret = list(Store.query(SubAccount, SubAccount.sub == s))
     if ret:
@@ -38,7 +38,7 @@ def findArea(s: int) -> ISubAccount:
     return Store.findOrCreate(SubAccount, sub=s, name=r['Descr'])
 
 @overload
-def findArea(s: str) -> ISubAccount:
+def findSubAccount(s: str) -> ISubAccount:
     from TimeClock.Axiom.Store import Store
     ret = list(Store.query(SubAccount, SubAccount.name == s))
     if ret:
@@ -47,5 +47,5 @@ def findArea(s: str) -> ISubAccount:
     return Store.findOrCreate(SubAccount, name=s, sub=r['Sub'])
 
 registerAdapter(newArea, Null, ISubAccount)
-registerAdapter(findArea, str, ISubAccount)
-registerAdapter(findArea, int, ISubAccount)
+registerAdapter(findSubAccount, str, ISubAccount)
+registerAdapter(findSubAccount, int, ISubAccount)
