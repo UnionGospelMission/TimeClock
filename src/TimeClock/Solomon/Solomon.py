@@ -49,13 +49,13 @@ def getEmployee(eid: str) -> dict:
         return fetchone(cur)
 
 
-@coerce
 def getEmployees() -> [dict]:
     if not pymssql:
-        return [dummyEntry]
+        yield dummyEntry
+        return
     with context() as cur:
         cur.execute("SELECT * FROM employee")
-        return fetchall(cur)
+        yield fetchone(cur)
 
 
 @coerce
