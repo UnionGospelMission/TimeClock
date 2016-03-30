@@ -48,11 +48,14 @@ class SetSubAccountsRenderer(AbstractCommandRenderer):
             self.emplist.visible = True
             ret = [eimp,
                    T.br(),
-                   T.input(type='button', value='Load Employee List')
-                    [T.Tag("athena:handler")(event='onclick', handler='runRefresh')], self.loclist]
+                   T.input(type='button', value='Load Employee List')[
+                       T.Tag('athena:handler')(event='onclick', handler='loadEmpoyeeList')], self.loclist]
             for p in self.preprocessors:
                 ret = p(ret)
             return ret
+    @expose
+    def loadEmployeeList(self):
+        return self.emplist
     @expose
     def refresh(self):
         fa = self.render_formArguments(None, None)

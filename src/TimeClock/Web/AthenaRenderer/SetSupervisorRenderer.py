@@ -46,11 +46,15 @@ class SetSupervisorRenderer(AbstractCommandRenderer):
             ret = [eimp,
                    simp,
                    T.br(),
-                   T.input(type='button', value='Refresh')[T.Tag('runRefresh')(event='onclick', handler='runRefresh')],
+                   T.input(type='button', value='Load Employee List')[
+                       T.Tag('athena:handler')(event='onclick', handler='loadEmpoyeeList')],
                    self.suplist]
             for p in self.preprocessors:
                 ret = p(ret)
             return ret
+    @expose
+    def loadEmployeeList(self):
+        return self.emplist
     @expose
     def refresh(self):
         fa = self.render_formArguments(None, None)

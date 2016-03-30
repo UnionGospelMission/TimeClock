@@ -19,6 +19,17 @@ TimeClock.WorkLocation.methods(
     function runRefresh(self, node){
         self.callRemote("refresh");
     },
+    function loadEmployeeList(self, node){
+        self.callRemote("loadEmployeeList").addCallback(function(emplist){
+            addChildWidgetFromWidgetInfo(emplist).addCallback(
+                function childAdded(widget){
+                    node.parentNode.replaceChild(widget.node, node);
+                    self.childWidgets.reverse();
+                }
+            );
+        });
+
+    },
     function refreshLists(self, emplist, wrkloclist){
         self.addChildWidgetFromWidgetInfo(emplist).addCallback(
                 function childAdded(widget){

@@ -18,6 +18,17 @@ TimeClock.SetSupervisor.methods(
     function runRefresh(self, node){
         self.callRemote("refresh");
     },
+    function loadEmployeeList(self, node){
+        self.callRemote("loadEmployeeList").addCallback(function(emplist){
+            addChildWidgetFromWidgetInfo(emplist).addCallback(
+                function childAdded(widget){
+                    node.parentNode.replaceChild(widget.node, node);
+                    self.childWidgets.reverse();
+                }
+            );
+        });
+
+    },
     function refreshLists(self, suplist, emplist){
         self.addChildWidgetFromWidgetInfo(emplist).addCallback(
                 function childAdded(widget){

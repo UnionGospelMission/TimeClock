@@ -49,10 +49,14 @@ class SetWorkLocationRenderer(AbstractCommandRenderer):
             eimp = T.input(id="employeeID", name="employeeID", disabled="")
             self.loclist.visible = True
             self.emplist.visible = True
-            ret = [eimp, T.br(), self.emplist, self.loclist]
+            ret = [eimp, T.br(), T.input(type='button', value='Load Employee List')[
+                T.Tag('athena:handler')(event='onclick', handler='loadEmpoyeeList')], self.loclist]
             for p in self.preprocessors:
                 ret = p(ret)
             return ret
+    @expose
+    def loadEmployeeList(self):
+        return self.emplist
     @expose
     def refresh(self):
         fa = self.render_formArguments(None, None)
