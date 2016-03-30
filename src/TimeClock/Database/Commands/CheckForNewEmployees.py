@@ -36,7 +36,7 @@ class CheckForNewEmployees(Item):
                 print("adding new employee", emp['EmpId'])
                 n_emp = IEmployee(NULL)
                 n_emp.employee_id = int(emp['EmpId'])
-                a = ISubAccount(emp['DfltExpSub'], None)
+                a = ISubAccount(int(emp['DfltExpSub']), None)
                 if a:
                     a.powerUp(n_emp, IEmployee)
                     n_emp.powerUp(a, ISubAccount)

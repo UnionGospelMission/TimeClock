@@ -1,7 +1,7 @@
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
-
+from TimeClock.ITimeClock.IDatabase.ILogger import ILogger
 from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.Solomon import Solomon
@@ -39,6 +39,12 @@ def findSubAccount(s: int) -> ISubAccount:
 
 @overload
 def findSubAccount(s: str) -> ISubAccount:
+    if s.strip().isdigit():
+        import traceback
+        stack = traceback.format_stack()
+        ILogger("Database").warn("findSubAccount(str) called with numeric string, caller should cast to int" +
+                                 str.join('\n', stack))
+        return findSubAccount(int(s))
     from TimeClock.Axiom.Store import Store
     ret = list(Store.query(SubAccount, SubAccount.name == s))
     if ret:

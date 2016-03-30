@@ -1,5 +1,6 @@
 from zope.interface import implementer
 
+from TimeClock.Database.File import File
 from TimeClock.Database.LogEntry import LogEntry
 from TimeClock.ITimeClock.IDatabase.ILogEntry import ILogEntry
 from TimeClock.ITimeClock.IDatabase.ILogger import ILogger
@@ -24,7 +25,7 @@ class Logger(Item):
     file = reference()
     @coerce
     def log(self, level: int, message: str):
-        if level & self.flags:
+        if level & self.flags and self.file:
             with self.file.open('a') as f:
                 print(str(DateTime.now()), message, file=self.file, flush=True)
         self.powerUp(LogEntry(store=self.store, level=level, message=message, logger=self), ILogEntry)
@@ -43,3 +44,13 @@ class Logger(Item):
     def handleEvent(self, event: IAbstractEvent):
         self.info(event)
 
+
+def findOrCreateLogger(lid: str):
+    from TimeClock.Axiom.Store import Store
+    logger = list(Store.query(Logger, Logger.name==lid))
+    if logger:
+        return logger[0]
+    logger = Logger(store=Store, name=lid, flags=INFO + DEBUG + WARN + ERROR)
+    if Store.filesdir:
+        logger.file = File(store=Store, path=Store.filesdir.child('%s.log' % lid).path)
+    return logger
