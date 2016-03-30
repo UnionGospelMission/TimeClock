@@ -43,7 +43,11 @@ class SetSupervisorRenderer(AbstractCommandRenderer):
             eimp = T.input(id="employeeID", name="employeeID", disabled="")
             self.suplist.visible = True
             self.emplist.visible = True
-            ret = [eimp, simp, T.br(), self.emplist, self.suplist]
+            ret = [eimp,
+                   simp,
+                   T.br(),
+                   T.input(type='button', value='Refresh')[T.Tag('runRefresh')(event='onclick', handler='runRefresh')],
+                   self.suplist]
             for p in self.preprocessors:
                 ret = p(ret)
             return ret

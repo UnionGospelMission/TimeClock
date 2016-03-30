@@ -68,9 +68,7 @@ class ListRenderer(AbstractRenderer):
     def render_listRow(self, ctx: WovenContext, data):
         listCell = inevow.IQ(ctx).patternGenerator("listCell")
         o = []
-        print(53, data)
         if isinstance(data['listItem'], dict):
-            print(54, data['listItem'])
             for i, v in data['listItem'].items():
                 o.append(listCell(data=dict(searchclass=i, index=data['index'], listItem=v)))
             return o
