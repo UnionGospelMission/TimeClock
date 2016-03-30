@@ -8,7 +8,5 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     zip_safe=False,
-    entry_points={
-        'console_scripts': ['axiomatic = TimeClock.Axiom.Axiomatic:run'],
-    },
+
 )
