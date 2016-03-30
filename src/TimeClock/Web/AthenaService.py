@@ -32,11 +32,13 @@ class AthenaService(Item):
     @staticmethod
     def new(options):
         self = AthenaService()
-        self.port = options.get('port', None)
+        port = options.get('port', None)
+        if port:
+            self.port = int(port)
         self.iajs_fqpn = options['iajs']
         return self
     def installOn(self, store):
-        self.store=store
+        self.store = store
         store.powerUp(self, twisted.application.service.IService)
     def setName(self, name):
         if self.parent:
