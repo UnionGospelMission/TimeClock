@@ -1,7 +1,7 @@
 import importlib
 
 import twisted
-from twisted.twisted.internet import ssl
+from twisted.internet import ssl
 
 import TimeClock
 from nevow.appserver import NevowSite
