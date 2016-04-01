@@ -12,3 +12,6 @@ TODO:  Command proxies for supervisors
 TODO:  admin/sup.getpermission should include user permissions
 How are average hours calculated?
 
+
+Status codes?
+List of supervisors/supers' employees

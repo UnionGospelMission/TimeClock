@@ -7,5 +7,5 @@ from axiom.item import Item
 
 
 @implementer(IAPI)
-class EmployeeAPI(AbstractAPI, Item):
+class API(AbstractAPI, Item):
     name = text()
