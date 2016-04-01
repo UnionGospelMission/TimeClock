@@ -142,9 +142,15 @@ def initializeDB(Store: store.Store, username: str, password: str):
 
 def findUsername(conn, emp: IEmployee):
     ise = ISolomonEmployee(emp)
-    name = ise.name.split()
-    fn = name[0]
-    ln = name[-1]
+    name = ise.name
+    if '~' in name:
+        name = name.split('~')
+        ln = name[0]
+        fn = name[1].split()[0]
+    else:
+        name = name.split()
+        fn = name[0]
+        ln = name[-1]
     if conn.search('dc=ugm, dc=local', '(&(givenName=%s) (sn=%s))' % (fn, ln), attributes=['sAMAccountName']):
         if len(conn.response) > 4:
             return
