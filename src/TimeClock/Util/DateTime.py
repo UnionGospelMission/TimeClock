@@ -35,5 +35,8 @@ class DateTime(Arrow):
     def get(cls, expr):
         return DateTime.fromdatetime(get(expr))
 
+    def astimezone(self, tz):
+        return self.fromdatetime(super().astimezone(tz))
+
     def asLocalTime(self):
         return self.astimezone(get_localzone())

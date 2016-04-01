@@ -110,8 +110,9 @@ class Calendar(AbstractRenderer):
         self.data = data
     @expose
     def zoomOnDay(self, day):
-        day=DateTime.fromordinal(int(day))
-        return CalendarDay(day).prepare(self)
+        pass
+        # day=DateTime.fromordinal(int(day))
+        # return CalendarDay(day).prepare(self)
     @classmethod
     def fromTimePeriod(cls, tp: ITimePeriod):
         self = cls()

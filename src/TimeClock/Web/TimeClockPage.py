@@ -3,6 +3,7 @@ import base64
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
+from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderer.Calendar import Calendar
 from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer
 from TimeClock.Web.LiveFragment import LiveFragment
@@ -70,8 +71,11 @@ class TimeClockPage(LivePage):
             self.api = self.employee.getAPI()
 
             self.setFragmentParent(parent)
-        def render_employeeName(self, args):
+        def render_employeeName(self, ctx):
             return ISolomonEmployee(self.employee).name
+        def render_workedThisWeek(self, ctx):
+            today = DateTime.today()
+            
         def render_menuItem(self, args):
             request, tag, data = args
             o = []
