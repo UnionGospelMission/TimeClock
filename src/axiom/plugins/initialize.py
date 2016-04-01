@@ -7,7 +7,7 @@ from zope.interface import provider
 
 from twisted.python import usage
 from twisted.plugin import IPlugin
-from TimeClock.API.initialize import initialize
+from TimeClock.initialize import initialize
 
 
 
