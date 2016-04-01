@@ -137,7 +137,6 @@ def initializeDB(Store: store.Store, username: str, password: str):
     for emp in employees:
         un = runWithConnection(findUsername, username, password, args=(emp,))
         if un:
-            print(140, un)
             emp.active_directory_name = un
 
 
@@ -151,7 +150,8 @@ def findUsername(conn, emp: IEmployee):
             return
         if 'attributes' not in conn.response[0]:
             return
-        return conn.response[0]['attributes']['sAMAccountName']
+        if conn.response[0]['attributes']['sAMAccountName']:
+            return conn.response[0]['attributes']['sAMAccountName'][0]
 
 
 def initialize(db: store.Store, options: usage.Options):
