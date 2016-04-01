@@ -29,7 +29,7 @@ class Login(Item):
             if e.alternate_authentication:
                 assert(e.alternate_authentication.authenticate(e, pw))
             else:
-                AD.authenticate(e, pw)
+                assert AD.authenticate(e, pw)
     @overload
     def execute(self, caller: object, adid: str, pw: str):
         c = CommandEvent(caller, self, adid)
@@ -38,7 +38,7 @@ class Login(Item):
             if e.alternate_authentication:
                 assert (e.alternate_authentication.authenticate(e, pw))
             else:
-                AD.authenticate(e, pw)
+                assert AD.authenticate(e, pw)
     @overload
     def execute(self, caller: IEmployee, *parameters: object):
         raise NotImplementedError("%s called with invalid parameters" % self.name)
