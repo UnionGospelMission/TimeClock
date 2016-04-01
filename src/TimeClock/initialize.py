@@ -175,7 +175,7 @@ def initialize(db: store.Store, options: usage.Options):
     if Solomon.pymssql:
         initializers.append(initializeSubAccounts)
         initializers.append(initializeWorkLocations)
-        initializers.append(lambda d: initializeDB(d, options.username, options.password))
+        initializers.append(lambda d: initializeDB(d, options.get('username'), options.get('password')))
     else:
         wl = IWorkLocation(NULL)
         wl.description = 'test'
