@@ -1,5 +1,6 @@
 import base64
 
+from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
@@ -75,7 +76,17 @@ class TimeClockPage(LivePage):
             return ISolomonEmployee(self.employee).name
         def render_workedThisWeek(self, ctx):
             today = DateTime.today()
-            
+            first_day_of_this_week = today.replace(days=-((today.weekday() + 1) % 7))
+            first_day_of_next_week = first_day_of_this_week.replace(days=7)
+            cd = ICalendarData(self.employee.viewHours(first_day_of_this_week, first_day_of_next_week))
+            o = 0
+            for i in cd:
+                o += i.duration().seconds
+            return "%.2f" % (o / 60 / 60)
+
+
+
+
         def render_menuItem(self, args):
             request, tag, data = args
             o = []
