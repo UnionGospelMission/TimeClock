@@ -163,24 +163,24 @@ def initialize(db: store.Store, options: usage.Options):
         adm1.employee = adm
         adm.powerUp(adm1, IAdministrator)
 
-        if adm.store.filesdir:
-            l = Logger(store=adm.store)
+    if db.filesdir:
+        l = Logger(store=db.store)
 
-            l.file = File(store=adm.store, path=adm.store.filesdir.child('Commands.log').path)
-            l.flags = 1 | 2 | 4 | 8
-            l.name = "Command Logger"
-            IEventBus("Commands").powerUp(l, ICommandEvent)
-            initializers = [initializeCommands, initializeAPIs]
+        l.file = File(store=db.store, path=db.store.filesdir.child('Commands.log').path)
+        l.flags = 1 | 2 | 4 | 8
+        l.name = "Command Logger"
+        IEventBus("Commands").powerUp(l, ICommandEvent)
+        initializers = [initializeCommands, initializeAPIs]
 
-            if Solomon.pymssql:
-                initializers.append(initializeSubAccounts)
-                initializers.append(initializeWorkLocations)
-                initializers.append(lambda d: initializeDB(d, options.username, options.password))
-            else:
-                wl = IWorkLocation(NULL)
-                wl.description = 'test'
-                wl.workLocationID = "TST"
-                sa = ISubAccount(NULL)
-                sa.name = 'test'
-                sa.sub = 1
-            db.transact(lambda: [i(db) for i in initializers])
+    if Solomon.pymssql:
+        initializers.append(initializeSubAccounts)
+        initializers.append(initializeWorkLocations)
+        initializers.append(lambda d: initializeDB(d, options.username, options.password))
+    else:
+        wl = IWorkLocation(NULL)
+        wl.description = 'test'
+        wl.workLocationID = "TST"
+        sa = ISubAccount(NULL)
+        sa.name = 'test'
+        sa.sub = 1
+    db.transact(lambda: [i(db) for i in initializers])
