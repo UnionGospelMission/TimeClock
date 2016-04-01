@@ -137,6 +137,7 @@ def initializeDB(Store: store.Store, username: str, password: str):
     for emp in employees:
         un = runWithConnection(findUsername, username, password, args=(emp,))
         if un:
+            print(140, un)
             emp.active_directory_name = un
 
 
