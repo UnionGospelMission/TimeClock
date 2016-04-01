@@ -34,6 +34,6 @@ class PrintAllItems(Options, axiomatic.AxiomaticSubCommandMixin):
     def postOptions(self):
         s = self.parent.getStore()
 
-        initialize(self, s)
+        initialize(s, self)
 
 
