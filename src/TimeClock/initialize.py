@@ -3,6 +3,7 @@ from TimeClock.Database.API.API import API
 from TimeClock.ITimeClock.IAPI import IAPI
 from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
+from TimeClock.Utils import coerce
 from .Database.File import File
 from .Database.Logger import Logger
 from .Database.StaticAuthenticationMethod import StaticAuthenticationMethod
@@ -132,15 +133,18 @@ def initializeSubAccounts(Store: store.Store):
         ISubAccount(int(i['Sub']))
 
 
-def initializeDB(Store: store.Store, username: str, password: str):
+def initializeDB(Store: store.Store, options: usage.Options):
+    username = options.get('username')
+    password = options.get('password')
     employees = commandFinder(Store)("Check For New Employees").doCheckForEmployees()
     for emp in employees:
-        un = runWithConnection(findUsername, username, password, args=(emp,))
+        un = runWithConnection(findUsername, username, password, args=(emp, options))
         if un:
             emp.active_directory_name = un
 
 
-def findUsername(conn, emp: IEmployee):
+@coerce
+def findUsername(conn, emp: IEmployee, options: usage.Options) -> str:
     ise = ISolomonEmployee(emp)
     name = ise.name
     if '~' in name:
@@ -152,12 +156,35 @@ def findUsername(conn, emp: IEmployee):
         fn = name[0]
         ln = name[-1]
     if conn.search('dc=ugm, dc=local', '(&(givenName=%s) (sn=%s))' % (fn, ln), attributes=['sAMAccountName']):
-        if len(conn.response) > 4:
-            return
-        if 'attributes' not in conn.response[0]:
-            return
-        if conn.response[0]['attributes']['sAMAccountName']:
-            return conn.response[0]['attributes']['sAMAccountName'][0]
+        if len(conn.response) == 4 and 'attributes' in conn.response[0]:
+            if conn.response[0]['attributes']['sAMAccountName']:
+                return conn.response[0]['attributes']['sAMAccountName'][0]
+        if options.get('resolve'):
+            print("AD username not found, searching by last name only")
+            if conn.search('dc=ugm, dc=local', '(&(givenName=*) (sn=%s))' % (ln,), attributes=['sAMAccountName', 'givenName', 'sn']):
+                while len(conn.response) > 3:
+                    resp = conn.response.pop(0)
+                    if 'attributes' not in resp:
+                        break
+                    print("Possible match found")
+                    print("FN:", resp['attributes']['givenName'])
+                    print("LN:", resp['attributes']['sn'])
+                    if 'Y' in input("Is this a match? (yN)").upper():
+                        return resp['attributes']['sAMAccountName'][0]
+            print("AD username not found, searching by first name only")
+            if conn.search('dc=ugm, dc=local', '(&(givenName=%s) (sn=*))' % (fn,),
+                           attributes=['sAMAccountName', 'givenName', 'sn']):
+                while len(conn.response) > 3:
+                    resp = conn.response.pop(0)
+                    if 'attributes' not in resp:
+                        break
+                    print("Possible match found")
+                    print("FN:", resp['attributes']['givenName'])
+                    print("LN:", resp['attributes']['sn'])
+                    if 'Y' in input("Is this a match? (yN)").upper():
+                        return resp['attributes']['sAMAccountName'][0]
+
+
 
 
 def initialize(db: store.Store, options: usage.Options):
@@ -182,7 +209,7 @@ def initialize(db: store.Store, options: usage.Options):
     if Solomon.pymssql:
         initializers.append(initializeSubAccounts)
         initializers.append(initializeWorkLocations)
-        initializers.append(lambda d: initializeDB(d, options.get('username'), options.get('password')))
+        initializers.append(lambda d: initializeDB(d, options))
     else:
         wl = IWorkLocation(NULL)
         wl.description = 'test'

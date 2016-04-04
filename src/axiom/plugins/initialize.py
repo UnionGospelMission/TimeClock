@@ -18,6 +18,7 @@ class Options(usage.Options):
     optParameters = [
         ["username", "u", None, "Active directory username to use to lookup employee information in LDAP"],
         ["password", "p", None, "LDAP password"],
+        ["resolve", "r", None, "Manually resolve AD employee information"],
     ]
 
 
