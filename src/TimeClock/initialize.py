@@ -160,7 +160,7 @@ def findUsername(conn, emp: IEmployee, options: usage.Options) -> str:
             if conn.response[0]['attributes']['sAMAccountName']:
                 return conn.response[0]['attributes']['sAMAccountName'][0]
         if options.get('resolve'):
-            print("AD username not found, searching by last name only")
+            print("AD username not found for %s, searching by last name only" % ise.name)
             if conn.search('dc=ugm, dc=local', '(&(givenName=*) (sn=%s))' % (ln,), attributes=['sAMAccountName', 'givenName', 'sn']):
                 while len(conn.response) > 3:
                     resp = conn.response.pop(0)
