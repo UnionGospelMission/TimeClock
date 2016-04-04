@@ -19,6 +19,11 @@ host = os.environ.get('SOLOMONHOST')
 db = os.environ.get('SOLOMONDATABASE')
 pw = os.environ.get('SOLOMONPW')
 
+ACTIVE = 'A'
+INACTIVE = 'I'
+HOLD = 'H'
+
+
 if not user:
     warnings.warn("Solomon environment variables undefined, Solomon database access unavailable")
     pymssql = None
@@ -154,7 +159,7 @@ dummyEntry = {'DfltWrkloc': 'OFF   ',
               'CalYr': '2016',
               'Addr2': '                                                            ',
               'Department': 'xxxxxx    ',
-              'Status': 'I',
+              'Status': 'A',
               'CpnyID': 'UGM       ',
               'EmpId': '1      ',
               'Name': 'John D. Doe Administrator                                           ',

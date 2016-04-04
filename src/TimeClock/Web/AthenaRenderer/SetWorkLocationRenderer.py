@@ -40,7 +40,7 @@ class SetWorkLocationRenderer(AbstractCommandRenderer):
                 locs.append({1: loc.description, 2: loc.workLocationID})
             e = [{"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id}
                  for i in Store.query(Employee)
-                 if ISolomonEmployee(i).status == 'I']
+                 if ISolomonEmployee(i).status == 'A']
             self.loclist = ListRenderer(locs)
             self.emplist = ListRenderer(e)
             self.loclist.prepare(self, callback=None, title="Locations")

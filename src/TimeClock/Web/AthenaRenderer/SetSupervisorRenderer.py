@@ -34,7 +34,7 @@ class SetSupervisorRenderer(AbstractCommandRenderer):
             for sup in supervisors:
                 if ISupervisor(sup.employee, None) is sup:
                     s.append({"Name": ISolomonEmployee(sup.employee).name, "Employee ID": sup.employee.employee_id})
-            e = [({"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id, 'Current Supervisor': i.supervisor.employee.employee_id if i.supervisor else None}) for i in Store.query(Employee) if ISolomonEmployee(i).status == 'I']
+            e = [({"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id, 'Current Supervisor': i.supervisor.employee.employee_id if i.supervisor else None}) for i in Store.query(Employee) if ISolomonEmployee(i).status == 'A']
             self.suplist = ListRenderer(s)
             self.emplist = ListRenderer(e)
             self.suplist.prepare(self, callback=self.supSelected, title="Supervisors")

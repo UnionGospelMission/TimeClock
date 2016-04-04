@@ -38,7 +38,7 @@ class SetSubAccountsRenderer(AbstractCommandRenderer):
                 subs.append({1: sub.name, 2: sub.sub})
             e = [{"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id}
                  for i in Store.query(Employee)
-                 if ISolomonEmployee(i).status == 'I']
+                 if ISolomonEmployee(i).status == 'A']
             self.loclist = ListRenderer(subs)
             self.emplist = ListRenderer(e)
             self.loclist.prepare(self, callback=None, title="Sub Accounts")

@@ -34,6 +34,8 @@ class CheckForNewEmployees(Item):
         for emp in getEmployees():
             n_emp = IEmployee(int(emp['EmpId']), None)
             if not n_emp:
+                if emp['Status'] != Solomon.ACTIVE:
+                    continue
                 print("adding new employee", emp['EmpId'])
                 n_emp = IEmployee(NULL)
                 n_emp.employee_id = int(emp['EmpId'])
