@@ -13,6 +13,7 @@ from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
+from TimeClock.Solomon.Solomon import ACTIVE
 from TimeClock.Web.AthenaRenderer.AbstractCommandRenderer import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderer.AbstractRenderer import path
 from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer
@@ -40,7 +41,7 @@ class SetWorkLocationRenderer(AbstractCommandRenderer):
                 locs.append({1: loc.description, 2: loc.workLocationID})
             e = [{"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id}
                  for i in Store.query(Employee)
-                 if ISolomonEmployee(i).status == 'A']
+                 if ISolomonEmployee(i).status == ACTIVE]
             self.loclist = ListRenderer(locs)
             self.emplist = ListRenderer(e)
             self.loclist.prepare(self, callback=None, title="Locations")

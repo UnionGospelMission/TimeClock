@@ -10,6 +10,7 @@ from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
+from TimeClock.Solomon import Solomon
 from TimeClock.Util import NULL
 from TimeClock.Utils import overload
 from axiom.item import Item

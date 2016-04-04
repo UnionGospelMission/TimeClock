@@ -10,6 +10,7 @@ from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
+from TimeClock.Solomon.Solomon import ACTIVE
 from TimeClock.Web.AthenaRenderer.AbstractCommandRenderer import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderer.AbstractRenderer import path
 from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer
@@ -34,7 +35,11 @@ class SetSupervisorRenderer(AbstractCommandRenderer):
             for sup in supervisors:
                 if ISupervisor(sup.employee, None) is sup:
                     s.append({"Name": ISolomonEmployee(sup.employee).name, "Employee ID": sup.employee.employee_id})
-            e = [({"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id, 'Current Supervisor': i.supervisor.employee.employee_id if i.supervisor else None}) for i in Store.query(Employee) if ISolomonEmployee(i).status == 'A']
+            e = [({"Name": ISolomonEmployee(i).name,
+                   "Employee ID": i.employee_id,
+                   'Current Supervisor': i.supervisor.employee.employee_id if i.supervisor else None})
+                 for i in Store.query(Employee)
+                    if ISolomonEmployee(i).status == ACTIVE]
             self.suplist = ListRenderer(s)
             self.emplist = ListRenderer(e)
             self.suplist.prepare(self, callback=self.supSelected, title="Supervisors")
