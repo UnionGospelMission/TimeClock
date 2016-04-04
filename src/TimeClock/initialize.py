@@ -171,18 +171,19 @@ def findUsername(conn, emp: IEmployee, options: usage.Options) -> str:
                     print("LN:", resp['attributes']['sn'])
                     if 'Y' in input("Is this a match? (yN)").upper():
                         return resp['attributes']['sAMAccountName'][0]
-            print("AD username not found, searching by first name only")
-            if conn.search('dc=ugm, dc=local', '(&(givenName=%s) (sn=*))' % (fn,),
-                           attributes=['sAMAccountName', 'givenName', 'sn']):
-                while len(conn.response) > 3:
-                    resp = conn.response.pop(0)
-                    if 'attributes' not in resp:
-                        break
-                    print("Possible match found")
-                    print("FN:", resp['attributes']['givenName'])
-                    print("LN:", resp['attributes']['sn'])
-                    if 'Y' in input("Is this a match? (yN)").upper():
-                        return resp['attributes']['sAMAccountName'][0]
+            if options.get('resolve')=='firstname':
+                print("AD username not found, searching by first name only")
+                if conn.search('dc=ugm, dc=local', '(&(givenName=%s) (sn=*))' % (fn,),
+                               attributes=['sAMAccountName', 'givenName', 'sn']):
+                    while len(conn.response) > 3:
+                        resp = conn.response.pop(0)
+                        if 'attributes' not in resp:
+                            break
+                        print("Possible match found")
+                        print("FN:", resp['attributes']['givenName'])
+                        print("LN:", resp['attributes']['sn'])
+                        if 'Y' in input("Is this a match? (yN)").upper():
+                            return resp['attributes']['sAMAccountName'][0]
 
 
 
