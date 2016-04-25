@@ -5,6 +5,7 @@ from zope.interface import implementer
 
 from TimeClock.Axiom.Store import Store
 from TimeClock.Database.Administrator import Administrator
+from TimeClock.Database.Commands.ChangeAuthentication import ChangeAuthentication
 from TimeClock.Database.Supervisor import Supervisor
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
@@ -45,8 +46,8 @@ employee_attributes['Addr2'] = "Address 2", None
 employee_attributes['City'] = "City", None
 employee_attributes['State'] = "State", None
 employee_attributes['Zip'] = "Zip", None
-employee_attributes['StrtDate'] = "Start Date", lambda d: str(d.naive.date())
-employee_attributes['BirthDate'] = "Birth Date", lambda d: str(d.naive.date())
+employee_attributes['StrtDate'] = "Start Date", lambda d: str(d.date())
+employee_attributes['BirthDate'] = "Birth Date", lambda d: str(d.date())
 
 
 @implementer(IAthenaRenderable)
@@ -85,6 +86,8 @@ class EmployeeRenderer(AbstractRenderer):
         self.commands = o = []
         api = self._employee.getAPI().api
         for c in api.getCommands(self._employee.getPermissions()):
+            if isinstance(c, ChangeAuthentication) and self._employee.active_directory_name:
+                continue
             iar = IAthenaRenderable(c, None)
             if iar:
                 iar.prepare(self)
