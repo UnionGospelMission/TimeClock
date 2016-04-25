@@ -91,7 +91,12 @@ class TimeClockPage(LivePage):
             o = 0
             for i in cd:
                 o += i.duration().seconds
-            reactor.callLater(60, self.updateTime)
+
+            delay = 60
+            if self.employee.timeEntry:
+                delay -= o % 60
+
+            reactor.callLater(delay, self.updateTime)
             return "%i:%02i" % (o // 3600, o // 60 % 60)
         def updateTime(self):
             worked = self.render_workedThisWeek(None)
