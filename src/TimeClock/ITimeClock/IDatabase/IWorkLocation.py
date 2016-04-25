@@ -7,6 +7,7 @@ from TimeClock.Util import fromFunction
 class IWorkLocation(IItem):
     workLocationID = Attribute("id")
     description = Attribute("description")
+    active = Attribute("active")
 
     @fromFunction
     def getEmployees() -> "":

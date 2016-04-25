@@ -1,3 +1,4 @@
+from axiom.upgrade import registerUpgrader, registerAttributeCopyingUpgrader
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
@@ -7,20 +8,27 @@ from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.Solomon import Solomon
 from TimeClock.Util import Null
 from TimeClock.Utils import coerce, overload
-from axiom.attributes import text, integer
+from axiom.attributes import text, integer, boolean
 from axiom.item import Item
 
 
 @implementer(ISubAccount)
 class SubAccount(Item):
+    schemaVersion = 2
     name = text()
     sub = integer()
+    active = boolean(default=True)
     def getEmployees(self) -> [IEmployee]:
         return self.powerupsFor(IEmployee)
     def addEmployee(self, employee: IEmployee):
         employee.powerUp(self, ISubAccount)
         self.powerUp(employee, IEmployee)
 
+registerAttributeCopyingUpgrader(
+    SubAccount,
+    1,
+    2
+)
 
 @coerce
 def newArea(_) -> ISubAccount:

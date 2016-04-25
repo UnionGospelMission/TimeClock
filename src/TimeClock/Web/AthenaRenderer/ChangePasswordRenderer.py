@@ -15,7 +15,13 @@ from TimeClock.Web.AthenaRenderer.AbstractRenderer import path
 class ChangePasswordRenderer(AbstractCommandRenderer):
     docFactory = xmlfile(path + "/Pages/ActionItem.xml", 'ActionItemPattern')
     def render_formArguments(self, ctx, idata):
-        return [tags.input(name="password", type="password")]
+        return [
+            tags.input(name="currentPassword", type="password", placeholder="Current Password"),
+            tags.br(),
+            tags.input(name="newPassword", type="password", placeholder="New Password"),
+            tags.br(),
+            tags.input(name="newPasswordAgain", type="password", placeholder="New Password Again")
+        ]
     @expose
     def runCommand(self, *a):
         self.hide()

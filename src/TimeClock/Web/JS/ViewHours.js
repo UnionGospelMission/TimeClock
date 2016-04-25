@@ -1,9 +1,21 @@
 // import TimeClock.Commands
+// import jquery_ui
+// import Modernizr
+'use strict';
 
-"use strict";
 
 TimeClock.ViewHours = TimeClock.Commands.subclass("TimeClock.ViewHours");
 TimeClock.ViewHours.methods(
+    function __init__(self, node){
+        TimeClock.Commands.upcall(self, "__init__", node);
+        if (!Modernizr.inputtypes.date){
+            self.startDate = $(self.nodeByAttribute('name', 'startDate')).datepicker();
+            self.endDate = $(self.nodeByAttribute('name', 'endDate')).datepicker();
+
+        }
+
+
+    },
     function runCommand(self, node){
         self.callRemote('runCommand', self.getArgs(node)).addCallback(
             function(newNode){
@@ -17,6 +29,17 @@ TimeClock.ViewHours.methods(
         return false;
     },
     function getArgs(self, node){
-        return [node.startDate.valueAsDate.toISOString(), node.endDate.valueAsDate.toISOString()];
+        var startDate;
+        var endDate;
+        if (Modernizr.inputtypes.date){
+            startDate = node.startDate.valueAsDate.toISOString();
+            endDate =  node.endDate.valueAsDate.toISOString();
+        }
+        else{
+            startDate = $(node.startDate).datepicker('getDate');
+            endDate = $(node.endDate).datepicker('getDate');
+        }
+
+        return [startDate, endDate];
     }
 );

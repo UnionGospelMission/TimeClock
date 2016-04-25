@@ -1,5 +1,6 @@
 import base64
 
+from TimeClock.Database.Commands.ChangeAuthentication import ChangeAuthentication
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
@@ -9,10 +10,12 @@ from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderer.Calendar import Calendar
 from TimeClock.Web.AthenaRenderer.Editor import Editor
 from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer
+from TimeClock.Web.AthenaRenderer.ManageSubAccounts import ManageSubAccounts
 from TimeClock.Web.LiveFragment import LiveFragment
 from nevow.athena import LivePage, expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
+from twisted.internet import reactor
 import os
 
 
@@ -39,11 +42,14 @@ def getActionItems(self, ctx):
     o = []
     p = self.employee.getPermissions()
     for i in self.api.getCommands():
+        if isinstance(i, ChangeAuthentication) and self.employee.active_directory_name:
+            continue
         if i.hasPermission(p) or IAdministrator(self.employee, None):
             iar = IAthenaRenderable(i, None)
             if iar:
-                print(40, iar)
                 o.append(iar)
+    if IAdministrator(self.employee, None):
+        o.append(ManageSubAccounts())
     return o
 
 
@@ -59,6 +65,7 @@ class TimeClockPage(LivePage):
         self.jsModules.mapping['TimeClock'] = path + '/JS/TimeClock.js'
         self.jsModules.mapping['mode-python.js'] = path + '/JS/mode-python.js'
         self.jsModules.mapping['theme-twilight.js'] = path + '/JS/theme-twilight.js'
+        self.cssModules.mapping['jquery-ui'] = path + '/CSS/jquery-ui.css'
         for f in os.listdir(path + '/JS'):
             self.jsModules.mapping['TimeClock.' + f.rsplit('.js', 1)[0]] = path + '/JS/' + f
             self.jsModules.mapping[f.rsplit('.js', 1)[0]] = path + '/JS/' + f
@@ -84,10 +91,11 @@ class TimeClockPage(LivePage):
             o = 0
             for i in cd:
                 o += i.duration().seconds
-            return "%.2f" % (o / 60 / 60)
-
-
-
+            reactor.callLater(60, self.updateTime)
+            return "%i:%02i" % (o // 3600, o // 60 % 60)
+        def updateTime(self):
+            worked = self.render_workedThisWeek(None)
+            self.callRemote("updateTime", worked)
 
         def render_menuItem(self, args):
             request, tag, data = args

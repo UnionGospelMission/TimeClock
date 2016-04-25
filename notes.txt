@@ -30,4 +30,10 @@ minimize list when dbl click on name
 fix OrderedDict to be specific ordered
 
 manage tasks editor in firefox
+new task; refresh hides new task window
+report refresh opens new report list
+
+Ace editor autoselects entire contents
+switch commands without waiting for server
+mark sub accounts and locations as unused
 

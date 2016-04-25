@@ -7,7 +7,7 @@
 var types = {
     int:'number',
     float:'number',
-    str:'text',
+    str:'text'
 };
 
 TimeClock.Reports = TimeClock.Commands.subclass("TimeClock.Reports");
@@ -105,7 +105,7 @@ TimeClock.Reports.methods(
                 var param = params[idx];
                 var type = "text";
                 if (param instanceof Array){
-                    type = types[param[1]];
+                    type = param[1];
                     param = param[0];
                 }
                 args.push({value: '', label:param, type:type});
@@ -115,7 +115,10 @@ TimeClock.Reports.methods(
             self.argCount = count;
             for (var idx=0; idx<count;idx++){
                 var i = self.lst.items[idx];
-                i.elm.children[1].type = i._values.type;
+                i.elm.children[1].type = types[i._values.type];
+                if (i._values.type=='int'){
+                    i.elm.children[1].step = 1;
+                }
             }
         });
     }

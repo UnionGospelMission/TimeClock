@@ -24,20 +24,29 @@ from nevow.loaders import xmlfile
 from nevow import tags as T
 
 
+def formatPhone(n):
+    if not n:
+        return n
+    if isinstance(n, str):
+        if not n.isdigit():
+            return n
+        n = int(n)
+    return ('(%i) %i-%i' % (n // 10000000, n // 10000 % 1000, n % 10000))
+
 employee_attributes = OrderedDict()
-employee_attributes['Name'] = "Name"
-employee_attributes['employee_id'] = "Employee ID"
-employee_attributes['active_directory_name'] = "Username"
-employee_attributes['emergency_contact_name'] = "Emergency Contact"
-employee_attributes['emergency_contact_phone'] = "Emergency Contact Phone"
-employee_attributes['Phone'] = "Phone"
-employee_attributes['Addr1'] = "Address 1"
-employee_attributes['Addr2'] = "Address 2"
-employee_attributes['City'] = "City"
-employee_attributes['State'] = "State"
-employee_attributes['Zip'] = "Zip"
-employee_attributes['StrtDate'] = "Start Date"
-employee_attributes['BirthDate'] = "Birth Date"
+employee_attributes['Name'] = "Name", None
+employee_attributes['employee_id'] = "Employee ID", None
+employee_attributes['active_directory_name'] = "Username", None
+employee_attributes['emergency_contact_name'] = "Emergency Contact", None
+employee_attributes['emergency_contact_phone'] = "Emergency Contact Phone", None
+employee_attributes['Phone'] = "Phone", formatPhone
+employee_attributes['Addr1'] = "Address 1", None
+employee_attributes['Addr2'] = "Address 2", None
+employee_attributes['City'] = "City", None
+employee_attributes['State'] = "State", None
+employee_attributes['Zip'] = "Zip", None
+employee_attributes['StrtDate'] = "Start Date", lambda d: str(d.naive.date())
+employee_attributes['BirthDate'] = "Birth Date", lambda d: str(d.naive.date())
 
 
 @implementer(IAthenaRenderable)
@@ -59,8 +68,12 @@ class EmployeeRenderer(AbstractRenderer):
     def render_employeeDetails(self, ctx, data):
         row = inevow.IQ(ctx).patternGenerator('employeeDataPattern')
         o = []
-        for k, i in employee_attributes.items():
-            o.append(row(data=dict(rowName=i, rowValue=data[-1][k])))
+        for k, e in employee_attributes.items():
+            i, c = e
+            if not c:
+                def c(x):
+                    return x
+            o.append(row(data=dict(rowName=i, rowValue=c(data[-1][k]))))
         return o
     def render_employeeActions(self, ctx, data):
         if ISupervisor(self.employee, None) and self._employee in ISupervisor(self.employee).getEmployees():
@@ -209,10 +222,6 @@ class EmployeeRenderer(AbstractRenderer):
                 else:
                     setattr(self._employee, k, v)
         return False
-
-
-
-
 
 
 registerAdapter(EmployeeRenderer, IPerson, IAthenaRenderable)

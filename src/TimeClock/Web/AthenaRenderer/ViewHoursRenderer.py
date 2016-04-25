@@ -17,8 +17,9 @@ from nevow.tags import input
 class ViewHoursRenderer(AbstractCommandRenderer):
     docFactory = xmlfile(path + "/Pages/ActionItem.xml", 'ActionItemPattern')
     jsClass = "TimeClock.ViewHours"
+    cssModule = 'jquery-ui'
     def render_formArguments(self, ctx, idata):
-        return [input(type="date", name="startDate"), input(type="date", name="endDate")]
+        return [input(type="date", name="startDate", placeholder="Start Date"), input(type="date", name="endDate", placeholder="End Date")]
 
     @expose
     def runCommand(self, args):

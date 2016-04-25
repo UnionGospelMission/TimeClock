@@ -4,9 +4,6 @@
 
 TimeClock.MenuPane = Nevow.Athena.Widget.subclass("TimeClock.MenuPane");
 TimeClock.MenuPane.methods(
-    /**
-     * Handle click events on any of the calculator buttons.
-     */
     function menuClicked(self, node){
         self.callRemote('navigate', node.id.split("-")[1]);
     },
@@ -20,6 +17,9 @@ TimeClock.MenuPane.methods(
         if (nbi){
             nbi.style.display='block';
         }
+    },
+    function updateTime(self, hours){
+        self.nodeById('hoursWorked').innerHTML = hours;
     }
 
 );
@@ -27,8 +27,5 @@ TimeClock.MenuPane.methods(
 
 TimeClock.ActionPane = Nevow.Athena.Widget.subclass("TimeClock.ActionPane");
 TimeClock.ActionPane.methods(
-    /**
-     * Handle click events on any of the calculator buttons.
-     */
 
 );

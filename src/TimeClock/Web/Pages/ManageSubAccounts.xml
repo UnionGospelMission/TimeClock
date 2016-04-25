@@ -1,0 +1,43 @@
+<div class="List" id="List" n:pattern="ManageSubAccountsPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"/>
+
+    <input class="search" placeholder="Search"/>
+
+    <table id="ListTable" border="1px" style="text-align:center">
+        <thead>
+            <tr>
+                <th>Sub Accounts</th>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <th>ID</th>
+                <th>Active</th>
+            </tr>
+        </thead>
+        <tbody class="list">
+            <invisible n:render="listSubAccounts">
+                <tr n:pattern="listRow">
+                    <invisible>
+                        <td n:render="mapping">
+                            <n:attr name="class"><n:slot name="searchclass"/></n:attr>
+                            <n:attr name="data-index"><n:slot name="index"/></n:attr>
+                            <n:slot name="subAccountName" />
+
+                        </td>
+                        <td n:render="mapping">
+                            <n:attr name="class"><n:slot name="searchclass"/></n:attr>
+                            <n:attr name="data-index"><n:slot name="index"/></n:attr>
+                            <n:slot name="subAccountID" />
+
+                        </td>
+                        <td n:render="mapping">
+                            <n:attr name="class"><n:slot name="searchclass"/></n:attr>
+                            <n:attr name="data-index"><n:slot name="index"/></n:attr>
+                            <n:slot name="subAccountVisible"/>
+                        </td>
+                    </invisible>
+                </tr>
+            </invisible>
+        </tbody>
+    </table>
+</div>

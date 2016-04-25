@@ -36,7 +36,8 @@ class SetSubAccountsRenderer(AbstractCommandRenderer):
             subs = []
             self.subaccounts = subaccount = list(Store.query(SubAccount))
             for sub in subaccount:
-                subs.append({1: sub.name, 2: sub.sub})
+                if sub.active:
+                    subs.append({1: sub.name, 2: '%05i' % sub.sub})
             e = [{"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id}
                  for i in Store.query(Employee)
                  if ISolomonEmployee(i).status == ACTIVE]

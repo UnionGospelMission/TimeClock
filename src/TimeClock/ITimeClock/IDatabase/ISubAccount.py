@@ -6,6 +6,7 @@ from TimeClock.ITimeClock.IDatabase.IItem import IItem
 class IAbstractSubAccount(IItem):
     name = Attribute("name")
     sub = Attribute("sub")
+    active = Attribute("active")
 
 
 class ISubAccount(IAbstractSubAccount):
