@@ -26,14 +26,10 @@ class ClockIn(Item):
         return TimeClock.API.Permissions.ClockIn in permissions
     @overload
     def execute(self, caller: IPerson, subAccount: ISubAccount, workLocation: IWorkLocation):
-        print(29)
         if self.hasPermission(IEmployee(caller).getPermissions()):
-            print(31)
             c = CommandEvent(caller, self, subAccount, workLocation)
             if IEventBus("Commands").postEvent(c):
                 IEmployee(caller).clockIn(subAccount, workLocation)
-                print(35)
-            print(36)
         else:
             raise PermissionDenied()
     @overload

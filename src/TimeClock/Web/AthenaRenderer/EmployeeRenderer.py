@@ -40,13 +40,13 @@ employee_attributes['StrtDate'] = "Start Date"
 employee_attributes['BirthDate'] = "Birth Date"
 
 
-
 @implementer(IAthenaRenderable)
 class EmployeeRenderer(AbstractRenderer):
     docFactory = xmlfile(path + "/Pages/Employee.xml", "EmployeePattern")
     jsClass = "TimeClock.EmployeeRenderer"
     def __init__(self, person: IPerson):
         self._employee = IEmployee(person)
+        print(50, self._employee, self.employee)
         self.solomonEmployee = ISolomonEmployee(self._employee)
         self.options = []
         self.commands = None
@@ -94,7 +94,7 @@ class EmployeeRenderer(AbstractRenderer):
             if k.startswith('emergency'):
                 edit = T.input(name=k, value=i or "")
                 self.options.append({'name': k, 'value': edit})
-        if self.employee.isAdministrator:
+        if self.employee.isAdministrator():
             isSup = T.input(type='checkbox', name='isSupervisor')
             if ISupervisor(self._employee, None):
                 isSup(checked='')
@@ -104,6 +104,10 @@ class EmployeeRenderer(AbstractRenderer):
             self.options.append({'name': 'username', 'value': T.input(name="active_directory_name", value=self._employee.active_directory_name or "")})
             self.options.append({'name': 'Is Supervisor', 'value': isSup})
             self.options.append({'name': 'Is Administrator', "value": isAdm})
+            pbt = T.input(type='checkbox', name='payByTask')
+            if self._employee.hourly_by_task:
+                pbt(checked='')
+            self.options.append({'name': 'Pay by Task', "value": pbt})
         save = T.input(type='button', value='Save Changes')[
             T.Tag("athena:handler")(event='onclick', handler='saveClicked')
         ]
@@ -135,19 +139,25 @@ class EmployeeRenderer(AbstractRenderer):
     def doSaveClicked(self, args, force):
         kargs = dict(
             isAdministrator=False,
-            isSupervisor=False
+            isSupervisor=False,
+            payByTask = False
         )
 
         for a in args:
             k = a['name']
             v = a['value']
-            kargs[k]=v
+            kargs[k] = v
         for k, v in kargs.items():
             # @TODO: Move into special commands
             if k.startswith('emergency'):
                 setattr(self._employee, k, v)
             elif IAdministrator(self.employee):
-                if k == 'isAdministrator':
+                if k == 'payByTask':
+                    if v == 'on':
+                        self._employee.hourly_by_task = True
+                    else:
+                        self._employee.hourly_by_task = False
+                elif k == 'isAdministrator':
                     print(132, v)
                     if v == 'on':
                         a = IAdministrator(self._employee, None)

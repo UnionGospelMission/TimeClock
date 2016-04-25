@@ -1,11 +1,9 @@
-Multiple supervisors? 
-@TODO: Approve Time
-@TODO: Reports
-
-@TODO: add tasklets
-@TODO: time display
-@TODO: time input
-@TODO: user time report
+TODO: Approve Time
+DONE: Reports
+DONE: add tasklets
+TODO: time display
+TODO: time input
+TODO: user time report
 
 
 TODO:  Command proxies for supervisors
@@ -13,5 +11,23 @@ TODO:  admin/sup.getpermission should include user permissions
 How are average hours calculated?
 
 
-Status codes?
-List of supervisors/supers' employees
+
+TODO: Schedule vacation
+TODO: Approve Vacation
+
+CSS: Mouseover 'links'
+
+JQuery Datepicker
+Hours worked this week in hours:minutes
+
+
+view hours -> close query on new query
+update hours worked dynamically
+view average hours -> run by month, average by selectable(week, month, total)
+add logout button
+login page quick clockin/out
+minimize list when dbl click on name
+fix OrderedDict to be specific ordered
+
+manage tasks editor in firefox
+

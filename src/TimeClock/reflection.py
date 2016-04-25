@@ -28,7 +28,7 @@ from .Database.TimePeriod import TimePeriod
 from .API import CalendarData
 from .Solomon import SolomonEmployee
 from .Solomon import Solomon
-
+from .Database.Permissions import Permission
 from .ITimeClock.IDateTime import IDateTime
 from nevow.inevow import IRendererFactory
 

@@ -6,9 +6,11 @@ from TimeClock.ITimeClock.IReport import IFormat
 class IReport(Interface):
     name = Attribute("name")
 
-    def runReport(format: IFormat) -> bytes:
+    def runReport(Format: IFormat, parameters: [object]) -> bytes:
         pass
 
     def getDescription() -> str:
         pass
 
+    def getArgs() -> [str]:
+        pass

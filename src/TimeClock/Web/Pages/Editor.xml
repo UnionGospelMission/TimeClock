@@ -1,0 +1,14 @@
+<div class="Editor" id="Editor" n:pattern="AceEditor" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"/>
+
+    <div id="editor" style="height: 1000px; width: 1000px; text-align: left"/>
+
+
+    <input type="button" value="save">
+        <athena:handler event="onclick" handler="save"/>
+    </input>
+    <input type="button" value="cancel">
+        <athena:handler event="onclick" handler="cancel"/>
+    </input>
+
+</div>

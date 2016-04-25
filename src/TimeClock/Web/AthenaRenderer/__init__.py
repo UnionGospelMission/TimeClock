@@ -11,3 +11,7 @@ from . import SetWorkLocationRenderer
 from . import SetSubAccountsRenderer
 from . import ApproveTimeRenderer
 from . import ChangePasswordRenderer
+from . import ReportViewer
+from . import ReportRenderer
+from . import ManageTasks
+from . import TaskRenderer

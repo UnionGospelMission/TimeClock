@@ -1,5 +1,9 @@
 from TimeClock.AD import runWithConnection
 from TimeClock.Database.API.API import API
+from TimeClock.Database.Commands.AssignTask import AssignTask
+from TimeClock.Database.Commands.CreateTask import CreateTask
+from TimeClock.Database.Commands.ViewReports import ViewReports
+from TimeClock.Database.Permissions import Permission
 from TimeClock.ITimeClock.IAPI import IAPI
 from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
@@ -63,6 +67,9 @@ def initializeCommands(Store: store.Store):
     Store.powerUp(Store.findOrCreate(SetWorkLocations, name="Set Work Locations"), ICommand)
     Store.powerUp(Store.findOrCreate(SetSubAccounts, name="Set Sub Accounts"), ICommand)
     Store.powerUp(Store.findOrCreate(ChangeAuthentication, name="Change Password"), ICommand)
+    Store.powerUp(Store.findOrCreate(ViewReports, name="View Reports"), ICommand)
+    Store.powerUp(Store.findOrCreate(CreateTask), ICommand)
+    Store.powerUp(Store.findOrCreate(AssignTask), ICommand)
 
 
 def commandFinder(Store: store.Store):
@@ -105,6 +112,9 @@ def initializeAPIs(Store: store.Store):
     AdministratorAPI.powerUp(findCommand("SetWorkLocations"), ICommand)
     AdministratorAPI.powerUp(findCommand("SetSubAccounts"), ICommand)
     AdministratorAPI.powerUp(findCommand("ChangePassword"), ICommand)
+    AdministratorAPI.powerUp(findCommand("ViewReports"), ICommand)
+    AdministratorAPI.powerUp(findCommand("AssignTask"), ICommand)
+    AdministratorAPI.powerUp(findCommand("CreateTask"), ICommand)
 
     EmployeeAPI.powerUp(findCommand("ClockIn"), ICommand)
     EmployeeAPI.powerUp(findCommand("ClockOut"), ICommand)
@@ -121,6 +131,8 @@ def initializeAPIs(Store: store.Store):
     SupervisorAPI.powerUp(findCommand("EditTime"), ICommand)
     SupervisorAPI.powerUp(findCommand("ApproveTime"), ICommand)
     SupervisorAPI.powerUp(findCommand("ChangePassword"), ICommand)
+    SupervisorAPI.powerUp(findCommand("AssignTask"), ICommand)
+    SupervisorAPI.powerUp(findCommand("CreateTask"), ICommand)
 
 
 def initializeWorkLocations(Store: store.Store):
@@ -131,6 +143,16 @@ def initializeWorkLocations(Store: store.Store):
 def initializeSubAccounts(Store: store.Store):
     for i in Solomon.getSubAccounts():
         ISubAccount(int(i['Sub']))
+
+
+def initializePermissions(Store: store.Store):
+    Permission(store=Store, name="Create Task")
+    Permission(store=Store, name="Assign Task")
+    Permission(store=Store, name="Make Supervisor")
+    Permission(store=Store, name="New Employee")
+    Permission(store=Store, name="Clock In")
+    Permission(store=Store, name="New SubAccount")
+    Permission(store=Store, name="Assign SubAccount")
 
 
 def initializeDB(Store: store.Store, options: usage.Options):
@@ -189,6 +211,8 @@ def findUsername(conn, emp: IEmployee, options: usage.Options) -> str:
 
 
 def initialize(db: store.Store, options: usage.Options):
+    initializers = []
+    initializePermissions(db)
     adm = IEmployee(1, None)
     if not adm:
         adm = IEmployee(NULL)

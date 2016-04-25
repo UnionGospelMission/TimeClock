@@ -29,7 +29,8 @@ TimeClock.ApproveTime.methods(
     function approveTime(self, node){
         var args = [];
         for (var idx=0; idx < self.hours.selected.length; idx++){
-            args.push(self.hours.selected[idx].children[0].dataset.index);
+            console.log(32, self.hours.selected[idx]);
+            args.push(self.hours.selected[idx].dataset.ordinal);
         }
         self.callRemote("approveShifts", args).addCallback(function(retval){
             self.nodeById("Submit").style.display="none";

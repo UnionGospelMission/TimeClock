@@ -20,6 +20,7 @@ class ListRenderer(AbstractRenderer):
     jsClass = "TimeClock.ListRenderer"
     initialArgs = ()
     limit = -1
+    itemsVisible = False
     @overload
     def __init__(self, lst: IFiniteSequence, title=None, limit=-1):
         self.list = lst
@@ -39,6 +40,19 @@ class ListRenderer(AbstractRenderer):
             if IAthenaRenderable(i, None):
                 i = self.list[idx] = IAthenaRenderable(i)
                 i.prepare(self)
+                if self.itemsVisible is True:
+                    i.visible = True
+                elif self.itemsVisible is False:
+                    i.visible = False
+            elif isinstance(i, dict):
+                for k, v in i.items():
+                    if IAthenaRenderable(v, None):
+                        v = i[k] = IAthenaRenderable(v)
+                        v.prepare(self)
+                        if self.itemsVisible is True:
+                            v.visible = True
+                        elif self.itemsVisible is False:
+                            v.visible = False
         self.callback = callback
         self.name = title
     def data_tableHeader(self, ctx, data):
@@ -72,6 +86,7 @@ class ListRenderer(AbstractRenderer):
             for i, v in data['listItem'].items():
                 o.append(listCell(data=dict(searchclass=i, index=data['index'], listItem=v)))
             return o
+        ctx.fillSlots('searchclass', self.name)
         return listCell(data=data)
     @expose
     def itemDblClicked(self, idx: int):

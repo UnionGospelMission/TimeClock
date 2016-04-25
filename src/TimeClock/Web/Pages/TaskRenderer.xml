@@ -1,0 +1,9 @@
+<div class="TaskRenderer" id="TaskRenderer" n:pattern="TaskRendererPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"/>
+
+    <input type="button" value="Edit Task"><athena:handler event="onclick" handler="viewDetails"/></input>
+    <input type="text" id="taskName" style="display:none"/>
+    <input type="number" step="0.01" id="taskHours" style="display:none"/>
+
+
+</div>

@@ -1,5 +1,6 @@
 from zope.interface import Attribute
 
+from TimeClock.ITimeClock.IDatabase.IAssignedTask import IAssignedTask
 from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.IDateTime import IDateTime
@@ -17,12 +18,20 @@ from .ITimeEntry import ITimeEntry
 
 
 class IEmployee(IPerson):
-    emergency_contact_name = Attribute("emergency_contact_name")
-    emergency_contact_phone = Attribute("emergency_contact_phone")
-    active_directory_name = Attribute("active_directory_name")
-    employee_id = Attribute("employee_id")
-    alternate_authentication = Attribute("alternate_authentication")
-    supervisor = Attribute("supervisor")
+    emergency_contact_name = Attribute("emergency_contact_name", 'str')
+    emergency_contact_phone = Attribute("emergency_contact_phone", 'str')
+    active_directory_name = Attribute("active_directory_name", 'str')
+    employee_id = Attribute("employee_id", 'int')
+    alternate_authentication = Attribute("alternate_authentication", 'reference')
+    supervisor = Attribute("supervisor", 'reference')
+
+    hourly_by_task = Attribute("hourly_by_task", 'bool')
+
+    def getCompensationType() -> tuple:
+        pass
+
+    def getTasks() -> [IAssignedTask]:
+        pass
 
     def clockIn(area: ISubAccount, workLocation: IWorkLocation) -> ITimeEntry:
         pass

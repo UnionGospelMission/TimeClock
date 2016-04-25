@@ -1,6 +1,8 @@
 from zope.interface import implementer
 
+from TimeClock.ITimeClock.IDatabase.IAssignedTask import IAssignedTask
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
+from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Util.InMemoryTimePeriod import InMemoryTimePeriod
 from ..ITimeClock.IDateTime import IDateTime
 
@@ -13,7 +15,7 @@ from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
 from TimeClock.Util import NULL
-from axiom.attributes import text, integer, reference
+from axiom.attributes import text, integer, reference, boolean
 from axiom.item import Item
 from ..Exceptions import InvalidTransformation
 from ..ITimeClock.IDatabase.ISubAccount import ISubAccount, IAbstractSubAccount
@@ -21,6 +23,10 @@ from ..ITimeClock.IDatabase.ICalendarData import ICalendarData
 from ..ITimeClock.IDatabase.IEmployee import IEmployee
 from ..ITimeClock.IDatabase.ITimeEntry import ITimeEntry
 from ..Utils import coerce, overload
+
+SLRY = 1
+HRLY = 2
+TASK = 4
 
 
 @implementer(IEmployee, ISupervisee)
@@ -32,6 +38,22 @@ class Employee(Item):
     alternate_authentication = reference()
     supervisor = reference()
     timeEntry = reference()
+    hourly_by_task = boolean(default=False)
+
+    @coerce
+    def getTasks(self) -> [IAssignedTask]:
+        return self.powerupsFor(IAssignedTask)
+
+    def getCompensationType(self) -> tuple:
+        ise = ISolomonEmployee(self.employee_id)
+        if not ise:
+            return None, None
+        if ise.stdSlry:
+            return ise.stdSlry, SLRY
+        if self.hourly_by_task:
+            return ise.stdUnitRate, TASK
+        return ise.stdUnitRate, HRLY
+
 
     @coerce
     def getWorkLocations(self) -> [IWorkLocation]:

@@ -1,0 +1,13 @@
+<div class="ReportRenderer" id="ReportRenderer" n:pattern="ReportRendererPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"/>
+
+    <input type="button" value="Edit Report"><athena:handler event="onclick" handler="viewDetails"/></input>
+    <input id="openReport" type="button" value="Open Report"><athena:handler event="onclick" handler="prepareReport"/></input>
+    <input type="text" id="reportName" style="display:none"/>
+    <textarea id="reportDescription" style="display:none"/>
+    <ul class="list"/>
+
+    <input id="runReport" type="button" value="Run Report" style="display:none"><athena:handler event="onclick" handler="runReport"/></input>
+
+
+</div>

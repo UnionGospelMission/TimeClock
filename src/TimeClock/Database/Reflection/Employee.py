@@ -18,9 +18,8 @@ def findEmployee(adid: str) -> IEmployee:
 
 def newEmployee(_):
     from TimeClock.Axiom.Store import Store
-    from TimeClock.API.Permissions import ClockIn
     e = Employee(store=Store)
-    e.powerUp(ClockIn, IPermission)
+    e.powerUp(IPermission("Clock In"), IPermission)
     return e
 
 

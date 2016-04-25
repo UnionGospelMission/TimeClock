@@ -14,6 +14,11 @@ from . import Solomon
 @implementer(ISolomonEmployee)
 class SolomonEmployee(object):
     @overload
+    def __init__(self, employee_id: int):
+        self.employee = IEmployee(employee_id)
+        self.record = Solomon.getEmployee(employee_id)
+
+    @overload
     def __init__(self, employee: IEmployee):
         self.employee = employee
         self.record = Solomon.getEmployee(employee.employee_id)
@@ -61,3 +66,4 @@ class SolomonEmployee(object):
 
 
 registerAdapter(SolomonEmployee, IEmployee, ISolomonEmployee)
+registerAdapter(SolomonEmployee, int, ISolomonEmployee)

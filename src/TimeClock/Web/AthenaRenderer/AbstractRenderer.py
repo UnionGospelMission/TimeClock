@@ -13,6 +13,8 @@ class AbstractRenderer(LiveFragment):
     employee = None
     visible = False
     def prepare(self, parent: LiveFragment):
+        if self.parent:
+            return
         self.parent = parent
         self.employee = parent.employee
         self.setFragmentParent(parent.fragmentParent)

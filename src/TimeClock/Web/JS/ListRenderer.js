@@ -44,7 +44,7 @@ TimeClock.ListRenderer.methods(
         if (self.node.dataset.selectable!="true"){
             return true;
         }
-        if (self.selected.includes(node)){
+        if (self.selected.indexOf(node)+1){
             self.selected.pop(node);
             node.style.backgroundColor="white";
         }

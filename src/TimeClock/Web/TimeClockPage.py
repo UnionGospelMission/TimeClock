@@ -1,11 +1,13 @@
 import base64
 
+from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderer.Calendar import Calendar
+from TimeClock.Web.AthenaRenderer.Editor import Editor
 from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer
 from TimeClock.Web.LiveFragment import LiveFragment
 from nevow.athena import LivePage, expose
@@ -36,14 +38,12 @@ def formatShortName(n):
 def getActionItems(self, ctx):
     o = []
     p = self.employee.getPermissions()
-    for i in self.api.getCommands(p):
-        iar = IAthenaRenderable(i, None)
-        if iar:
-            print(40, iar)
-            o.append(iar)
-    # o.append(IAthenaRenderable([1,2,3,4,5]))
-    # o.append(ListRenderer([{'a':1,'b':5}, {'a':2,'b':4}, {'a':3,'b':3}], title="dict"))
-    o.append(Calendar())
+    for i in self.api.getCommands():
+        if i.hasPermission(p) or IAdministrator(self.employee, None):
+            iar = IAthenaRenderable(i, None)
+            if iar:
+                print(40, iar)
+                o.append(iar)
     return o
 
 
@@ -57,6 +57,8 @@ class TimeClockPage(LivePage):
         self.pageId = getId()
         self.pages[self.pageId] = self
         self.jsModules.mapping['TimeClock'] = path + '/JS/TimeClock.js'
+        self.jsModules.mapping['mode-python.js'] = path + '/JS/mode-python.js'
+        self.jsModules.mapping['theme-twilight.js'] = path + '/JS/theme-twilight.js'
         for f in os.listdir(path + '/JS'):
             self.jsModules.mapping['TimeClock.' + f.rsplit('.js', 1)[0]] = path + '/JS/' + f
             self.jsModules.mapping[f.rsplit('.js', 1)[0]] = path + '/JS/' + f

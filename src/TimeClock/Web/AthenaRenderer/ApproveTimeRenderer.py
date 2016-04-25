@@ -58,6 +58,7 @@ class ApproveTimeRenderer(AbstractCommandRenderer):
         return lr
     @expose
     def approveShifts(self, args):
+        print(61, args)
         a = []
         for arg in args:
             arg = int(arg)

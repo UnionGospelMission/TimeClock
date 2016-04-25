@@ -28,6 +28,8 @@ class ClockOutRenderer(AbstractCommandRenderer):
         self.parent.elements['clockIn'].show()
         self.parent.selectedElement = self.parent.elements['clockIn']
         if hasattr(self.parent, 'menu'):
+            self.parent.menu.hideClockOut()
+        if hasattr(self.parent, 'parent') and hasattr(self.parent.parent, 'menu'):
             self.parent.parent.menu.hideClockOut()
 
 

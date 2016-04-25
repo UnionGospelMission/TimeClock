@@ -9,7 +9,9 @@ class IFormat(Interface):
     name = Attribute("name")
     def formatRow(row: IReportData) -> bytes:
         pass
-    def formatHeader(table: Subclass[Item]) -> bytes:
+    def formatHeader(columns: [str]) -> bytes:
         pass
-    def formatFooter(table: Subclass[Item]) -> bytes:
+    def formatFooter() -> bytes:
+        pass
+    def getReport() -> bytes:
         pass

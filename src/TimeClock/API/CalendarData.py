@@ -58,7 +58,6 @@ class CalendarData(object):
     @coerce
     def sumBetween(self, start: IDateTime, end: IDateTime) -> ITimeDelta:
         b = self.between(start, end)
-        print(61, b.entries)
         total = start - start
         all = iter(b.allTimes())
         for st in all:

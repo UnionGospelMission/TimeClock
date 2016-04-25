@@ -21,7 +21,7 @@ class AbstractCommandRenderer(AbstractRenderer):
         return a
     def execute(self, *a):
         emp = IAdministrator(self.employee, None) or ISupervisor(self.employee, None) or self.employee
-        print(23)
+        print(23, emp, a, self.employee)
         return self.command.execute(emp, *a)
     def __init__(self, command: ICommand):
         self.command = command
