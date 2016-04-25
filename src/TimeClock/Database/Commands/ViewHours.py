@@ -25,6 +25,10 @@ from TimeClock.Utils import overload, coerce
 class ViewHours(Item):
     name = text()
     @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, caller: IEmployee, employee: ISupervisee) -> bool:
         return IAdministrator(caller, None) or (ISupervisor(caller, None) and employee in ISupervisor(caller).getEmployees()) or caller is employee
     @overload

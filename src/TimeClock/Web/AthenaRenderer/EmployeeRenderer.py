@@ -85,9 +85,7 @@ class EmployeeRenderer(AbstractRenderer):
             return ""
         self.commands = o = []
         api = self._employee.getAPI().api
-        for c in api.getCommands(self._employee.getPermissions()):
-            if isinstance(c, ChangeAuthentication) and self._employee.active_directory_name:
-                continue
+        for c in api.getCommands(self._employee):
             iar = IAthenaRenderable(c, None)
             if iar:
                 iar.prepare(self)

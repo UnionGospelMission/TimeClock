@@ -34,6 +34,7 @@ class Administrator(Item):
     def editTime(self, employee: IEmployee, time: ITimePeriod, affected: ITimePeriod):
         pass
 
+    @coerce
     def getPermissions(self) -> [IPermission]:
         return self.powerupsFor(IPermission)
 

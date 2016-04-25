@@ -41,9 +41,7 @@ def formatShortName(n):
 def getActionItems(self, ctx):
     o = []
     p = self.employee.getPermissions()
-    for i in self.api.getCommands():
-        if isinstance(i, ChangeAuthentication) and self.employee.active_directory_name:
-            continue
+    for i in self.api.getCommands(self.employee):
         if i.hasPermission(p) or IAdministrator(self.employee, None):
             iar = IAthenaRenderable(i, None)
             if iar:

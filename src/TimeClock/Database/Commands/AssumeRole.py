@@ -22,6 +22,10 @@ from axiom.item import Item
 class AssumeRole(Item):
     name = text()
     @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return False
     @overload

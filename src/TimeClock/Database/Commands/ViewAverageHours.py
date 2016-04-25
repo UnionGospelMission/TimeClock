@@ -25,6 +25,10 @@ from TimeClock.Utils import overload, coerce
 class ViewAverageHours(Item):
     name = text()
     @overload
+    def hasPermission(self, caller: IEmployee) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, caller: IEmployee, employee: ISupervisee) -> bool:
         return IAdministrator(caller, None) or (ISupervisor(caller, None) and employee in ISupervisor(caller).getEmployees()) or caller is employee
     @overload

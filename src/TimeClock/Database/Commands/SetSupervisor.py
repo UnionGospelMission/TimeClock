@@ -20,6 +20,12 @@ from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 @implementer(ICommand, IItem)
 class SetSupervisor(Item):
     name = text()
+
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return True
     @overload

@@ -13,8 +13,8 @@ from TimeClock.Utils import overload
 @implementer(IAPI)
 class APIProxy(object):
     def __init__(self, api, employee):
-        self.api=api
-        self.employee=employee
+        self.api = api
+        self.employee = employee
     def __getattr__(self, attr):
         val = getattr(self.api, attr)
         if isinstance(val, BoundFunction):
@@ -36,6 +36,13 @@ class AbstractAPI(object):
     @overload
     def getCommands(self) -> [ICommand]:
         return self.powerupsFor(ICommand)
+    @overload
+    def getCommands(self, employee: IEmployee) -> [ICommand]:
+        o = []
+        for c in self.powerupsFor(ICommand):
+            if c.hasPermission(employee):
+                o.append(c)
+        return o
     @overload
     def getCommands(self, permissions: [IPermission]) -> [ICommand]:
         o = []

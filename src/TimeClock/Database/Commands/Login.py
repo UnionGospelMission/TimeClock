@@ -6,6 +6,7 @@ from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
+from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.Utils import coerce, overload
 from axiom.item import Item
@@ -17,7 +18,11 @@ class Login(Item):
     def getArguments(self) -> [object]:
         return ["caller", "employee", "password"]
     name = text()
-    @coerce
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return True
     @overload

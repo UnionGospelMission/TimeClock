@@ -17,7 +17,11 @@ from axiom.attributes import text
 class NewEmployee(Item):
     name = text()
 
-    @coerce
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return False
     @overload

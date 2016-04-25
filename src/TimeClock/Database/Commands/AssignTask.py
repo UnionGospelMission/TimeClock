@@ -19,6 +19,11 @@ from axiom.item import Item
 @implementer(ICommand, IItem)
 class AssignTask(Item):
     name = text(default="Assign Task")
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return IPermission("Assign Task") in permissions
     @overload

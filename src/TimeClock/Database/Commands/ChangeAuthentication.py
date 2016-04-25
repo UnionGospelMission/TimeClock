@@ -21,6 +21,11 @@ from TimeClock.Solomon.Solomon import getEmployees
 @implementer(ICommand, IItem)
 class ChangeAuthentication(Item):
     name = text()
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return (not caller.active_directory_name) and self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]):
         return True
     @overload

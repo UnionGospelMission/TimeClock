@@ -19,6 +19,12 @@ from axiom.attributes import text
 @implementer(ICommand, IItem)
 class SetSubAccounts(Item):
     name = text()
+
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return True
     @overload

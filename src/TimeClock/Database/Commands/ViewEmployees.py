@@ -25,9 +25,15 @@ from TimeClock.Utils import overload, coerce
 @implementer(ICommand, IItem)
 class ViewEmployees(Item):
     name = text()
+
     @overload
     def hasPermission(self, caller: IAdministrator) -> bool:
         return True
+
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
     @overload
     def hasPermission(self, caller: IPerson) -> bool:
         return IAdministrator(caller, None) or ISupervisor(caller, None)

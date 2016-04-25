@@ -21,6 +21,11 @@ from TimeClock.Solomon.Solomon import getEmployees
 @implementer(ICommand, IItem)
 class CheckForNewEmployees(Item):
     name = text()
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]):
         return True
     @overload

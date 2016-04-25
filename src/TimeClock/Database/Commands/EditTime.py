@@ -24,6 +24,10 @@ from axiom.attributes import text
 class EditTime(Item):
     name = text()
     @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, caller: ISupervisor, employee: ISupervisee, entry: ITimeEntry) -> bool:
         return IAdministrator(caller, None) or (not entry.approved and employee in caller.powerupsFor(ISupervisee))
     @overload

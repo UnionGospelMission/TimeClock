@@ -17,7 +17,11 @@ from axiom.attributes import text
 @implementer(ICommand, IItem)
 class NewArea(Item):
     name = text()
-    @coerce
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return TimeClock.API.Permissions.NewArea in permissions
     @overload

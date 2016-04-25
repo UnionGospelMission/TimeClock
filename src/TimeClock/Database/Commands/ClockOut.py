@@ -21,7 +21,11 @@ class ClockOut(Item):
     def getArguments(self) -> [object]:
         return ["caller", {"Employee ID":"optional"}]
     name = text()
-    @coerce
+    @overload
+    def hasPermission(self, caller: IPerson) -> bool:
+        return self.hasPermission(caller.getPermissions())
+
+    @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return True
     @overload
