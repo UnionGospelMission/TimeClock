@@ -19,5 +19,25 @@ LoginPage.Login.methods(
         });
         return false;
 
+    },
+    function clockIn(self, node){
+        self.callRemote("quickValidate", 'clockIn', self.nodeById("username").value, self.nodeById("password").value).addCallback(function(success){
+            if (success=='access granted'){
+                alert("Clocked In");
+            }
+            else{
+                alert(success);
+            }
+        });
+    },
+    function clockOut(self, node){
+        self.callRemote("quickValidate", 'clockOut', self.nodeById("username").value, self.nodeById("password").value).addCallback(function(success){
+            if (success=='access granted'){
+                alert("Clocked Out");
+            }
+            else{
+                alert(success);
+            }
+        });
     }
 );

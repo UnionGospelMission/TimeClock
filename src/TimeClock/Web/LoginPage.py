@@ -1,5 +1,6 @@
 from TimeClock.API.APIs import PublicAPI
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
+from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Web.TimeClockPage import TimeClockPage
 from nevow.loaders import xmlfile
 
@@ -23,6 +24,20 @@ class LoginPage(LivePage):
         def __init__(self, parent, ctx):
             self.parent = parent
             self.setFragmentParent(parent)
+        @expose
+        def quickValidate(self, func, username, password):
+            if username.isdigit():
+                username = int(username)
+            employee = IEmployee(username, None)
+            if employee is None:
+                return "access denied"
+            PublicAPI.login(employee, username, password)
+            if func == 'clockIn':
+                ise = ISolomonEmployee(employee)
+                employee.clockIn(ise.defaultSubAccount, ise.defaultWorkLocation)
+            elif func == 'clockOut':
+                employee.clockOut()
+            return 'access granted'
 
         @expose
         def validate(self, username, password):
