@@ -2,6 +2,7 @@ from zope.interface import implementer
 
 from TimeClock import AD
 from TimeClock.Database.Commands.CommandEvent import CommandEvent
+from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
@@ -32,9 +33,11 @@ class Login(Item):
         if r:
             e = IEmployee(eid)
             if e.alternate_authentication:
-                assert(e.alternate_authentication.authenticate(e, pw))
+                valid = e.alternate_authentication.authenticate(e, pw)
             else:
-                assert AD.authenticate(e, pw)
+                valid = AD.authenticate(e, pw)
+            if not valid:
+                raise PermissionDenied("Incorrect Username or Password")
     @overload
     def execute(self, caller: object, adid: str, pw: str):
         c = CommandEvent(caller, self, adid)

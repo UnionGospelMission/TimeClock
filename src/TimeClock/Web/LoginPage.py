@@ -1,4 +1,5 @@
 from TimeClock.API.APIs import PublicAPI
+from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Web.TimeClockPage import TimeClockPage
@@ -46,7 +47,10 @@ class LoginPage(LivePage):
             employee = IEmployee(username, None)
             if employee is None:
                 return "access denied"
-            PublicAPI.login(employee, username, password)
+            try:
+                PublicAPI.login(employee, username, password)
+            except PermissionDenied as e:
+                return "access denied"
             newPage = TimeClockPage(employee)
             return newPage.pageId
 
