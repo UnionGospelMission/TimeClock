@@ -9,8 +9,8 @@ TimeClock.ViewHours.methods(
     function __init__(self, node){
         TimeClock.Commands.upcall(self, "__init__", node);
         if (!Modernizr.inputtypes.date){
-            self.startDate = $(self.nodeByAttribute('name', 'startDate')).datepicker({ dateFormat: 'yyyy-mm-dd' });
-            self.endDate = $(self.nodeByAttribute('name', 'endDate')).datepicker({ dateFormat: 'yyyy-mm-dd' });
+            self.startDate = $(self.nodeByAttribute('name', 'startDate')).datepicker({ dateFormat: 'yy-mm-dd' });
+            self.endDate = $(self.nodeByAttribute('name', 'endDate')).datepicker({ dateFormat: 'yy-mm-dd' });
 
         }
 
