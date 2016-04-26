@@ -21,9 +21,13 @@ LoginPage.Login.methods(
 
     },
     function clockIn(self, node){
-        self.callRemote("quickValidate", 'clockIn', self.nodeById("username").value, self.nodeById("password").value).addCallback(function(success){
+        var un = self.nodeById("username");
+        var pw = self.nodeById("password");
+        self.callRemote("quickValidate", 'clockIn', un.value, pw.value).addCallback(function(success){
             if (success=='access granted'){
                 alert("Clocked In");
+                un.value = '';
+                pw.value = '';
             }
             else{
                 alert(success);
@@ -31,9 +35,13 @@ LoginPage.Login.methods(
         });
     },
     function clockOut(self, node){
-        self.callRemote("quickValidate", 'clockOut', self.nodeById("username").value, self.nodeById("password").value).addCallback(function(success){
+        var un = self.nodeById("username");
+        var pw = self.nodeById("password");
+        self.callRemote("quickValidate", 'clockOut', un.value, pw.value).addCallback(function(success){
             if (success=='access granted'){
                 alert("Clocked Out");
+                un.value = '';
+                pw.value = '';
             }
             else{
                 alert(success);

@@ -26,7 +26,6 @@ class ViewHoursRenderer(AbstractCommandRenderer):
         a = []
         for i in args:
             a.append(DateTime.get(i))
-        print(29, a)
         iar = IAthenaRenderable(super(ViewHoursRenderer, self).execute(*a))
         iar.prepare(self)
         iar.visible = True

@@ -9,8 +9,8 @@ TimeClock.ViewHours.methods(
     function __init__(self, node){
         TimeClock.Commands.upcall(self, "__init__", node);
         if (!Modernizr.inputtypes.date){
-            self.startDate = $(self.nodeByAttribute('name', 'startDate')).datepicker();
-            self.endDate = $(self.nodeByAttribute('name', 'endDate')).datepicker();
+            self.startDate = $(self.nodeByAttribute('name', 'startDate')).datepicker({ dateFormat: 'yyyy-mm-dd' });
+            self.endDate = $(self.nodeByAttribute('name', 'endDate')).datepicker({ dateFormat: 'yyyy-mm-dd' });
 
         }
 
@@ -36,8 +36,10 @@ TimeClock.ViewHours.methods(
             endDate =  node.endDate.valueAsDate.toISOString();
         }
         else{
-            startDate = $(node.startDate).datepicker('getDate');
-            endDate = $(node.endDate).datepicker('getDate');
+            var tzoffset = new Date().getTimezoneOffset();
+            startDate = $(node.startDate).datepicker('getDate').toISOString();
+            endDate = $(node.endDate).datepicker('getDate').toISOString();
+            console.log(startDate, endDate);
         }
 
         return [startDate, endDate];
