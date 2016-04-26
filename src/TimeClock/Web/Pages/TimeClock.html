@@ -10,6 +10,7 @@
         <ul id="menuList">
             <li n:data="menuItem" n:render="menuItem"><athena:handler event="onclick" handler="menuClicked" /></li>
         </ul>
+        <input type="button" value="Logout"><athena:handler event="onclick" handler="logout"/></input>
         <div id="greeter"><h3>Welcome <invisible n:render="employeeName"/></h3><h5>You have worked <span id="hoursWorked"><invisible n:render="workedThisWeek"/></span> this week</h5></div>
     </div>
     <div n:render="ActionPane">ActionPane</div>

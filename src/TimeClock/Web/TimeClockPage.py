@@ -51,8 +51,6 @@ def getActionItems(self, ctx):
     return o
 
 
-
-
 class TimeClockPage(LivePage):
     pages = {}
     def __init__(self, employee: IEmployee):

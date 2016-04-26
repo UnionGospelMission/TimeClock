@@ -20,6 +20,9 @@ TimeClock.MenuPane.methods(
     },
     function updateTime(self, hours){
         self.nodeById('hoursWorked').innerHTML = hours;
+    },
+    function logout(self, node){
+        $.redirectPost("/");
     }
 
 );
