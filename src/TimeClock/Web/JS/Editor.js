@@ -18,7 +18,7 @@ TimeClock.Editor.methods(
         })
     },
     function save(self, node){
-        self.callRemote("save", self.editor.getValue());
+        self.busyCallRemote("save", self.editor.getValue());
         var ps = self.editorSaveCallback;
         if (ps){
             ps();

@@ -72,7 +72,7 @@ TimeClock.ListRenderer.methods(
             return;
         }
         self.noclick = true;
-        self.callRemote("itemDblClicked", node.children[0].dataset.index).addCallback(
+        self.busyCallRemote("itemDblClicked", node.children[0].dataset.index).addCallback(
             function (newNode) {
                 self.noclick = false;
                 if (!newNode) {

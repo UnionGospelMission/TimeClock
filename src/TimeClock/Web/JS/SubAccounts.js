@@ -35,6 +35,6 @@ TimeClock.SubAccounts.methods(
 
     },
     function toggleActive(self, node){
-        self.callRemote("toggleActive", node.dataset.storeid, node.checked);
+        self.busyCallRemote("toggleActive", node.dataset.storeid, node.checked);
     }
 );

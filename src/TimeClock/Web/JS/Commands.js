@@ -7,17 +7,33 @@
 
 TimeClock.Commands = Nevow.Athena.Widget.subclass("TimeClock.Commands");
 TimeClock.Commands.methods(
-    /**
-     * Handle click events on any of the calculator buttons.
-     */
+    function busyCallRemote(self, func){
+        var busy = self.setBusy();
+        var args = [func];
+        for (var idx=2; idx<arguments.length;idx++){
+            args.push(arguments[idx]);
+        }
+        var cb = self.callRemote.apply(self, args);
+        cb.addCallback(busy);
+        cb.addErrback(busy);
+        return cb;
+    },
+    function setBusy(self){
+        var oldstyle = document.body.style.cursor;
+        document.body.style.cursor='progress';
+        return function(data){
+            document.body.style.cursor=oldstyle;
+            return data;
+        };
+    },
     function __init__(self, node){
         TimeClock.Commands.upcall(self, "__init__", node);
-        //self.callRemote("getVisibility");
     },
     function runCommand(self, node){
         var args = self.getArgs(node);
-        console.log(args);
-        console.log(self.callRemote('runCommand', args));
+        var b = self.setBusy();
+        self.busyCallRemote('runCommand', args).addCallback(b);
+
         return false;
     },
     function hide(self){
@@ -43,5 +59,7 @@ TimeClock.Commands.methods(
 
     }
 
+
 );
+
 

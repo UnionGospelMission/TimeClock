@@ -10,11 +10,11 @@ TimeClock.EmployeePicker.methods(
         for (var idx = 0; idx < lst.selected.length; idx++) {
             args.push(lst.selected[idx].children[0].dataset.index);
         }
-        self.callRemote('runCallback', args);
+        self.busyCallRemote('runCallback', args);
     },
     function loadEmployeeList(self, node){
         node.disabled=true;
-        self.callRemote("loadEmployeeList").addCallback(function(elist){
+        self.busyCallRemote("loadEmployeeList").addCallback(function(elist){
             self.addChildWidgetFromWidgetInfo(elist).addCallback(function(widget){
                 node.parentNode.replaceChild(widget.node, node);
             });

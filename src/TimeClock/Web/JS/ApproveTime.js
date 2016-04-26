@@ -5,7 +5,7 @@
 TimeClock.ApproveTime = TimeClock.Commands.subclass("TimeClock.ApproveTime");
 TimeClock.ApproveTime.methods(
     function runCommand(self, node){
-        self.callRemote('runCommand', self.getArgs(node)).addCallback(
+        self.busyCallRemote('runCommand', self.getArgs(node)).addCallback(
             function(newNode){
                 self.addChildWidgetFromWidgetInfo(newNode).addCallback(
                     function childAdded(widget){
@@ -32,7 +32,7 @@ TimeClock.ApproveTime.methods(
             console.log(32, self.hours.selected[idx]);
             args.push(self.hours.selected[idx].dataset.ordinal);
         }
-        self.callRemote("approveShifts", args).addCallback(function(retval){
+        self.busyCallRemote("approveShifts", args).addCallback(function(retval){
             self.nodeById("Submit").style.display="none";
         });
     },

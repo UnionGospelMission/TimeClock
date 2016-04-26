@@ -33,7 +33,7 @@ TimeClock.Tasks.methods(
         self.nodeById('refresh').style.display='block';
     },
     function refreshTasks(self, node){
-        self.callRemote('listTasks').addCallback(function(newNode){
+        self.busyCallRemote('listTasks').addCallback(function(newNode){
             self.addChildWidgetFromWidgetInfo(newNode).addCallback(
                 function childAdded(widget){
                     if (self.childWidgets.length>1){
@@ -50,10 +50,10 @@ TimeClock.Tasks.methods(
     function onSave(self){
         self.nodeById('taskName').style.display='none';
         self.nodeById('taskHours').style.display='none';
-        self.callRemote("save", self.nodeById('taskName').value, self.nodeById('taskHours').value);
+        self.busyCallRemote("save", self.nodeById('taskName').value, self.nodeById('taskHours').value);
     },
     function viewDetails(self, node){
-        self.callRemote("viewDetails").addCallback(function(params){
+        self.busyCallRemote("viewDetails").addCallback(function(params){
             var newNode = params[0];
             var taskName = params[1];
             var taskHours = params[2];

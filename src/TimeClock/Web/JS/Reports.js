@@ -16,10 +16,10 @@ TimeClock.Reports.methods(
         self.nodeById('newReport').style.display='none';
         self.nodeById('newReportName').style.display='block';
         self.nodeById('newReportDescription').style.display='block';
-        self.callRemote("showEditor");
+        self.busyCallRemote("showEditor");
     },
     function getNameAndDescr(self, node){
-        self.callRemote('setNameAndDescr', self.nodeById('newReportName').value, self.nodeById('newReportDescription').value);
+        self.busyCallRemote('setNameAndDescr', self.nodeById('newReportName').value, self.nodeById('newReportDescription').value);
         self.nodeById('newReportName').style.display='none';
         self.nodeById('newReportDescription').style.display='none';
         self.nodeById('newReportName').value='';
@@ -27,7 +27,7 @@ TimeClock.Reports.methods(
         self.nodeById('newReport').style.display='block';
     },
     function viewDetails(self, node){
-        self.callRemote("viewDetails").addCallback(function(params){
+        self.busyCallRemote("viewDetails").addCallback(function(params){
             var newNode = params[0];
             var reportName = params[1];
             var reportDescription = params[2];
@@ -46,7 +46,7 @@ TimeClock.Reports.methods(
         });
     },
     function listReports(self, node){
-        self.callRemote('listReports').addCallback(function(newNode){
+        self.busyCallRemote('listReports').addCallback(function(newNode){
             self.addChildWidgetFromWidgetInfo(newNode).addCallback(
                     function childAdded(widget){
                         self.node.replaceChild(widget.node, node);
@@ -57,7 +57,7 @@ TimeClock.Reports.methods(
         self.nodeById('refresh').style.display='block';
     },
     function refreshReports(self, node){
-        self.callRemote('listReports').addCallback(function(newNode){
+        self.busyCallRemote('listReports').addCallback(function(newNode){
             self.addChildWidgetFromWidgetInfo(newNode).addCallback(
                 function childAdded(widget){
                     if (self.childWidgets.length>1){
@@ -76,7 +76,7 @@ TimeClock.Reports.methods(
         for (var i=0; i<self.lst.items.length;i++){
             args.push(self.lst.items[i].elm.children[1].value);
         }
-        self.callRemote("runReport", args).addCallback(function(retval){
+        self.busyCallRemote("runReport", args).addCallback(function(retval){
             var report, mimetype;
             report = retval[0];
             mimetype = retval[1];
@@ -88,13 +88,13 @@ TimeClock.Reports.methods(
     function onSave(self){
         self.nodeById('reportName').style.display='none';
         self.nodeById('reportDescription').style.display='none';
-        self.callRemote("save", self.nodeById('reportName').value, self.nodeById('reportDescription').value);
+        self.busyCallRemote("save", self.nodeById('reportName').value, self.nodeById('reportDescription').value);
     },
     function prepareReport(self, node){
         self.nodeById("openReport").style.display='none';
         self.nodeById("runReport").style.display='block';
 
-        self.callRemote("getArgs").addCallback(function(params) {
+        self.busyCallRemote("getArgs").addCallback(function(params) {
             var count = params.length;
             var options = {
                 valueNames: [ 'value', 'label'],

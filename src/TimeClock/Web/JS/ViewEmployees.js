@@ -5,7 +5,7 @@
 TimeClock.ViewEmployees = TimeClock.Commands.subclass("TimeClock.ViewEmployees");
 TimeClock.ViewEmployees.methods(
     function runCommand(self, node){
-        self.callRemote('runCommand', self.getArgs(node)).addCallback(
+        self.busyCallRemote('runCommand', self.getArgs(node)).addCallback(
             function(newNode){
                 self.addChildWidgetFromWidgetInfo(newNode).addCallback(
                     function childAdded(widget){

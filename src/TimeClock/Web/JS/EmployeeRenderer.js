@@ -3,7 +3,7 @@
 "use strict";
 
 
-TimeClock.EmployeeRenderer = Nevow.Athena.Widget.subclass("TimeClock.EmployeeRenderer");
+TimeClock.EmployeeRenderer = TimeClock.Commands.subclass("TimeClock.EmployeeRenderer");
 TimeClock.EmployeeRenderer.methods(
 
     function hide(self){
@@ -33,7 +33,7 @@ TimeClock.EmployeeRenderer.methods(
         event.stopPropagation();
     },
     function saveClicked(self, node){
-        self.callRemote("saveClicked", $(self.nodeById("editEmployee")).serializeArray()).addCallback(
+        self.busyCallRemote("saveClicked", $(self.nodeById("editEmployee")).serializeArray()).addCallback(
             function(ret){
                 if (ret) {
                    self.addChildWidgetFromWidgetInfo(ret).addCallback(
@@ -57,7 +57,7 @@ TimeClock.EmployeeRenderer.methods(
         self.node.parentNode.removeChild(self.node);
     },
     function showCommand(self, node){
-        self.callRemote("showCommand", node.value);
+        self.busyCallRemote("showCommand", node.value);
     }
 
 );

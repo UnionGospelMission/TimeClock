@@ -12,7 +12,7 @@ TimeClock.SetSupervisor.methods(
         self.nodeById("employeeID").value = val;
     },
     function runCommand(self, node){
-        self.callRemote("runCommand", [self.nodeById("employeeID").value, self.nodeById("supervisorID").value]);
+        self.busyCallRemote("runCommand", [self.nodeById("employeeID").value, self.nodeById("supervisorID").value]);
         event.preventDefault();
     },
     function runRefresh(self, node){
@@ -23,7 +23,7 @@ TimeClock.SetSupervisor.methods(
     },
     function loadEmployeeList(self, node){
         self.elist = true;
-        self.callRemote("loadEmployeeList").addCallback(function(emplist){
+        self.busyCallRemote("loadEmployeeList").addCallback(function(emplist){
             self.addChildWidgetFromWidgetInfo(emplist).addCallback(
                 function childAdded(widget){
                     node.parentNode.replaceChild(widget.node, node);

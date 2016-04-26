@@ -13,18 +13,18 @@ TimeClock.WorkLocation.methods(
         for (var idx=0;idx<self.childWidgets[1].selected.length; idx++){
             selected.push(self.childWidgets[1].selected[idx].cells[1].innerHTML);
         }
-        self.callRemote("runCommand", [self.nodeById("employeeID").value, selected]);
+        self.busyCallRemote("runCommand", [self.nodeById("employeeID").value, selected]);
         event.preventDefault();
     },
     function runRefresh(self, node){
         if (!self.elist){
             self.loadEmployeeList();
         }
-        self.callRemote("refresh");
+        self.busyCallRemote("refresh");
     },
     function loadEmployeeList(self, node){
         self.elist=true;
-        self.callRemote("loadEmployeeList").addCallback(function(emplist){
+        self.busyCallRemote("loadEmployeeList").addCallback(function(emplist){
             self.addChildWidgetFromWidgetInfo(emplist).addCallback(
                 function childAdded(widget){
                     node.parentNode.replaceChild(widget.node, node);
