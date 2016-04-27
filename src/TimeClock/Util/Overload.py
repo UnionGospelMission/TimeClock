@@ -2,12 +2,13 @@ from collections import defaultdict, OrderedDict
 
 from zope.interface import Interface
 from zope.interface.exceptions import BrokenImplementation, BrokenMethodImplementation, DoesNotImplement
-from zope.interface.interface import Attribute, Method
+from zope.interface.interface import Attribute
 from zope.interface.verify import verifyObject
 
 from .BoundFunction import BoundFunction
 from .Default import Defalt
 from .needs_coercing import needs_coercing
+
 
 class Overloader(Attribute):
     def __new__(cls):
