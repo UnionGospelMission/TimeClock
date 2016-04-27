@@ -1,10 +1,10 @@
-from collections import OrderedDict
 from collections.abc import Iterable
 
 from twisted.python.components import registerAdapter
 
 from TimeClock.ITimeClock.IFiniteSequence import IFiniteSequence
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
+from TimeClock.Util.OrderedDict import OrderedDict
 from TimeClock.Utils import coerce, overload
 from nevow import inevow
 from nevow.athena import expose
@@ -44,7 +44,7 @@ class ListRenderer(AbstractRenderer):
                     i.visible = True
                 elif self.itemsVisible is False:
                     i.visible = False
-            elif isinstance(i, dict):
+            elif isinstance(i, (dict, OrderedDict)):
                 for k, v in i.items():
                     if IAthenaRenderable(v, None):
                         v = i[k] = IAthenaRenderable(v)

@@ -13,6 +13,7 @@ from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Solomon.Solomon import ACTIVE
+from TimeClock.Util.OrderedDict import OrderedDict
 from TimeClock.Web.AthenaRenderer.AbstractCommandRenderer import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderer.AbstractRenderer import path
 from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer
@@ -37,8 +38,8 @@ class SetSubAccountsRenderer(AbstractCommandRenderer):
             self.subaccounts = subaccount = list(Store.query(SubAccount))
             for sub in subaccount:
                 if sub.active:
-                    subs.append({1: sub.name, 2: '%05i' % sub.sub})
-            e = [{"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id}
+                    subs.append(OrderedDict(**{'Sub Account': sub.name, 'Code': '%05i' % sub.sub}))
+            e = [OrderedDict({"Name": ISolomonEmployee(i).name, "Employee ID": i.employee_id})
                  for i in Store.query(Employee)
                  if ISolomonEmployee(i).status == ACTIVE]
             self.loclist = ListRenderer(subs)

@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
@@ -15,6 +13,7 @@ from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Util import NULL
+from TimeClock.Util.OrderedDict import OrderedDict
 from TimeClock.Web.AthenaRenderer.AbstractRenderer import AbstractRenderer, path
 from TimeClock.Web.AthenaRenderer.ConfirmationRenderer import ConfirmationRenderer
 from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer

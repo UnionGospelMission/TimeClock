@@ -48,8 +48,6 @@ class ReportViewer(AbstractRenderer):
     def showEditor(self):
         self.nrEditor.show()
 
-
-
     def onSave(self):
         self.callRemote("getNameAndDescr")
     @expose

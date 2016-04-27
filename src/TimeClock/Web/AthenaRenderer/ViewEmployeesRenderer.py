@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from TimeClock.Util.OrderedDict import OrderedDict
 
 from TimeClock.Axiom.Store import Store
 from TimeClock.Database.SubAccount import SubAccount
@@ -8,10 +8,8 @@ from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
-from TimeClock.Util.DateTime import DateTime
 from TimeClock.Utils import coerce
 from TimeClock.Web.AthenaRenderer.AbstractCommandRenderer import AbstractCommandRenderer
-from TimeClock.Web.AthenaRenderer.Calendar import Calendar
 from nevow.athena import expose
 
 from nevow.loaders import xmlfile
@@ -37,7 +35,6 @@ class ViewEmployeesRenderer(AbstractCommandRenderer):
                     option(id="mine")["mine"]
                 ]
 
-
             for a in Store.query(SubAccount):
                 _ = s[option(id=a.sub)[a.name]]
             return s
@@ -61,7 +58,6 @@ class ViewEmployeesRenderer(AbstractCommandRenderer):
         for i in o:
             l.append(OrderedDict(EmployeeID=i.employee_id, Name=ISolomonEmployee(i).name))
 
-        print(37, l)
         iar = IAthenaRenderable(l)
         iar.prepare(self, title="Employees", callback=lambda idx: [print(55, idx), self.employeeSelected(l[idx])][1])
         iar.visible = True
