@@ -7,7 +7,7 @@
 TimeClock.ViewHours = TimeClock.Commands.subclass("TimeClock.ViewHours");
 TimeClock.ViewHours.methods(
     function __init__(self, node){
-        TimeClock.Commands.upcall(self, "__init__", node);
+        TimeClock.ViewHours.upcall(self, "__init__", node);
         if (!Modernizr.inputtypes.date){
             self.startDate = $(self.nodeByAttribute('name', 'startDate')).datepicker({ dateFormat: 'yy-mm-dd' });
             self.endDate = $(self.nodeByAttribute('name', 'endDate')).datepicker({ dateFormat: 'yy-mm-dd' });

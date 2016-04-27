@@ -1,22 +1,20 @@
 import base64
+import os
 
-from TimeClock.Database.Commands.ChangeAuthentication import ChangeAuthentication
+from twisted.internet import reactor
+
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Util.DateTime import DateTime
-from TimeClock.Web.AthenaRenderer.Calendar import Calendar
-from TimeClock.Web.AthenaRenderer.Editor import Editor
-from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer
 from TimeClock.Web.AthenaRenderer.ManageSubAccounts import ManageSubAccounts
 from TimeClock.Web.LiveFragment import LiveFragment
+from TimeClock.Web.Utils import formatShortName
 from nevow.athena import LivePage, expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
-from twisted.internet import reactor
-import os
 
 
 path = __file__.rsplit('/', 1)[0]
@@ -31,11 +29,6 @@ def Renderer(cls):
     def render_cls(self, ctx):
         return cls(self, ctx)
     return render_cls
-
-
-def formatShortName(n):
-    n=n.title().replace(' ', '')
-    return n[0].lower() + n[1:]
 
 
 def getActionItems(self, ctx):
@@ -119,7 +112,6 @@ class TimeClockPage(LivePage):
             self.callRemote("hideClockOut")
         @expose
         def navigate(self, element):
-            print(84, element)
             self.parent.action.navigate(element)
 
     render_MenuPane = Renderer(MenuPane)
@@ -148,10 +140,10 @@ class TimeClockPage(LivePage):
 
         @expose
         def navigate(self, element):
-            if self.selectedElement:
-                self.selectedElement.hide()
+            # if self.selectedElement:
+            #     self.selectedElement.hide()
             self.selectedElement = self.elements[element]
-            self.elements[element].show()
+            # self.elements[element].show()
     render_ActionPane = Renderer(ActionPane)
 
 

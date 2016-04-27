@@ -1,6 +1,7 @@
 <div class="List" id="List" n:pattern="ListPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
     <n:attr name="style" n:render="visibility"/>
     <n:attr name="data-selectable" n:render="selectable"/>
+    <n:attr name="data-title" n:render="title"/>
 
     <input type="button" value="Close">
         <athena:handler event="onclick" handler="onClose"/>

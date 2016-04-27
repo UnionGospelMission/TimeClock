@@ -3,6 +3,7 @@ from nevow.athena import expose
 from TimeClock.Web.LiveFragment import LiveFragment
 from nevow.loaders import xmlfile
 from nevow.tags import br, input
+from ..Utils import formatShortName
 
 
 path = __file__.rsplit('/', 2)[0]
@@ -32,6 +33,10 @@ class AbstractRenderer(LiveFragment):
         if self.visible:
             return "display:block"
         return "display:none"
+    def render_name(self, ctx, data):
+        return formatShortName(self.name)
+    def render_title(self, ctx, data):
+        return "Time Clock - %s" % self.name
     def hide(self):
         self.visible = False
         self.callRemote("hide");

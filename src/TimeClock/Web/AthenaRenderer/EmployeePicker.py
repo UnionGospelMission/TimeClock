@@ -19,6 +19,7 @@ class EmployeePicker(AbstractRenderer):
     docFactory = xmlfile(path + "/Pages/EmployeePicker.xml", 'EmployeePickerPattern')
     jsClass = "TimeClock.EmployeePicker"
     list = None
+    name = 'Employee Picker'
     def __init__(self, parent, employees: [IEmployee], callback, limit=1):
         self.prepare(parent)
         self.visible = True

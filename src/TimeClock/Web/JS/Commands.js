@@ -28,6 +28,11 @@ TimeClock.Commands.methods(
     },
     function __init__(self, node){
         TimeClock.Commands.upcall(self, "__init__", node);
+        TimeClock.ActionPane.fromAthenaID(2).commands[self.node.dataset.name] = self;
+        if (node.style.display!='none' && node.dataset.name){
+            TimeClock.ActionPane.fromAthenaID(2).currentCommand = self;
+        }
+
     },
     function runCommand(self, node){
         var args = self.getArgs(node);
@@ -41,6 +46,10 @@ TimeClock.Commands.methods(
     },
     function show(self){
         self.node.style.display="block";
+        if (self.node.dataset.title){
+            document.title = self.node.dataset.title;
+        }
+
     },
     function getArgs(self, node){
         return $(node).serializeArray();

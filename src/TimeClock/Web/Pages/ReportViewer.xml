@@ -1,5 +1,8 @@
 <div class="ReportViewer" id="ReportViewer" n:pattern="ReportViewerPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
     <n:attr name="style" n:render="visibility"/>
+    <n:attr name="data-title" n:render="title"/>
+    <n:attr name="data-name" n:render="name"/>
+
     <div n:render="listReports"/>
 
 

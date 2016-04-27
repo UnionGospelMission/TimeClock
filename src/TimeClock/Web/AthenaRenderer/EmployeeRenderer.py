@@ -18,7 +18,7 @@ from TimeClock.Util import NULL
 from TimeClock.Web.AthenaRenderer.AbstractRenderer import AbstractRenderer, path
 from TimeClock.Web.AthenaRenderer.ConfirmationRenderer import ConfirmationRenderer
 from TimeClock.Web.AthenaRenderer.ListRenderer import ListRenderer
-from TimeClock.Web.TimeClockPage import formatShortName
+from TimeClock.Web.Utils import formatShortName
 from nevow import inevow
 from nevow.athena import expose
 from nevow.loaders import xmlfile

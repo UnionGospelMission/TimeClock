@@ -6,9 +6,7 @@ TODO: time input
 TODO: user time report
 
 
-TODO:  Command proxies for supervisors
 TODO:  admin/sup.getpermission should include user permissions
-How are average hours calculated?
 
 
 
@@ -17,15 +15,10 @@ TODO: Approve Vacation
 
 CSS: Mouseover 'links'
 
-JQuery Datepicker
-Hours worked this week in hours:minutes
 
 
 view hours -> close query on new query
-update hours worked dynamically
 view average hours -> run by month, average by selectable(week, month, total)
-add logout button
-login page quick clockin/out
 minimize list when dbl click on name
 fix OrderedDict to be specific ordered
 
@@ -35,5 +28,5 @@ report refresh opens new report list
 
 Ace editor autoselects entire contents
 switch commands without waiting for server
-mark sub accounts and locations as unused
+mark locations as unused
 
