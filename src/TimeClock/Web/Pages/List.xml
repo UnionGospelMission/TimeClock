@@ -1,15 +1,16 @@
 <div class="List" id="List" n:pattern="ListPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
     <n:attr name="style" n:render="visibility"/>
-    <n:attr name="data-selectable" n:render="selectable"/>
     <n:attr name="data-title" n:render="title"/>
-
+    <n:attr name="data-name" n:render="name"/>
+    <n:attr name="data-toplevel" n:render="topLevel"/>
+    <n:attr name="data-selectable" n:render="selectable"/>
     <input type="button" value="Close">
+        <n:attr name="style" n:render="closeable"/>
         <athena:handler event="onclick" handler="onClose"/>
     </input>
     <br/>
     <input class="search" placeholder="Search"/>
-
-    <table id="ListTable" border="1px" style="text-align:center">
+    <table id="ListTable" border="1px" style="text-align:center" class="sortable">
         <thead n:data="tableHeader">
             <tr>
                 <th><n:attr name="colspan"><n:slot name="titleWidth"/></n:attr><n:slot name="tableTitle" /></th>
@@ -17,30 +18,38 @@
             <tr>
             <invisible n:render="header">
                 <invisible n:pattern="headerRow" n:render="headerRow">
-
                         <th n:render="mapping" n:pattern="headerCell">
                             <n:slot name="listHeader" />
-                            <athena:handler event="onclick" handler="headerClicked"/>
+                            <!--<athena:handler event="onclick" handler="headerClicked"/>-->
                         </th>
-
                 </invisible>
-
             </invisible>
             </tr>
         </thead>
         <tbody class="list">
+            <athena:handler event="onclick" handler="itemClicked"/>
             <invisible n:render="list">
+                <tr n:pattern="liveListRow" n:render="liveFragment">
+                    <invisible n:render="listRow">
+                        <td n:render="mapping" n:pattern="listCell">
+                            <n:attr name="class" n:render="searchclass"/>
+                            <n:attr name="data-index"><n:slot name="index"/></n:attr>
+                            <n:slot name="listItem" />
+                        </td>
+                    </invisible>
+                    <!--<athena:handler event="ondblclick" handler="itemDblClicked"/>-->
+
+                </tr>
                 <tr n:pattern="listRow">
                     <invisible n:render="listRow">
                         <td n:render="mapping" n:pattern="listCell">
-                            <n:attr name="class"><n:slot name="searchclass"/></n:attr>
+                            <n:attr name="class" n:render="searchclass"/>
                             <n:attr name="data-index"><n:slot name="index"/></n:attr>
                             <n:slot name="listItem" />
-
                         </td>
                     </invisible>
-                    <athena:handler event="ondblclick" handler="itemDblClicked"/>
-                    <athena:handler event="onclick" handler="itemClicked"/>
+                    <!--<athena:handler event="ondblclick" handler="itemDblClicked"/>-->
+                    <!--<athena:handler event="onclick" handler="itemClicked"/>-->
                 </tr>
             </invisible>
         </tbody>

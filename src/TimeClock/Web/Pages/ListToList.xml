@@ -1,0 +1,15 @@
+<div class="ListToList" id="ListToList" n:pattern="ListToListPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <n:attr name="style" n:render="visibility"/>
+    <n:attr name="data-title" n:render="title"/>
+    <n:attr name="data-name" n:render="name"/>
+    <n:attr name="data-toplevel" n:render="topLevel"/>
+    <athena:handler event="onclick" handler="listClicked"/>
+    <input type="button" value="Close">
+        <n:attr name="style" n:render="closeable"/>
+        <athena:handler event="onclick" handler="onClose"/>
+    </input>
+    <br/>
+    <invisible n:render="list1"/>
+    <invisible n:render="list2"/>
+    <input name="save" type="button" value="save"><athena:handler event="onclick" handler="doSave"/></input>
+</div>

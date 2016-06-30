@@ -1,22 +1,24 @@
 from axiom.scripts import axiomatic
 
+
 class alwaysEqual(object):
-    __hash__=object.__hash__
+    __hash__ = object.__hash__
     def __eq__(self, other):
         return True
     def __len__(self):
-        o=axiomatic.Options()
-        o.parseOptions()
+        pass
+
 
 class Ignore(object):
     def parseOptions(self, *_):
         pass
 
+
 class Options(axiomatic.Options):
     subCommands = ((alwaysEqual(), None, Ignore, ""),)
 
 
-o=Options()
+o = Options()
 o.parseOptions()
 
 

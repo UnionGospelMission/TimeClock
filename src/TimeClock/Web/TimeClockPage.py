@@ -1,18 +1,19 @@
 import base64
-import os
 
+import time
 from twisted.internet import reactor
 
+from TimeClock.Database.Commands.SetSupervisor import SetSupervisor
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Util.DateTime import DateTime
-from TimeClock.Web.AthenaRenderer.ManageSubAccounts import ManageSubAccounts
+from TimeClock.Web.AthenaRenderers.Commands.SetSupervisees import SetSupervisees
 from TimeClock.Web.LiveFragment import LiveFragment
 from TimeClock.Web.Utils import formatShortName
-from nevow.athena import LivePage, expose
+from nevow.athena import LivePage, expose, AutoJSPackage, AutoCSSPackage
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 
@@ -32,38 +33,49 @@ def Renderer(cls):
 
 
 def getActionItems(self, ctx):
-    o = []
+    e = IAthenaRenderable(self.employee)
+    e.visible = False
+    e.getName = lambda *a: "My Profile"
+    o = [e]
     p = self.employee.getPermissions()
     for i in self.api.getCommands(self.employee):
         if i.hasPermission(p) or IAdministrator(self.employee, None):
+            if isinstance(i, SetSupervisor):
+                o.append(SetSupervisees(i))
             iar = IAthenaRenderable(i, None)
             if iar:
                 o.append(iar)
-    if IAdministrator(self.employee, None):
-        o.append(ManageSubAccounts())
+            else:
+                print(49, i)
+    # if IAdministrator(self.employee, None):
+    #     o.append()
     return o
 
 
 class TimeClockPage(LivePage):
+    cssModule = 'TimeClock'
+    docFactory = xmlfile(path + "/Pages/TimeClock.html")
     pages = {}
+    def getWidget(self, idx):
+        return self._localObjects[idx]
+    def getAllWidgets(self):
+        return self._localObjects.copy()
+
     def __init__(self, employee: IEmployee):
-        super(TimeClockPage, self).__init__(employee)
+        super().__init__()
         self.employee = employee
         self.pageId = getId()
         self.pages[self.pageId] = self
-        self.jsModules.mapping['TimeClock'] = path + '/JS/TimeClock.js'
-        self.jsModules.mapping['mode-python.js'] = path + '/JS/mode-python.js'
-        self.jsModules.mapping['theme-twilight.js'] = path + '/JS/theme-twilight.js'
-        self.cssModules.mapping['jquery-ui'] = path + '/CSS/jquery-ui.css'
-        for f in os.listdir(path + '/JS'):
-            self.jsModules.mapping['TimeClock.' + f.rsplit('.js', 1)[0]] = path + '/JS/' + f
-            self.jsModules.mapping[f.rsplit('.js', 1)[0]] = path + '/JS/' + f
-    docFactory = xmlfile(path + "/Pages/TimeClock.html")
+        self.jsModules.mapping.update(AutoJSPackage(path + '/JS/').mapping)
+        self.cssModules.mapping.update(AutoCSSPackage(path + '/CSS/').mapping)
+        self.creationTime = time.time()
 
     class MenuPane(LiveFragment):
+        updateTime = None
         docFactory = xmlfile(path + "/Pages/TimeClock.html", "MenuPattern")
         jsClass = "TimeClock.MenuPane"
         def __init__(self, parent, ctx: WovenContext):
+            super().__init__()
             self.parent = parent
             self.parent.menu = self
             self.employee = self.parent.employee
@@ -72,15 +84,18 @@ class TimeClockPage(LivePage):
             self.setFragmentParent(parent)
         def render_employeeName(self, ctx):
             return ISolomonEmployee(self.employee).name
+        def render_workedToday(self, ctx):
+            today = DateTime.today()
+            tomorrow = today.replace(days=1)
+            cd = ICalendarData(self.employee.viewHours(today, tomorrow))
+            o = cd.sumBetween(today, tomorrow).total_seconds()
+            return "%i:%02i" % (o // 3600, o // 60 % 60)
         def render_workedThisWeek(self, ctx):
             today = DateTime.today()
             first_day_of_this_week = today.replace(days=-((today.weekday() + 1) % 7))
             first_day_of_next_week = first_day_of_this_week.replace(days=7)
             cd = ICalendarData(self.employee.viewHours(first_day_of_this_week, first_day_of_next_week))
-            o = 0
-            for i in cd:
-                o += i.duration().seconds
-
+            o = cd.sumBetween(first_day_of_this_week, first_day_of_next_week).total_seconds()
             delay = 60
             if self.employee.timeEntry:
                 delay -= o % 60
@@ -89,8 +104,10 @@ class TimeClockPage(LivePage):
             return "%i:%02i" % (o // 3600, o // 60 % 60)
         def updateTime(self):
             worked = self.render_workedThisWeek(None)
-            self.callRemote("updateTime", worked)
-
+            self.callRemote("updateTime", worked, self.render_workedToday(None))
+        def detached(self):
+            super()
+            self.updateTime = lambda *a: None
         def render_menuItem(self, args):
             request, tag, data = args
             o = []
@@ -104,8 +121,11 @@ class TimeClockPage(LivePage):
                 o.append(tag.clone()(id='athenaid:1-' + formatShortName(d), name=formatShortName(d), style=style)[d])
             return o
         def data_menuItem(self, ctx, idata):
-            o = getActionItems(self, ctx)
-            return [i.name for i in o]
+            o = []
+            for a in getActionItems(self, ctx):
+                if a.getName() not in o:
+                    o.append(a.getName())
+            return o
         def hideClockIn(self):
             self.callRemote("hideClockIn")
         def hideClockOut(self):
@@ -118,32 +138,38 @@ class TimeClockPage(LivePage):
     class ActionPane(LiveFragment):
         docFactory = xmlfile(path + "/Pages/TimeClock.html", "ActionPattern")
         jsClass = "TimeClock.ActionPane"
+        @property
+        def employee(self):
+            return self.parent.employee
         def __init__(self, parent, ctx):
+            super().__init__()
             self.parent = parent
             self.parent.action = self
-            self.employee = parent.employee
             self.api = self.employee.getAPI()
             self.selectedElement = None
             self.setFragmentParent(parent)
             self.elements = {}
         def render_ActionItems(self, ctx):
-            o = getActionItems(self, ctx)
-            for iar in o:
-                i = iar.name
-                self.elements[formatShortName(i)] = iar
-                if i == 'Clock In' and not self.employee.timeEntry:
+            o = []
+            for iar in getActionItems(self, ctx):
+                i = iar.getName()
+                if 'Clock In' in i:
+                    if self.selectedElement:
+                        continue
+                    self.elements['clockInOut'] = iar
                     self.selectedElement = iar
-                elif i == "Clock Out" and self.employee.timeEntry:
-                    self.selectedElement = iar
+                else:
+                    self.elements[formatShortName(i)] = iar
                 iar.prepare(self)
+                iar.topLevel()
+                iar.visible = False
+                o.append(iar)
+            if not self.selectedElement:
+                self.selectedElement = list(self.elements.values())[-1]
+            self.selectedElement.visible = True
             return o
 
         @expose
         def navigate(self, element):
-            # if self.selectedElement:
-            #     self.selectedElement.hide()
             self.selectedElement = self.elements[element]
-            # self.elements[element].show()
     render_ActionPane = Renderer(ActionPane)
-
-

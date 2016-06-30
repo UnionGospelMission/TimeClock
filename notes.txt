@@ -19,7 +19,6 @@ CSS: Mouseover 'links'
 
 view hours -> close query on new query
 view average hours -> run by month, average by selectable(week, month, total)
-minimize list when dbl click on name
 fix OrderedDict to be specific ordered
 
 manage tasks editor in firefox
@@ -27,6 +26,13 @@ new task; refresh hides new task window
 report refresh opens new report list
 
 Ace editor autoselects entire contents
-switch commands without waiting for server
-mark locations as unused
+Done: switch commands without waiting for server
+Done: mark locations as unused
 
+
+make events cancel when multi-concurrent changes detected
+
+
+
+event for adding/removing supervisor/administrator
+    list of supers/admins needs to subscribe

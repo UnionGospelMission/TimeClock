@@ -1,0 +1,25 @@
+<div class="TimeEntry" id="TimeEntry" n:pattern="TimeEntryPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <input type="button" value="Close">
+        <n:attr name="style" n:render="closeable"/>
+        <athena:handler event="onclick" handler="onClose"/></input>
+    <n:attr name="data-toplevel" n:render="topLevel"/>
+    <invisible n:render="timeEntryTable"/>
+    <table id="TimeEntryTable" border="1px" style="text-align:center;" n:data="timeEntryData" n:pattern="TimeEntryTablePattern">
+        <tr class="tableHeader">
+            <td colspan="3">Sub Account</td>
+        </tr>
+        <tr>
+            <td>
+                <table id="timeEntryDetails">
+                    <invisible n:render="timeEntryDetails">
+                        <tr n:pattern="timeEntryDataPattern" n:render="mapping">
+                            <td><n:slot name="rowName"/></td>
+                            <td><n:slot name="rowValue"/></td>
+                        </tr>
+                    </invisible>
+                </table>
+            </td>
+
+        </tr>
+    </table>
+</div>

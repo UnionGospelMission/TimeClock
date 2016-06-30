@@ -1,8 +1,11 @@
 <div class="Employee" id="Employee" n:pattern="EmployeePattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
-    <input type="button" value="Close"><athena:handler event="onclick" handler="onClose"/></input>
-    <br/>
-
-    <table id="EmployeeTable" border="1px" style="text-align:center" n:data="employeeData">
+    <input type="button" value="Close">
+        <n:attr name="style" n:render="closeable"/>
+        <athena:handler event="onclick" handler="onClose"/></input>
+    <n:attr name="data-toplevel" n:render="topLevel"/>
+    <n:attr name="style" n:render="visibility"/>
+    <invisible n:render="employeeTable"/>
+    <table id="EmployeeTable" border="1px" style="text-align:center;" n:data="employeeData" n:pattern="EmployeeTablePattern">
         <tr class="tableHeader">
             <td colspan="3">Employee</td>
         </tr>
@@ -16,24 +19,11 @@
                         </tr>
                     </invisible>
                     <tr>
-                        <td><input value="Options" type="button"><athena:handler event="onclick" handler="optionsClicked"/></input></td>
                         <td><input value="Actions" type="button"><athena:handler event="onclick" handler="actionsClicked"/></input></td>
                     </tr>
                 </table>
             </td>
-            <td>
-                <table id="employeeOptions" style="display:none">
-                    <tr class="tableHeader">
-                    <td colspan="2">Employee Options</td>
-                    </tr>
-                    <invisible n:render="employeeOptions">
-                        <tr n:pattern="employeeOptionPattern">
-                            <td><n:slot name="rowName"/></td>
-                            <td><n:slot name="rowValue"/></td>
-                        </tr>
-                    </invisible>
-                </table>
-            </td>
+
             <td>
                 <table id="employeeActions" style="display:none">
                     <tr class="tableHeader">

@@ -1,4 +1,4 @@
-from zope.interface import Interface
+from zope.interface import Interface, Attribute
 from TimeClock.ITimeClock.IDateTime import ITimeDelta, IDateTime
 
 from TimeClock.ITimeClock.IDatabase.IItem import IItem

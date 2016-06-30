@@ -1,0 +1,25 @@
+<div class="SubAccount" id="SubAccount" n:pattern="SubAccountPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <input type="button" value="Close">
+        <n:attr name="style" n:render="closeable"/>
+        <athena:handler event="onclick" handler="onClose"/></input>
+    <n:attr name="data-toplevel" n:render="topLevel"/>
+    <invisible n:render="subAccountTable"/>
+    <table id="SubAccountTable" border="1px" style="text-align:center;" n:data="subAccountData" n:pattern="SubAccountTablePattern">
+        <tr class="tableHeader">
+            <td colspan="3">Sub Account</td>
+        </tr>
+        <tr>
+            <td>
+                <table id="subAccountDetails">
+                    <invisible n:render="subAccountDetails">
+                        <tr n:pattern="subAccountDataPattern" n:render="mapping">
+                            <td><n:slot name="rowName"/></td>
+                            <td><n:slot name="rowValue"/></td>
+                        </tr>
+                    </invisible>
+                </table>
+            </td>
+
+        </tr>
+    </table>
+</div>

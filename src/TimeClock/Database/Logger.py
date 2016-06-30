@@ -5,7 +5,8 @@ from TimeClock.Database.File import File
 from TimeClock.Database.LogEntry import LogEntry
 from TimeClock.ITimeClock.IDatabase.ILogEntry import ILogEntry
 from TimeClock.ITimeClock.IDatabase.ILogger import ILogger
-from TimeClock.ITimeClock.IEvent.IAbstractEvent import IAbstractEvent
+from TimeClock.ITimeClock.IEvent.IEvent import IEvent
+from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
 from TimeClock.Util.DateTime import DateTime
 from TimeClock.Utils import coerce
 from axiom.item import Item
@@ -19,7 +20,7 @@ WARN = 0x4
 ERROR = 0x8
 
 
-@implementer(ILogger)
+@implementer(ILogger, IEventHandler)
 class Logger(Item):
     name = text()
     flags = integer()
@@ -42,7 +43,7 @@ class Logger(Item):
     def error(self, message: str):
         self.log(ERROR, message)
 
-    def handleEvent(self, event: IAbstractEvent):
+    def handleEvent(self, event: IEvent):
         self.info(event)
 
 

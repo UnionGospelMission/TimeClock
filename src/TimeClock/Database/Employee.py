@@ -1,7 +1,10 @@
 from zope.interface import implementer
 
+from TimeClock.Axiom import Transaction
+from TimeClock.Database.Event.ClockInOutEvent import ClockInOutEvent
 from TimeClock.ITimeClock.IDatabase.IAssignedTask import IAssignedTask
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
+from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Util.InMemoryTimePeriod import InMemoryTimePeriod
 from ..ITimeClock.IDateTime import IDateTime
@@ -80,6 +83,7 @@ class Employee(Item):
             return API.APIs.SupervisorAPI.apiFor(self)
         return API.APIs.EmployeeAPI.apiFor(self)
 
+    @Transaction
     def clockIn(self, subAccount: IAbstractSubAccount, workLocation: IWorkLocation) -> ITimeEntry:
         subAccount = ISubAccount(subAccount)
         if self not in subAccount.getEmployees():
@@ -91,10 +95,14 @@ class Employee(Item):
         timeEntry.type = IEntryType("Work")
         timeEntry.period = ITimePeriod(NULL)
         timeEntry.workLocation = workLocation
+        timeEntry.employee = self
         self.powerUp(timeEntry, ITimeEntry)
         self.timeEntry = timeEntry
+        e = ClockInOutEvent(self)
+        IEventBus("Database").postEvent(e)
         return timeEntry
 
+    @Transaction
     def clockOut(self) -> ITimeEntry:
         timeEntry = list(self.powerupsFor(ITimeEntry))
         if (not timeEntry) or timeEntry[-1].period._endTime!=None:
@@ -102,6 +110,8 @@ class Employee(Item):
         timeEntry = timeEntry[-1]
         timeEntry.period.end()
         self.timeEntry = None
+        e = ClockInOutEvent(self)
+        IEventBus("Database").postEvent(e)
         return timeEntry
 
     @coerce

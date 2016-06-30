@@ -1,6 +1,7 @@
 from zope.interface import implementer
 
 from TimeClock.Database.Commands.CommandEvent import CommandEvent
+from TimeClock.Database.Event.ClockInOutEvent import ClockInOutEvent
 from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
@@ -46,4 +47,4 @@ class ClockOut(Item):
             raise PermissionDenied()
     @overload
     def execute(self, caller: IPerson, *parameters: object):
-        raise NotImplementedError("%s called with invalid parameters"%self.name)
+        raise NotImplementedError("%s called with invalid parameters" % self.name)

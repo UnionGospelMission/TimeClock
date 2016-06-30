@@ -19,7 +19,7 @@ from .API import APIs
 from .Database import Reflection
 from .Event import EventBus
 import TimeClock.API.Permissions
-import TimeClock.Web.AthenaRenderer
+import TimeClock.Web.AthenaRenderers
 from .Database import SubAccount, Supervisor, Administrator
 from .Database.TimeEntry import TimeEntry
 from .Database.WorkLocation import WorkLocation
@@ -44,5 +44,16 @@ registerAdapter(FlattenDate, datetime, inevow.IRenderer)
 registerFlattener(lambda x, y: str(x), datetime)
 
 
+from nevow import athena
+mangleID_ = athena._mangleId
 
 
+def mangleId(oldId):
+    if 'athenaid:' in str(oldId) or 'athena:' in str(oldId):
+        return oldId
+    return mangleID_(oldId)
+
+athena._mangleId = mangleId
+
+
+import TimeClock.API.EventBus

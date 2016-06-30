@@ -3,6 +3,7 @@ from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Web.TimeClockPage import TimeClockPage
+from nevow import inevow
 from nevow.loaders import xmlfile
 
 from nevow.athena import LivePage, LiveElement, LiveFragment, expose
@@ -12,10 +13,14 @@ path = __file__.rsplit('/', 1)[0]
 
 
 class LoginPage(LivePage):
+    def renderHTTP(self, ctx):
+        __builtins__['ctx'] = ctx
+        return super().renderHTTP(ctx)
+
     def __init__(self, *a):
         super(LoginPage, self).__init__(*a)
         self.jsModules.mapping['LoginPage'] = path + '/JS/Login.js'
-        self.jsModules.mapping['jQuery'] = path + '/JS/jQuery.js'
+        self.jsModules.mapping['jquery'] = path + '/JS/jquery/__init__.js'
         self.jsModules.mapping['redirect'] = path + '/JS/redirect.js'
     docFactory = xmlfile(path + "/Pages/Login.html")
 
@@ -32,11 +37,20 @@ class LoginPage(LivePage):
             employee = IEmployee(username, None)
             if employee is None:
                 return "access denied"
-            PublicAPI.login(employee, username, password)
+
+            try:
+                PublicAPI.login(employee, username, password)
+            except PermissionDenied as e:
+                return "access denied"
             if func == 'clockIn':
                 ise = ISolomonEmployee(employee)
+                if employee.timeEntry:
+                    return "Already clocked in"
                 employee.clockIn(ise.defaultSubAccount, ise.defaultWorkLocation)
+
             elif func == 'clockOut':
+                if not employee.timeEntry:
+                    return "Already clocked out"
                 employee.clockOut()
             return 'access granted'
 

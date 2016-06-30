@@ -44,9 +44,11 @@ class Login(Item):
         if IEventBus("Commands").postEvent(c):
             e = IEmployee(adid)
             if e.alternate_authentication:
-                assert (e.alternate_authentication.authenticate(e, pw))
+                allowed = e.alternate_authentication.authenticate(e, pw)
             else:
-                assert AD.authenticate(e, pw)
+                allowed = AD.authenticate(e, pw)
+            if not allowed:
+                raise PermissionDenied("Incorrect Username or Password")
     @overload
     def execute(self, caller: IEmployee, *parameters: object):
         raise NotImplementedError("%s called with invalid parameters" % self.name)

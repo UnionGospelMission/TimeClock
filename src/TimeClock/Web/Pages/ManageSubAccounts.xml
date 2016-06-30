@@ -2,44 +2,7 @@
     <n:attr name="style" n:render="visibility"/>
     <n:attr name="data-title" n:render="title"/>
     <n:attr name="data-name" n:render="name"/>
+    <n:attr name="data-toplevel" n:render="topLevel"/>
+    <invisible n:render="subAccounts"/>
 
-    <input class="search" placeholder="Search"/>
-
-    <table id="ListTable" border="1px" style="text-align:center">
-        <thead>
-            <tr>
-                <th>Sub Accounts</th>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <th>ID</th>
-                <th>Active</th>
-            </tr>
-        </thead>
-        <tbody class="list">
-            <invisible n:render="listSubAccounts">
-                <tr n:pattern="listRow">
-                    <invisible>
-                        <td n:render="mapping">
-                            <n:attr name="class"><n:slot name="searchclass"/></n:attr>
-                            <n:attr name="data-index"><n:slot name="index"/></n:attr>
-                            <n:slot name="subAccountName" />
-
-                        </td>
-                        <td n:render="mapping">
-                            <n:attr name="class"><n:slot name="searchclass"/></n:attr>
-                            <n:attr name="data-index"><n:slot name="index"/></n:attr>
-                            <n:slot name="subAccountID" />
-
-                        </td>
-                        <td n:render="mapping">
-                            <n:attr name="class"><n:slot name="searchclass"/></n:attr>
-                            <n:attr name="data-index"><n:slot name="index"/></n:attr>
-                            <n:slot name="subAccountVisible"/>
-                        </td>
-                    </invisible>
-                </tr>
-            </invisible>
-        </tbody>
-    </table>
 </div>

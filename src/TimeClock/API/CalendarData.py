@@ -67,7 +67,6 @@ class CalendarData(object):
             if et > end:
                 et = end
             this = et - st
-            print(71, this)
             total += this
         return total
     @coerce

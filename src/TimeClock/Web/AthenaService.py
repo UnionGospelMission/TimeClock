@@ -51,6 +51,9 @@ class AthenaService(Item):
     def disownServiceParent(self, parent):
         return self.parent.removeService(self)
     def startService(self):
+        from ..PTPython import embed
+        embed()
+
         pf = PageFactory(self.iajs, self.port)
         for i in pf.iajs.Ports:
             if i[0]=='TCP':

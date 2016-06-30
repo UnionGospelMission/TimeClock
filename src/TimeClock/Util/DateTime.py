@@ -1,11 +1,13 @@
 import datetime
 from pytz import timezone, utc
+from twisted.python.components import registerAdapter
 from tzlocal import get_localzone
 from zope.interface import implementer
 
 from TimeClock.ITimeClock.IDateTime import IDateTime
 from TimeClock.Utils import coerce
 from arrow import Arrow, get
+zonename = get_localzone().zone
 
 
 @implementer(IDateTime)
@@ -40,3 +42,6 @@ class DateTime(Arrow):
 
     def asLocalTime(self):
         return self.astimezone(get_localzone())
+
+
+registerAdapter(DateTime.get, str, IDateTime)

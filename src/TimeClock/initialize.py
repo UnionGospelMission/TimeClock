@@ -2,6 +2,8 @@ from TimeClock.AD import runWithConnection
 from TimeClock.Database.API.API import API
 from TimeClock.Database.Commands.AssignTask import AssignTask
 from TimeClock.Database.Commands.CreateTask import CreateTask
+from TimeClock.Database.Commands.ManageSubAccounts import ManageSubAccounts
+from TimeClock.Database.Commands.ManageWorkLocations import ManageWorkLocations
 from TimeClock.Database.Commands.ViewReports import ViewReports
 from TimeClock.Database.Permissions import Permission
 from TimeClock.ITimeClock.IAPI import IAPI
@@ -68,6 +70,8 @@ def initializeCommands(Store: store.Store):
     Store.powerUp(Store.findOrCreate(SetSubAccounts, name="Set Sub Accounts"), ICommand)
     Store.powerUp(Store.findOrCreate(ChangeAuthentication, name="Change Password"), ICommand)
     Store.powerUp(Store.findOrCreate(ViewReports, name="View Reports"), ICommand)
+    Store.powerUp(Store.findOrCreate(ManageSubAccounts, name="Manage Sub Accounts"), ICommand)
+    Store.powerUp(Store.findOrCreate(ManageWorkLocations, name="Manage Work Locations"), ICommand)
     Store.powerUp(Store.findOrCreate(CreateTask), ICommand)
     Store.powerUp(Store.findOrCreate(AssignTask), ICommand)
 
@@ -115,6 +119,8 @@ def initializeAPIs(Store: store.Store):
     AdministratorAPI.powerUp(findCommand("ViewReports"), ICommand)
     AdministratorAPI.powerUp(findCommand("AssignTask"), ICommand)
     AdministratorAPI.powerUp(findCommand("CreateTask"), ICommand)
+    AdministratorAPI.powerUp(findCommand("ManageSubAccounts"), ICommand)
+    AdministratorAPI.powerUp(findCommand("ManageWorkLocations"), ICommand)
 
     EmployeeAPI.powerUp(findCommand("ClockIn"), ICommand)
     EmployeeAPI.powerUp(findCommand("ClockOut"), ICommand)
@@ -183,7 +189,9 @@ def findUsername(conn, emp: IEmployee, options: usage.Options) -> str:
                 return conn.response[0]['attributes']['sAMAccountName'][0]
         if options.get('resolve'):
             print("AD username not found for %s, searching by last name only" % ise.name)
-            if conn.search('dc=ugm, dc=local', '(&(givenName=*) (sn=%s))' % (ln,), attributes=['sAMAccountName', 'givenName', 'sn']):
+            if conn.search('dc=ugm, dc=local', '(&(givenName=*) (sn=%s))' % (ln,), attributes=['sAMAccountName',
+                                                                                               'givenName',
+                                                                                               'sn']):
                 while len(conn.response) > 3:
                     resp = conn.response.pop(0)
                     if 'attributes' not in resp:
@@ -193,7 +201,7 @@ def findUsername(conn, emp: IEmployee, options: usage.Options) -> str:
                     print("LN:", resp['attributes']['sn'])
                     if 'Y' in input("Is this a match? (yN)").upper():
                         return resp['attributes']['sAMAccountName'][0]
-            if options.get('resolve')=='firstname':
+            if options.get('resolve') == 'firstname':
                 print("AD username not found, searching by first name only")
                 if conn.search('dc=ugm, dc=local', '(&(givenName=%s) (sn=*))' % (fn,),
                                attributes=['sAMAccountName', 'givenName', 'sn']):
@@ -206,8 +214,6 @@ def findUsername(conn, emp: IEmployee, options: usage.Options) -> str:
                         print("LN:", resp['attributes']['sn'])
                         if 'Y' in input("Is this a match? (yN)").upper():
                             return resp['attributes']['sAMAccountName'][0]
-
-
 
 
 def initialize(db: store.Store, options: usage.Options):

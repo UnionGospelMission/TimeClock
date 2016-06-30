@@ -1,0 +1,25 @@
+<div class="WorkLocation" id="WorkLocation" n:pattern="WorkLocationPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <input type="button" value="Close">
+        <n:attr name="style" n:render="closeable"/>
+        <athena:handler event="onclick" handler="onClose"/></input>
+    <n:attr name="data-toplevel" n:render="topLevel"/>
+    <invisible n:render="workLocationTable"/>
+    <table id="WorkLocationTable" border="1px" style="text-align:center;" n:data="workLocationData" n:pattern="WorkLocationTablePattern">
+        <tr class="tableHeader">
+            <td colspan="3">Sub Account</td>
+        </tr>
+        <tr>
+            <td>
+                <table id="workLocationDetails">
+                    <invisible n:render="workLocationDetails">
+                        <tr n:pattern="workLocationDataPattern" n:render="mapping">
+                            <td><n:slot name="rowName"/></td>
+                            <td><n:slot name="rowValue"/></td>
+                        </tr>
+                    </invisible>
+                </table>
+            </td>
+
+        </tr>
+    </table>
+</div>

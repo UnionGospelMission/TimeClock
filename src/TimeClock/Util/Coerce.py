@@ -8,6 +8,7 @@ from TimeClock.Util.Default import Defalt
 from TimeClock.Util.needs_coercing import needs_coercing
 from .subclass import issubclass
 
+
 class Coercer(object):
     def __init__(self, func):
         self.func = func

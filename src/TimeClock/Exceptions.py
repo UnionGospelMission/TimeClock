@@ -10,4 +10,13 @@ class InvalidTransformation(DatabasException):
     pass
 
 
-class PermissionDenied(Exception): pass
+class EventCancelled(Exception):
+    pass
+
+
+class DatabaseChangeCancelled(EventCancelled, DatabasException):
+    pass
+
+
+class PermissionDenied(Exception):
+    pass

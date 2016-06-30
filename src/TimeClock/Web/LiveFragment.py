@@ -1,15 +1,28 @@
-from nevow.athena import LiveFragment
+from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
+from TimeClock.Utils import overload
+from TimeClock.Web.LiveFragmentMeta import LiveFragmentMeta
+from nevow.athena import LiveFragment as LF
+from nevow.context import WovenContext
 from nevow.stan import Tag
 
+EventBus = IEventBus("Web")
 
-class LiveFragment(LiveFragment):
+
+class LiveFragment(LF, metaclass=LiveFragmentMeta):
     parent = None
+    def detached(self):
+        if self in self.instances:
+            self.instances.remove(self)
+        EventBus.unregister(self)
+    def connectionLost(self, reason):
+        self.detached()
+
     def child(self, ctx, idata):
-        d = super(LiveFragment, self).child(ctx, idata)
+        d = super().child(ctx, idata)
         return ctx, ctx.tag, d(ctx, idata)
     def locateMethod(self, ctx, methodName):
         try:
-            method = super(LiveFragment, self).locateMethod(ctx, methodName)
+            method = super().locateMethod(ctx, methodName)
             return method
         except AttributeError as e:
             if methodName in self.api.getCommandShortNames():
@@ -19,6 +32,7 @@ class LiveFragment(LiveFragment):
         super().__init__(*args, **kw)
         if self.fixCheckboxes not in self.preprocessors:
             self.preprocessors.append(self.fixCheckboxes)
+        self.instances.append(self)
     @staticmethod
     def fixCheckboxes(root: Tag):
         if not isinstance(root, (Tag, list, tuple)):
@@ -41,4 +55,14 @@ class LiveFragment(LiveFragment):
         for p in self.preprocessors:
             ret = p(ret)
         return ret
+
+    def renderer(self, context, name):
+        renderer = super().renderer(context, name)
+        def flatten(ctx, data, _=None):
+            if renderer.__code__.co_argcount==3:
+                result = renderer(ctx, data)
+            else:
+                result = renderer(data)
+            return self.preprocess(result)
+        return flatten
 

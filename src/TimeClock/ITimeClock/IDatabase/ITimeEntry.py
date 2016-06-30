@@ -1,9 +1,11 @@
 from zope.interface import Attribute
 
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
+from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
 
 
-class ITimeEntry(IItem):
+class ITimeEntry(ITimePeriod):
+    employee = Attribute("employee")
     subAccount = Attribute("area")
     workLocation = Attribute("workLocation")
     type = Attribute("type")

@@ -1,3 +1,5 @@
+from TimeClock.Database.Employee import Employee
+from axiom.upgrade import registerAttributeCopyingUpgrader
 from twisted.python.components import registerAdapter
 from TimeClock.ITimeClock.IDateTime import ITimeDelta
 
@@ -22,6 +24,8 @@ class TimeEntry(Item):
     type = reference()
     period = reference()
     approved = boolean(default=False)
+    employee = reference()
+    schemaVersion = 2
 
     def startTime(self) -> IDateTime:
         return self.period.startTime()
@@ -56,6 +60,19 @@ class TimeEntry(Item):
     def duration(self) -> ITimeDelta:
         return self.period.duration()
 
+    def getEmployee(self):
+        for e in self.store.query(Employee):
+            if self in e.powerupsFor(ITimePeriod):
+                self.employee = e
+                return
+
+
+registerAttributeCopyingUpgrader(
+    TimeEntry,
+    1,
+    2,
+    TimeEntry.getEmployee
+)
 
 def newTimeEntry(x):
     te = TimeEntry(store=Store.Store)
