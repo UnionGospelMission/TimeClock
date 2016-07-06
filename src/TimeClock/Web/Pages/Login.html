@@ -3,8 +3,20 @@
     <link rel="shortcut icon" type="image/gif" href="/favicon.gif"/>
     <n:invisible n:render="liveglue" />
     <title>Login</title>
+    <script type="text/javascript">
+        function verifyLivePage() {
+            if (LoginPage==undefined || LoginPage.Login == undefined || !LoginPage.fromAthenaID(1)) {
+                console.log("Live Page initialization failed");
+            }
+            else {
+                var d = document.getElementById("noscript")
+                d.parentNode.removeChild(d);
+            }
+        }
+    </script>
 </head>
-<body>
+<body onload="verifyLivePage()">
+    <div id="noscript">Athena Live Page failed to start, is javascript disabled?</div>
     <div n:render="LoginPage">Login Frame</div>
     <div class="login" id="login" n:pattern="LoginPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7">
         <form id="loginForm">
