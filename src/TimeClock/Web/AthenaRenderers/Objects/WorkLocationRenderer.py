@@ -8,6 +8,7 @@ from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
+from TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent import IEmployeeChangedEvent
 from TimeClock.ITimeClock.IEvent.IWebEvent.ISubAccountChangedEvent import ISubAccountChangedEvent
 from TimeClock.ITimeClock.IEvent.IWebEvent.IWorkLocationChangedEvent import IWorkLocationChangedEvent
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
@@ -16,8 +17,11 @@ from TimeClock.Utils import overload, coerce
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractExpandable import AbstractExpandable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.Events.SubAccountChangedEvent import SubAccountChangedEvent
+from TimeClock.Web.Events.WorkLocationAssignmentChangedEvent import WorkLocationAssignmentChangedEvent
 from TimeClock.Web.Events.WorkLocationChangedEvent import WorkLocationChangedEvent
+from TimeClock.Web.LiveFragment import LiveFragment
 
 from nevow import inevow
 from nevow.athena import expose
@@ -50,9 +54,18 @@ class _RenderListRowMixin(AbstractExpandable):
             descr(disabled=True)
 
         self.preprocess([active, workLocationID, descr])
-        r = [listCell(data=dict(listItem=descr)),
-             listCell(data=dict(listItem=workLocationID)),
-             listCell(data=dict(listItem=active))]
+        if self.length==4:
+            r = [
+                listCell(data=dict(listItem='►'))(id='expand-button')[
+                    T.Tag("athena:handler")(event='onclick', handler='expand')],
+                listCell(data=dict(listItem='▼'))(style='display:none', id='unexpand-button')[
+                    T.Tag("athena:handler")(event='onclick', handler='expand')],
+            ]
+        else:
+            r = []
+        r.extend([listCell(data=dict(listItem=workLocationID))[T.Tag('athena:handler')(event='ondblclick', handler='expand')],
+                  listCell(data=dict(listItem=descr)),
+                  listCell(data=dict(listItem=active))])
         return r
     def __conform__(self, iface):
         if iface == IListRow:
@@ -70,12 +83,15 @@ class WorkLocationRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMix
     listDocFactory = xmlfile(path + '/Pages/List.xml', 'liveListRow')
     tableDocFactory = xmlfile(path + '/Pages/WorkLocation.xml', 'WorkLocationTablePattern')
     jsClass = 'TimeClock.Objects.WorkLocationRenderer';
-
+    l = None
     commands = None
     visible = True
     def getWLoc(self):
         return self._workLocation
-
+    def prepare(self, parent: LiveFragment, force: bool = False):
+        super().prepare(parent)
+        if hasattr(parent, 'cols'):
+            self.length = max(min(len(parent.cols), 4), 3)
     def powerUp(self, obj, iface):
         self.powerups[iface] = self.powerups.get(iface, [])
         self.powerups[iface].append(obj)
@@ -85,6 +101,9 @@ class WorkLocationRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMix
             d = self._workLocation.persistentValues()
             changed = event.previous_values
             self.callRemote("newValues", {k: d[k] for k in changed.keys()})
+    @overload
+    def handleEvent(self, event: WorkLocationAssignmentChangedEvent):
+        print(93, vars(event))
     @overload
     def handleEvent(self, event: IEvent):
         pass
@@ -160,6 +179,21 @@ class WorkLocationRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMix
             IEventBus("Web").postEvent(e)
             if e.cancelled:
                 raise DatabaseChangeCancelled(e.retval)
+    @expose
+    def expand(self):
+        self.l = List()
+        self.l.setColumns("Employee ID", "Employee Name")
+        self.l.prepare(self)
+        for e in self._workLocation.getEmployees():
+            self.l.addRow(e)
+        self.l.visible = True
+        self.l.closeable = False
+        IEventBus("Web").register(self, IEmployeeChangedEvent)
+        return self.l
+    @expose
+    def unexpand(self):
+        IEventBus("Web").unregister(self, IEmployeeChangedEvent)
+        self.l = None
 
 
 registerAdapter(WorkLocationRenderer.listRow, IWorkLocation, IListRow)

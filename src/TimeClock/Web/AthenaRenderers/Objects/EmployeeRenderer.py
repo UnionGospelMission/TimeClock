@@ -23,6 +23,7 @@ from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRend
 from TimeClock.Web.Events.EmployeeChangedEvent import EmployeeChangedEvent
 from TimeClock.Web.Events.SupervisorCreatedEvent import SupervisorCreatedEvent
 from TimeClock.Web.Events.SupervisorRemovedEvent import SupervisorRemovedEvent
+from TimeClock.Web.LiveFragment import LiveFragment
 
 from TimeClock.Web.Utils import employee_attributes
 from nevow import inevow
@@ -45,11 +46,20 @@ class _RenderListRowMixin(AbstractExpandable):
     def render_listRow(self, ctx: WovenContext, data=None):
         listCell = inevow.IQ(ctx).patternGenerator("listCell")
         self.expanded = False
-        self.length = 2
         ctx.fillSlots('index', self._employee.employee_id)
-        r = [listCell(data=dict(listItem=self._employee.employee_id))[Tag('athena:handler')(event='ondblclick', handler='expand')],
-             listCell(data=dict(listItem=self.name))[Tag('athena:handler')(event='ondblclick', handler='expand')],
-             ]
+        if self.length == 3:
+            r = [
+                listCell(data=dict(listItem='►'))(id='expand-button')[
+                    T.Tag("athena:handler")(event='onclick', handler='expand')],
+                listCell(data=dict(listItem='▼'))(style='display:none', id='unexpand-button')[
+                    T.Tag("athena:handler")(event='onclick', handler='expand')],
+            ]
+        else:
+            r = []
+
+        r.extend([listCell(data=dict(listItem=self._employee.employee_id))[Tag('athena:handler')(event='ondblclick', handler='expand')],
+                  listCell(data=dict(listItem=self.name))[Tag('athena:handler')(event='ondblclick', handler='expand')],
+                ])
         if not self.parent.selectable:
             r.append(T.td(style='display:none', id='expanded')[self.tableDocFactory.load(ctx, self.preprocessors)])
         return r
@@ -234,6 +244,10 @@ class EmployeeRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin):
             IEventBus("Web").postEvent(e)
             if e.cancelled:
                 raise DatabaseChangeCancelled(e.retval)
+    def prepare(self, parent: LiveFragment, force: bool = False):
+        super().prepare(parent)
+        if hasattr(parent, 'cols'):
+            self.length = max(min(len(parent.cols), 3), 2)
 
 
 registerAdapter(EmployeeRenderer.listRow, IEmployee, IListRow)

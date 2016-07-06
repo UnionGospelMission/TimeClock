@@ -7,10 +7,8 @@ TimeClock.MenuPane.methods(
     function __init__(self, node) {
         TimeClock.MenuPane.upcall(self, "__init__", node);
         self.commands = TimeClock.ActionPane.fromAthenaID(2);
-        console.log(self.commands);
     },
     function menuClicked(self, node){
-        console.log(13, node.id);
         var name = node.id.split("-")[1];
         self.callRemote('navigate', name);
         self.commands.show(name);

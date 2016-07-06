@@ -1,6 +1,6 @@
 from zope.interface import Interface
 
-from TimeClock.Util.subclass import subclass
+from TimeClock.Util.subclass import subclass, issubclass
 
 
 def needs_coercing(Variable, Type):
@@ -21,7 +21,6 @@ def needs_coercing(Variable, Type):
         if isinstance(Variable, Type):
             return False
     except:
-        print(17, Variable, Type)
         raise
     if issubclass(Type, Interface) and Type.providedBy(Variable):
         return False

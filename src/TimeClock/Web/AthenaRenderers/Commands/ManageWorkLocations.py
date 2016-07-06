@@ -22,9 +22,9 @@ class ManageWorkLocations(AbstractRenderer, AbstractHideable):
     def render_class(self, ctx, data):
         return "ManageWorkLocations"
     def render_genericCommand(self, ctx: WovenContext, data):
-        l = List(list(Store.query(WorkLocation)), ["Sub Account", "Name", "Active"])
+        l = List(list(Store.query(WorkLocation)), ['', "Work Location", "Description", "Active"])
         l.closeable = False
-        l.addRow(SaveList(3))
+        l.addRow(SaveList(4, start=1))
         l.prepare(self)
         l.visible = True
         return l

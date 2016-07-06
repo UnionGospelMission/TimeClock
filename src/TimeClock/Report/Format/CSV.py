@@ -1,8 +1,10 @@
+from zope.component import provideUtility
+
+from TimeClock.ITimeClock.IReport.IFormatterFactory import IFormatterFactory
 from TimeClock.Util.subclass import Subclass
 from axiom.item import Item
 from twisted.python.components import registerAdapter
-from zope.interface import implementer
-
+from zope.interface import implementer, provider
 
 from TimeClock.Utils import coerce
 from TimeClock.ITimeClock.IReport.IFormat import IFormat
@@ -10,6 +12,7 @@ from TimeClock.ITimeClock.IReport.IReportData import IReportData
 
 
 @implementer(IFormat)
+@provider(IFormatterFactory)
 class CSV(object):
     name = "csv"
     columns = None
@@ -35,6 +38,4 @@ class CSV(object):
         return bytes.join(b'', self.rows)
 
 
-
-
-registerAdapter(CSV, CSV, IFormat)
+provideUtility(CSV, IFormatterFactory, 'csv')

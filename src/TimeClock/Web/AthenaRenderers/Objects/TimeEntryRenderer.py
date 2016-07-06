@@ -6,6 +6,7 @@ import dateutil.parser
 from twisted.python.components import registerAdapter
 from zope.interface import implementer, directlyProvides
 
+from TimeClock import Utils
 from TimeClock.Axiom import Transaction
 from TimeClock.Exceptions import DatabaseChangeCancelled
 from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
@@ -50,13 +51,18 @@ class _RenderListRowMixin(AbstractExpandable):
         et = self._timeEntry.period.endTime(False)
         ctx.fillSlots('index', self._timeEntry.storeID)
         approved = T.input(id='approved', type='checkbox', checked=self._timeEntry.approved)
-        workLocationID = T.input(id='workLocation', value=self._timeEntry.workLocation.workLocationID)
-        subAccount = T.input(id='subAccount', value=self._timeEntry.subAccount.sub)
+        workLocationID = T.select(id='workLocation', value=self._timeEntry.workLocation.workLocationID)[
+            [T.option(value=i.workLocationID, selected=self._timeEntry.workLocation == i)[i.description] for i in
+             self._timeEntry.getEmployee().getWorkLocations()]
+        ]
+        subAccount = T.select(id='subAccount', value=self._timeEntry.subAccount.sub)[
+            [T.option(value=i.sub, selected=self._timeEntry.subAccount==i)[i.name] for i in self._timeEntry.getEmployee().getSubAccounts()]
+        ]
         startTime = T.input(id='startTime', value=st.strftime('%Y-%m-%d %H:%M:%S %Z') if st else 'None')
         endTime = T.input(id='endTime', value=et.strftime('%Y-%m-%d %H:%M:%S %Z') if et else 'None')
         duration = T.input(id='duration', value=str(self._timeEntry.period.duration()))
 
-        if not self.employee.isAdministrator() or self.parent.selectable:
+        if not self.employee.isAdministrator() or self.parent.selectable or self.employee is self._timeEntry.employee:
             approved(disabled=True)
             workLocationID(disabled=True)
             subAccount(disabled=True)
@@ -104,6 +110,8 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
             d['startTime'] = self._timeEntry.startTime().strftime('%Y-%m-%d %H:%M:%S %Z') if self._timeEntry.startTime() else 'None'
             d['endTime'] = self._timeEntry.endTime(False).strftime('%Y-%m-%d %H:%M:%S %Z') if self._timeEntry.endTime(False) else 'None'
             d['duration'] = str(self._timeEntry.period.duration())
+            d['workLocation'] = d['workLocation'].workLocationID
+            d['subAccount'] = d['subAccount'].sub
             changed = event.previous_values
             keys = list(changed.keys())
             keys.append('duration')
@@ -144,7 +152,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
         save = T.input(type='button', value='Save Changes')[
             T.Tag("athena:handler")(event='onclick', handler='saveClicked')]
 
-        if not self.employee.isAdministrator():
+        if not self.employee.isAdministrator() or self.employee is self._timeEntry.employee:
             approved(disabled=True)
             workLocationID(disabled=True)
             subAccount(disabled=True)
@@ -184,9 +192,9 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
             elif key == 'startTime':
                 oldv = self._timeEntry.period.startTime()
                 tz = tzpattern.search(vals[key])
-                if tz:
+                if tz and tz != 'AUTO':
                     tz = tz.group(0)
-                    tzoffset = dateutil.parser.parse('1970-01-01 00:00:00 %s' % tz).utcoffset().total_seconds() / 60
+                    tzoffset = Utils.TZOffsets[tz]
                     if tzoffset > 0:
                         tzoffsetstr = '%02i:%02i' % (int(tzoffset / 60), int(tzoffset) % 60)
                     else:
@@ -203,9 +211,9 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
                 oldv = self._timeEntry.period.endTime(False)
 
                 tz = tzpattern.search(vals[key])
-                if tz:
+                if tz and tz != 'AUTO':
                     tz = tz.group(0)
-                    tzoffset = dateutil.parser.parse('1970-01-01 00:00:00 %s' % tz).utcoffset().total_seconds() / 60
+                    tzoffset = Utils.TZOffsets[tz]
                     if tzoffset > 0:
                         tzoffsetstr = '%02i:%02i' % (int(tzoffset / 60), int(tzoffset) % 60)
                     else:
@@ -227,13 +235,15 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
     @expose
     @Transaction
     def saveClicked(self, args):
+        if self.employee is self._timeEntry.getEmployee():
+            return
         oldVals = {}
         keys = []
         sup = ISupervisor(self.employee, None)
-        if self.employee.isAdministrator():
+        if self.employee.isAdministrator() and self.employee is not self._timeEntry.employee:
             keys = ['workLocation', 'subAccount', 'startTime', 'endTime', 'approved']
-        elif sup and self._timeEntry.employee in sup.getEmployees():
-            keys = ['approved']
+        elif sup and self._timeEntry.employee in sup.getEmployees() and not self._timeEntry.approved:
+            keys = ['workLocation', 'subAccount', 'startTime', 'endTime', 'approved']
         if not self._timeEntry.endTime(False):
             if 'approved' in keys:
                 keys.remove('approved')

@@ -20,9 +20,9 @@ class ViewEmployees(AbstractRenderer, AbstractHideable):
     subaccounts = None
     name = 'View Employees'
     def render_genericCommand(self, ctx: WovenContext, data):
-        l = List(list(Store.query(Employee)), ["Employee ID", "Name"])
+        l = List(list(Store.query(Employee)), ['', "Employee ID", "Name"])
         l.closeable = False
-        l.addRow(SaveList(2))
+        l.addRow(SaveList(3, start=1))
         l.prepare(self)
         l.visible = True
         return l

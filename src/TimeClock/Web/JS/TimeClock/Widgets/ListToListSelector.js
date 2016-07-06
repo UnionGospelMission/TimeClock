@@ -10,7 +10,7 @@ TimeClock.Widgets.ListToListSelector.methods(
         self.node.style.display='block';
     },
     function listClicked(self, node, evt){
-        console.log(13, self, node, evt);
+        //console.log(13, self, node, evt);
         var e = window.event || evt;
         var l1 = self.childWidgets[0];
         var l2 = self.childWidgets[1];

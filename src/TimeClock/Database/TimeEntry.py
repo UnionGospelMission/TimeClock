@@ -61,8 +61,10 @@ class TimeEntry(Item):
         return self.period.duration()
 
     def getEmployee(self):
+        if self.employee is not None:
+            return self.employee
         for e in self.store.query(Employee):
-            if self in e.powerupsFor(ITimePeriod):
+            if self in list(e.powerupsFor(ITimeEntry)):
                 self.employee = e
                 return
 

@@ -6,7 +6,7 @@
     <invisible n:render="workLocationTable"/>
     <table id="WorkLocationTable" border="1px" style="text-align:center;" n:data="workLocationData" n:pattern="WorkLocationTablePattern">
         <tr class="tableHeader">
-            <td colspan="3">Sub Account</td>
+            <td colspan="3">Work Location</td>
         </tr>
         <tr>
             <td>

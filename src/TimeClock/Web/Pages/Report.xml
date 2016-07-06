@@ -1,0 +1,25 @@
+<div class="Report" id="Report" n:pattern="ReportPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7" xmlns:n="http://nevow.com/ns/nevow/0.1">
+    <input type="button" value="Close">
+        <n:attr name="style" n:render="closeable"/>
+        <athena:handler event="onclick" handler="onClose"/></input>
+    <n:attr name="data-toplevel" n:render="topLevel"/>
+    <invisible n:render="reportTable"/>
+    <table id="ReportTable" border="1px" style="text-align:center;" n:data="reportData" n:pattern="ReportTablePattern">
+        <tr class="tableHeader">
+            <td colspan="3">Report</td>
+        </tr>
+        <tr>
+            <td>
+                <table id="reportDetails">
+                    <invisible n:render="reportDetails">
+                        <tr n:pattern="reportDataPattern" n:render="mapping">
+                            <td><n:slot name="rowName"/></td>
+                            <td><n:slot name="rowValue"/></td>
+                        </tr>
+                    </invisible>
+                </table>
+            </td>
+
+        </tr>
+    </table>
+</div>

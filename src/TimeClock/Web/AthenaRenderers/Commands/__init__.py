@@ -7,3 +7,4 @@ from . import SetSupervisors
 from . import ViewEmployees
 from . import ViewShifts
 from . import ApproveShifts
+from . import ViewReports

@@ -6,7 +6,7 @@
     <invisible n:render="timeEntryTable"/>
     <table id="TimeEntryTable" border="1px" style="text-align:center;" n:data="timeEntryData" n:pattern="TimeEntryTablePattern">
         <tr class="tableHeader">
-            <td colspan="3">Sub Account</td>
+            <td colspan="3">Time Entry</td>
         </tr>
         <tr>
             <td>

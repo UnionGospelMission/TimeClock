@@ -8,21 +8,44 @@
 TimeClock.Objects.TimeEntryRenderer = TimeClock.Objects.subclass("TimeClock.Objects.TimeEntryRenderer");
 TimeClock.Objects.TimeEntryRenderer.methods(
     function __init__(self, node){
-        console.log(11);
         TimeClock.Objects.TimeEntryRenderer.upcall(self, "__init__", node);
-        console.log(13);
+
+        setTimeout(function(){
+            self.setDateTimePicker(self.nodeById('startTime'));
+            self.setDateTimePicker(self.nodeById('endTime'));
+        }, 500);
+
+    },
+    function newValues(self, args) {
+        TimeClock.Objects.TimeEntryRenderer.upcall(self, 'newValues', args);
+        self.setDateTimePicker(self.nodeById('startTime'));
+        self.setDateTimePicker(self.nodeById('endTime'));
+    },
+    function setDateTimePicker(self, node){
         var options = {
             timeFormat: 'HH:mm:ss z',
             dateFormat: 'yy-mm-dd',
             showTimezone: true,
             timezoneList: [
-                { value: 'PDT', label: 'PDT'},
-                { value: 'PST', label: 'PST'}
             ]
         };
-        setTimeout(function(){$(self.nodeById('startTime')).datetimepicker(options);}, 500);
-        setTimeout(function(){$(self.nodeById('endTime')).datetimepicker(options);}, 500);
-        console.log(16);
+        var val = node.value.split(' ');
+        switch (val[val.length-1]){
+            case 'PDT':
+                options.timezoneList = [
+                    { value: 'PDT', label: 'PDT'},
+                    { value: 'PST',  label: 'PST' },
+                    { value: "AUTO",  label: 'AUTO' }
+                ];
+                break;
+            case 'PST':
+                options.timezoneList = [
+                    { value: 'PST',  label: 'PST' },
+                    { value: 'PDT', label: 'PDT'},
+                    { value: "AUTO",  label: 'AUTO' }
+                ];
+                break;
+        }
+        $(node).datetimepicker(options);
     }
-
 );

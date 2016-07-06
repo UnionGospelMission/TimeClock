@@ -16,13 +16,17 @@ class LifoQueue(LifoQueue):
         return super().get(False)
 
 
-class Executor(object):
+class Sandbox(object):
     SUSPEND = object()
+    startTime = None
+    counter = None
+    iterlimit = None
+    timelimit = None
 
-    def __init__(self, parent, function, arguments, *, globals=None, functions=(), attributes_accessible = ()):
+    def __init__(self, parent, function, arguments, *, globals_=None, functions=(), attributes_accessible = ()):
         self.parent = parent
-        if globals is None:
-            globals = {}
+        if globals_ is None:
+            globals_ = {}
         if parent:
             self.stack = parent.stack
             self.blocks = parent.blocks
@@ -34,7 +38,7 @@ class Executor(object):
             self.stack = LifoQueue()
             self.blocks = LifoQueue()
             self.frames = LifoQueue()
-            self.globals = globals
+            self.globals = globals_
             self.functions = functions
             self.attributes_accessible = attributes_accessible
         self.local_variables = {}
@@ -67,7 +71,7 @@ class Executor(object):
         if function in self.functions:
             return function(*arguments)
         if type(function) == Function:
-            exc = Executor(self, function, arguments)
+            exc = Sandbox(self, function, arguments)
             gen = exc.execute(self.iterlimit - self.counter, self.timelimit + self.startTime - time.time())
             ret = next(gen)
             if ret == self.SUSPEND:
@@ -75,7 +79,6 @@ class Executor(object):
             self.counter += exc.counter
             return ret
         raise TypeError("Function %r not allowed" %function)
-
 
     def execute(self, iterlimit, timelimit):
         self.startTime = time.time()

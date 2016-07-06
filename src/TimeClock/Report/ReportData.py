@@ -16,5 +16,10 @@ class ReportData(object):
     def __iter__(self) -> [tuple]:
         return iter(self.data)
 
+    @staticmethod
+    def fromItem(item):
+        return ReportData(item.persistentValues())
+
 
 registerAdapter(ReportData, dict, IReportData)
+registerAdapter(ReportData.fromItem, Item, IReportData)

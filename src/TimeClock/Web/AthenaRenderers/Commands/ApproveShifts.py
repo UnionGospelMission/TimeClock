@@ -12,6 +12,7 @@ from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
+from TimeClock.ITimeClock.IDateTime import IDateTime
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
@@ -33,6 +34,7 @@ from TimeClock.Web.Events.SupervisorAssignmentChangedEvent import SupervisorAssi
 from TimeClock.Web.Events.TimeEntryCreatedEvent import TimeEntryCreatedEvent
 from TimeClock.Web.Events.WorkLocationAssignmentChangedEvent import WorkLocationAssignmentChangedEvent
 from nevow import tags, loaders
+from nevow.athena import expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 from nevow.stan import directive
@@ -48,6 +50,8 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
     ltl = None
     l1 = None
     l2 = None
+    startTime = 0
+    endTime = '2100-01-01'
     @overload
     def handleEvent(self, evt: TimeEntryCreatedEvent):
         if evt.timeEntry.employee is self.ltl.element:
@@ -75,8 +79,16 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
         ltl.getMappingFor = self.getMappingFor
         ltl.setMappingFor = self.setMappingFor
         l2.setSelectable(False)
-        return ltl
 
+        startTime = tags.input(id='startTime', placeholder='Start Time')[tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
+        endTime = tags.input(id='endTime', placeholder='End Time')[
+            tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
+        self.preprocess([startTime, endTime])
+        return [startTime, endTime, ltl]
+    @expose
+    def timeWindowChanged(self, startTime, endTime):
+        self.startTime = startTime
+        self.endTime = endTime
     @coerce
     def getMappingFor(self, e: EmployeeRenderer):
         if self.employee.isAdministrator() or e.getEmployee() in ISupervisor(self.employee).getEmployees():
@@ -85,11 +97,13 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
             return []
         o = []
         shifts = self.selected.powerupsFor(ITimeEntry)
-
+        startTime = IDateTime(self.startTime)
+        endTime = IDateTime(self.endTime)
         for shift in shifts:
-            s = IListRow(shift)
-            s.prepare(self.l2)
-            o.append(s)
+            if not (shift.endTime() < startTime or shift.startTime() > endTime):
+                s = IListRow(shift)
+                s.prepare(self.l2)
+                o.append(s)
         o.append(SaveList(6).prepare(self.l2))
         return self.preprocess(o)
 

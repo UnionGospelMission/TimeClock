@@ -1,6 +1,3 @@
-TODO: Approve Time
-DONE: Reports
-DONE: add tasklets
 TODO: time display
 TODO: time input
 TODO: user time report
@@ -10,8 +7,6 @@ TODO:  admin/sup.getpermission should include user permissions
 
 
 
-TODO: Schedule vacation
-TODO: Approve Vacation
 
 CSS: Mouseover 'links'
 
@@ -26,13 +21,17 @@ new task; refresh hides new task window
 report refresh opens new report list
 
 Ace editor autoselects entire contents
-Done: switch commands without waiting for server
-Done: mark locations as unused
 
 
 make events cancel when multi-concurrent changes detected
 
 
 
-event for adding/removing supervisor/administrator
-    list of supers/admins needs to subscribe
+
+TODO: Schedule vacation
+TODO: Approve Vacation
+Todo: Reports
+Todo: Average Hours
+Todo: Tasks
+Todo: allow custom authentication password even for AD users
+Todo: select time entry ranges

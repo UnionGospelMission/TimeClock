@@ -12,8 +12,12 @@ TimeClock.Objects.methods(
     function expand(self, node){
         self.expanded = !self.expanded;
         if (self.expanded){
+            self.nodeById('expand-button').style.display='none';
+            self.nodeById('unexpand-button').style.display='block';
             self.nodeById('expanded').style.display='block';
         }else{
+            self.nodeById('expand-button').style.display='block';
+            self.nodeById('unexpand-button').style.display='none';
             self.nodeById('expanded').style.display='none';
         }
     },
@@ -24,10 +28,8 @@ TimeClock.Objects.methods(
                     var inp = self.nodeById(key);
                 }
                 catch (e){
-                    console.log(e);
                     continue;
                 }
-
                 if (inp.type=='checkbox'){
                     inp.checked = args[key];
                 }
@@ -53,6 +55,13 @@ TimeClock.Objects.methods(
                 else{
                     vars[ele.id.split('-')[1]] = ele.checked;
                 }
+            }
+        }
+        e = self.node.getElementsByTagName('select');
+        for (var idx=0; idx< e.length;idx++){
+            var ele = e[idx];
+            if (ele.id!=''){
+                vars[ele.id.split('-')[1]] = ele.value;
             }
         }
         console.log(vars);

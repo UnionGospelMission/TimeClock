@@ -1,5 +1,9 @@
+from twisted.python.components import registerAdapter
+from zope.component import provideUtility
+
+from TimeClock.ITimeClock.IReport.IFormatterFactory import IFormatterFactory
 from axiom.item import Item
-from zope.interface import implementer
+from zope.interface import implementer, provider
 
 from TimeClock.ITimeClock.IReport.IFormat import IFormat
 from TimeClock.ITimeClock.IReport.IReportData import IReportData
@@ -9,12 +13,15 @@ import json
 
 
 @implementer(IFormat)
+@provider(IFormatterFactory)
 class JSON(object):
     name = "json"
     def __init__(self, other=None):
         self.other = other
-        self.table = None
+        self.columns = None
         self.first = False
+        self.last = False
+        self.rows = []
     @coerce
     def formatRow(self, row: IReportData) -> bytes:
         if self.first:
@@ -22,15 +29,24 @@ class JSON(object):
             self.first = False
         else:
             ret = ',\n    '
-        return json.encode(row.persistentValues()).encode('charmap')
+        self.rows.append((ret + json.dumps({k: row[k] for k in self.columns})).encode('charmap'))
+        return self.rows[-1]
 
     @coerce
-    def formatHeader(self, table: Subclass[Item]) -> bytes:
-        self.table = table
+    def formatHeader(self, columns: [str]) -> bytes:
+        self.columns = columns
         self.first = True
+        self.rows.append(b'[')
         return b'['
-        # return (','.join(i[0] for i in table.getSchema())).encode('charmap')+b'\n'
     @coerce
-    def formatFooter(self, table: Subclass[Item]) -> bytes:
-        return b']'
+    def formatFooter(self) -> bytes:
+        self.rows.append(b'\n]')
+        self.last = True
+        return b'\n]'
 
+    def getReport(self) -> bytes:
+        if not self.last:
+            self.formatFooter()
+        return bytes.join(b'', self.rows)
+
+provideUtility(JSON, IFormatterFactory, 'json')

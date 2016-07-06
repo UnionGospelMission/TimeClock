@@ -2075,7 +2075,6 @@
 	/**
 	 * Get the number in minutes that represents a timezone string
 	 * @param  {string} tzString formatted like "+0500", "-1245", "Z"
-	 * @return {number} the offset minutes or the original string if it doesn't match expectations
 	 */
 	$.timepicker.timezoneOffsetNumber = function (tzString) {
 		var normalized = tzString.toString().replace(':', ''); // excuse any iso8601, end up with "+1245"
@@ -2085,7 +2084,7 @@
 		}
 
 		if (!/^(\-|\+)\d{4}$/.test(normalized)) { // possibly a user defined tz, so just give it back
-			return parseInt(tzString, 10);
+			return tzString;
 		}
 
 		return ((normalized.substr(0, 1) === '-' ? -1 : 1) * // plus or minus

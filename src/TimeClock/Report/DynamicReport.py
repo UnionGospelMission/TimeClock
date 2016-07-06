@@ -2,14 +2,18 @@ import dis
 
 from TimeClock.Database.Employee import Employee
 from TimeClock.Database.SubAccount import SubAccount
-from TimeClock.Executor.Executor import Executor
-from TimeClock.Executor.Function import Function
+from TimeClock.ITimeClock.IDateTime import IDateTime
+from TimeClock.ITimeClock.IReport.IFormatterFactory import IFormatterFactory
+from TimeClock.Sandbox.Sandbox import Sandbox
+from TimeClock.Sandbox.Function import Function
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IReport.IFormat import IFormat
 from TimeClock.Axiom import Store
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Solomon.SolomonEmployee import SolomonEmployee
+from TimeClock.Util.DateTime import DateTime
+from TimeClock.Utils import overload
 from axiom.attributes import text
 
 from axiom.item import Item
@@ -57,8 +61,12 @@ class DynamicReport(Item):
         self.inMemoryPowerUp(function, Function)
         return function
 
-    def runReport(self, Format: IFormat, parameters: [object]) -> bytes:
-        formatter = Format()
+    @overload
+    def runReport(self, FormatFactory: IFormatterFactory, parameters: [object]) -> bytes:
+        formatter = IFormat(FormatFactory())
+        return self.runReport(formatter, parameters)
+    @overload
+    def runReport(self, formatter: IFormat, parameters: [object]) -> bytes:
         function = self.prepare()
         globs = dict(
             formatHeader=formatter.formatHeader,
@@ -66,6 +74,7 @@ class DynamicReport(Item):
             formatRow=formatter.formatRow,
             parameters=parameters,
             print=print,
+            IDateTime=IDateTime,
             ISubAccount=ISubAccount,
             IEmployee=IEmployee,
             ISolomonEmployee=ISolomonEmployee,
@@ -74,17 +83,20 @@ class DynamicReport(Item):
             int=int,
             float=float,
             str=str,
+            tuple=tuple,
+            list=list,
+            today=DateTime.today
         )
 
-        exc = Executor(None, function,
-                       parameters,
-                       globals=globs,
-                       functions=globs.values(),
-                       attributes_accessible=(Item, Employee, SolomonEmployee, SubAccount),
-                       )
+        exc = Sandbox(None, function,
+                      parameters,
+                      globals_=globs,
+                      functions=globs.values(),
+                      attributes_accessible=(Item, Employee, SolomonEmployee, SubAccount, DateTime),
+                      )
         g = exc.execute(10000, 10)
         n = next(g)
-        while n == Executor.SUSPEND:
+        while n == Sandbox.SUSPEND:
             n = n.tell(1)
         return formatter.getReport()
 

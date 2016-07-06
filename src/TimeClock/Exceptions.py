@@ -20,3 +20,7 @@ class DatabaseChangeCancelled(EventCancelled, DatabasException):
 
 class PermissionDenied(Exception):
     pass
+
+
+class ReportCancelled(EventCancelled):
+    pass

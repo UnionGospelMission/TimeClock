@@ -43,11 +43,12 @@ class LiveFragment(LF, metaclass=LiveFragmentMeta):
             return root
         if root.tagName.lower() == "input" and 'type' in root.attributes and root.attributes['type'] == 'checkbox':
             if 'checked' in root.attributes and not root.attributes['checked']:
-
                 del root.attributes['checked']
             elif 'value' in root.attributes and root.attributes['value'] is True:
                 root.attributes['checked'] = ''
                 del root.attributes['value']
+        if root.tagName.lower() == 'option' and 'selected' in root.attributes and not root.attributes['selected']:
+            del root.attributes['selected']
         for c in root.children:
             LiveFragment.fixCheckboxes(c)
         return root

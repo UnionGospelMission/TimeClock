@@ -3,7 +3,8 @@ from types import CodeType
 
 class Function(object):
     def __repr__(self):
-        return "<Function %s(%s)>" % (self.name, ','.join(self.arguments))
+        arguments = [i if isinstance(i, str) else i[0] for i in self.arguments]
+        return "<Function %s(%s)>" % (self.name, ','.join(arguments))
     def __init__(self, name: str, code: CodeType, arguments: [str], closure: object=None):
         self.code = code
         self.arguments = arguments

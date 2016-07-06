@@ -20,7 +20,7 @@
                 <invisible n:pattern="headerRow" n:render="headerRow">
                         <th n:render="mapping" n:pattern="headerCell">
                             <n:slot name="listHeader" />
-                            <!--<athena:handler event="onclick" handler="headerClicked"/>-->
+                            <athena:handler event="onclick" handler="headerClicked"/>
                         </th>
                 </invisible>
             </invisible>

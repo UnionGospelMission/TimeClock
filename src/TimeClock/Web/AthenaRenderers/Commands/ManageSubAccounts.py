@@ -22,9 +22,9 @@ class ManageSubAccounts(AbstractRenderer, AbstractHideable):
     subaccounts = None
     name = 'Manage Sub Accounts'
     def render_subAccounts(self, ctx: WovenContext, data):
-        l = List(list(Store.query(SubAccount)), ["Sub Account", "Name", "Active"])
+        l = List(list(Store.query(SubAccount)), ["", "Sub Account", "Name", "Active"])
         l.closeable = False
-        l.addRow(SaveList(3))
+        l.addRow(SaveList(4, start=1))
         l.prepare(self)
         l.visible = True
         return l

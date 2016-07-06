@@ -1,0 +1,97 @@
+// import TimeClock.Objects
+// import jquery
+// import Ace
+// import Ace.mode_python
+// import Ace.theme_twilight
+
+"use strict";
+
+
+TimeClock.Objects.DynamicReportRenderer = TimeClock.Objects.subclass("TimeClock.Objects.DynamicReportRenderer");
+TimeClock.Objects.DynamicReportRenderer.methods(
+    function __init__(self, node){
+        self.options = {
+            timeFormat: 'HH:mm:ss z',
+            dateFormat: 'yy-mm-dd',
+            showTimezone: true,
+            timezoneList: [
+                { value: "AUTO",  label: 'AUTO' },
+                { value: 'PDT', label: 'PDT'},
+                { value: 'PST',  label: 'PST' }
+            ]
+        };
+        TimeClock.Objects.DynamicReportRenderer.upcall(self, "__init__", node);
+        self.editor = ace.edit(self.nodeById('editor'));
+        //self.editor.setValue(val);
+        ace.config.set("basePath", "/jsmodule/Ace");
+        self.editor.setTheme("ace/theme/twilight");
+        self.editor.getSession().setMode("ace/mode/python");
+        $('.IDateTime', self.node).datetimepicker(self.options);
+    },
+
+    function newValues(self, args){
+        TimeClock.Objects.DynamicReportRenderer.upcall(self, 'newValues', args);
+        if (args.code != undefined) {
+            self.editor.setValue(args.code);
+        }
+        if (args.args!=undefined){
+            self.nodeById('arguments').innerHTML = args.args;
+            $('.IDateTime', self.node).datetimepicker(self.options);
+        }
+    },
+    function runReport(self, node, evt) {
+        var args = [];
+        var e = self.nodeById('arguments').getElementsByTagName('input');
+        for (var idx=0; idx< e.length;idx++){
+            var ele = e[idx];
+            if (ele.id!=''){
+                if (ele.type!='checkbox'){
+                    args.push(ele.value);
+                }
+                else{
+                    args.push(ele.checked);
+                }
+            }
+        }
+
+        self.busyCallRemote("runReport", self.nodeById('format').value, args).addCallback(function(retval){
+            var report, mimetype;
+            report = retval[0];
+            mimetype = retval[1];
+            var blob = new Blob([report], {type: mimetype});
+            var url = URL.createObjectURL(blob);
+            window.open(url,'_blank');
+        });
+    },
+    function saveClicked(self, node, evt){
+        var event = window.event || evt;
+        if (event!=undefined){
+            event.stopPropagation();
+        }
+
+        var vars = {};
+        var e = self.node.getElementsByTagName('input');
+        for (var idx=0; idx< e.length;idx++){
+            var ele = e[idx];
+            if (ele.id!=''){
+                if (ele.type!='checkbox'){
+                    vars[ele.id.split('-')[1]] = ele.value;
+                }
+                else{
+                    vars[ele.id.split('-')[1]] = ele.checked;
+                }
+            }
+        }
+        vars['code'] = self.editor.getValue();
+        console.log(vars);
+        self.busyCallRemote('saveClicked', vars).addCallback(function(){
+            if (self.expanded) {
+                self.expand(null);
+            }
+        });
+
+    }
+
+
+
+);

@@ -12,7 +12,6 @@ from .InterfaceMethod import OverloadedMethod, AnnotatedMethod
 from .Overload import Overloaded
 from .subclass import issubclass, subclass
 
-
 def getSignatureString(positional, optional, varargs, kwargs, annotations = None, **kw):
     if isinstance(positional, tuple):
         positional = [positional]

@@ -29,6 +29,29 @@ TimeClock.Objects.SubAccountRenderer.methods(
         console.log(vars);
         self.busyCallRemote('saveClicked', vars);
 
+    },
+    function expand(self, node){
+        var expanded=self.expanded;
+        if (expanded){
+            self.nodeById('expand-button').style.display='block';
+            self.nodeById('unexpand-button').style.display='none';
+            self.busyCallRemote('unexpand');
+            self.expanded.node.parentNode.parentNode.removeChild(self.expanded.node.parentNode);
+            self.removeChildWidget(self.expanded);
+            self.expanded=null;
+        }
+        else{
+            self.nodeById('expand-button').style.display='none';
+            self.nodeById('unexpand-button').style.display='block';
+            self.busyCallRemote('expand').addCallback(function (newnode) {
+                self.addChildWidgetFromWidgetInfo(newnode).addCallback(function (widget){
+                    var td = document.createElement('td');
+                    td.appendChild(widget.node);
+                    self.node.appendChild(td);
+                    self.expanded = widget;
+                });
+            });
+        }
     }
 
 

@@ -44,12 +44,12 @@ class List(AbstractRenderer, AbstractExpandable, AbstractHideable):
 
     @coerce
     def addRow(self, row: IListRow):
+        row.prepare(self)
         if self.cols is None:
             raise RuntimeError("Columns must be speicified before rows may be added")
         if row.length != len(self.cols):
             raise TypeError("Row of length %i expected, got %i" % (len(self.cols), row.length))
         self.list.append(row)
-        row.prepare(self)
         if self.rendered:
             self.callRemote("append", row)
 
