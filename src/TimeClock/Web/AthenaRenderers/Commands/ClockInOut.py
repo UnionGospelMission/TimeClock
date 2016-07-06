@@ -9,17 +9,24 @@ from TimeClock.ITimeClock.IEvent.IDatabaseEvent import IDatabaseEvent
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
+from TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent import IEmployeeChangedEvent
+from TimeClock.ITimeClock.IEvent.IWebEvent.ISubAccountChangedEvent import ISubAccountChangedEvent
+from TimeClock.ITimeClock.IEvent.IWebEvent.IWebEvent import IWebEvent
+from TimeClock.ITimeClock.IEvent.IWebEvent.IWorkLocationChangedEvent import IWorkLocationChangedEvent
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Utils import overload
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.Events.SubAccountAssignmentChangedEvent import SubAccountAssignmentChangedEvent
 from TimeClock.Web.Events.TimeEntryChangedEvent import TimeEntryChangedEvent
 from TimeClock.Web.Events.TimeEntryCreatedEvent import TimeEntryCreatedEvent
+from TimeClock.Web.Events.WorkLocationAssignmentChangedEvent import WorkLocationAssignmentChangedEvent
 from nevow import tags
 from nevow.athena import expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
+from nevow import flat
 
 
 @implementer(IEventHandler)
@@ -30,6 +37,28 @@ class ClockInOut(AbstractRenderer, AbstractHideable):
     name = 'Clock In / Clock Out'
     selected = None
     ltl = None
+
+    @overload
+    def handleEvent(self, event: SubAccountAssignmentChangedEvent):
+        if event.employee is self.employee:
+            self.refresh()
+
+    @overload
+    def handleEvent(self, event: ISubAccountChangedEvent):
+        subAccount = event.subAccount
+        if subAccount in self.employee.getSubAccounts():
+            self.refresh()
+
+    @overload
+    def handleEvent(self, event: WorkLocationAssignmentChangedEvent):
+        if event.employee is self.employee:
+            self.refresh()
+
+    @overload
+    def handleEvent(self, event: IWorkLocationChangedEvent):
+        workLocation = event.workLocation
+        if workLocation in self.employee.getWorkLocations():
+            self.refresh()
 
     @overload
     def handleEvent(self, event: ClockInOutEvent):
@@ -45,21 +74,33 @@ class ClockInOut(AbstractRenderer, AbstractHideable):
 
     def render_class(self, ctx: WovenContext, data):
         IEventBus("Database").register(self, IDatabaseEvent)
+        IEventBus("Web").register(self, IWebEvent)
         return "ClockInOut"
-    def render_genericCommand(self, ctx: WovenContext, data):
-        s = tags.select(id="sub")
-        se = ISolomonEmployee(self.employee)
+    def getSubs(self, se):
+        subs = []
         for a in self.employee.getSubAccounts():
             o = tags.option(value=a.sub)[a.name]
             if se.defaultSubAccount == a:
                 o(selected='')
-            _ = s[o]
-        w = tags.select(id='wloc')
+            subs.append(o)
+        return subs
+    def getWLocs(self, se):
+        locs = []
         for b in self.employee.getWorkLocations():
             o = tags.option(value=b.workLocationID)[b.description]
             if se.defaultWorkLocation == b:
                 o(selected='')
-            _ = w[o]
+            locs.append(o)
+        return locs
+    def refresh(self):
+        se = ISolomonEmployee(self.employee)
+        self.callRemote('refresh', flat.flatten(self.getSubs(se)).decode('charmap'), flat.flatten(self.getWLocs(se)).decode('charmap'))
+    def render_genericCommand(self, ctx: WovenContext, data):
+        se = ISolomonEmployee(self.employee)
+        s = tags.select(id="sub")[self.getSubs(se)]
+
+        w = tags.select(id='wloc')[self.getWLocs(se)]
+
 
         sub = tags.input(type='button', value='Clock In')[
             tags.Tag('athena:handler')(event='onclick', handler='doClockIn')

@@ -28,7 +28,6 @@ TimeClock.Widgets.ListToListSelector.methods(
         for (var idx=0; idx<selected.length;idx++){
             args.push(Nevow.Athena.athenaIDFromNode(selected[idx].node));
         }
-        console.log(29, args);
         self.callRemote('doSave', args);
     },
     function refresh(self){

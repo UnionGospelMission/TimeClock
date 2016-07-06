@@ -39,20 +39,16 @@ class DynamicReport(Item):
         if f:
             return f[0]
         code = compile(self.code, self.name, "exec")
-        dis.dis(code)
+
         if code.co_code[0] == dis.opmap['LOAD_CONST']:
             c = code.co_code[1] + code.co_code[2] * 256
             arguments = code.co_consts[c]
             if not isinstance(arguments, tuple):
-                print(43)
                 arguments = ()
             for arg in arguments:
-                print(45, arg)
                 if isinstance(arg, tuple) and len(arg) == 2:
-                    print(47)
                     continue
                 if not isinstance(arg, str):
-                    print(50, arg)
                     arguments = ()
                     break
         else:
@@ -68,6 +64,7 @@ class DynamicReport(Item):
     @overload
     def runReport(self, formatter: IFormat, parameters: [object]) -> bytes:
         function = self.prepare()
+        dis.dis(compile(self.code, self.name, "exec"))
         globs = dict(
             formatHeader=formatter.formatHeader,
             formatFooter=formatter.formatFooter,
@@ -105,5 +102,4 @@ class DynamicReport(Item):
 
     def getArgs(self) -> [str]:
         function = self.prepare()
-        print(79, function.arguments)
         return function.arguments

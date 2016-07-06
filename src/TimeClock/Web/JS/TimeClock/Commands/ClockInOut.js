@@ -25,6 +25,11 @@ TimeClock.Commands.ClockInOut.methods(
         }
 
     },
+    function refresh(self, subs, locs) {
+        console.log(29, subs, locs);
+        self.nodeById('sub').innerHTML = subs;
+        self.nodeById('wloc').innerHTML = locs;
+    },
     function doClockIn(self, node){
         self.callRemote("clockIn", self.nodeById("sub").value, self.nodeById("wloc").value);
     },
