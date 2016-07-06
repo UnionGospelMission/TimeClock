@@ -5,11 +5,11 @@
     <title>Login</title>
     <script type="text/javascript">
         function verifyLivePage() {
-            if (LoginPage==undefined || LoginPage.Login == undefined || !LoginPage.fromAthenaID(1)) {
+            if (LoginPage==undefined || LoginPage.Login == undefined || !LoginPage.Login.fromAthenaID(1)) {
                 console.log("Live Page initialization failed");
             }
             else {
-                var d = document.getElementById("noscript")
+                var d = document.getElementById("noscript");
                 d.parentNode.removeChild(d);
             }
         }
