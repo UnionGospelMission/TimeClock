@@ -8,6 +8,61 @@
 
 TimeClock.Widgets.List = TimeClock.Widgets.subclass("TimeClock.Widgets.List");
 TimeClock.Widgets.List.methods(
+    function headerClicked(self, node){
+        if (self.lst){
+            var key=0;
+            for (var p=node; p.previousElementSibling!=null; key++){
+                p = p.previousElementSibling;
+            }
+            if (self.lastKey==key){
+                if (self.order == 'desc'){
+                    self.order = 'asc';
+                }
+                else{
+                    self.order = 'desc';
+                }
+            }
+            else {
+                self.order='asc';
+            }
+            var options = {
+                order: self.order,
+                sortFunction: function(a, b) {
+                    var aval;
+                    var bval;
+                    var ainp = $(a.elm).find('input');
+                    var binp = $(b.elm).find('input');
+                    if (key < ainp.length){
+                        if (ainp[key].type=='checkbox'){
+                            aval = ainp[key].checked;
+                        }
+                        else {
+                            aval = $(ainp[key]).val();
+                        }
+                    }
+                    else{
+                        aval = null;
+                    }
+                    if (key < binp.length){
+                        if (binp[key].type=='checkbox'){
+                            bval = binp[key].checked;
+                        }
+                        else {
+                            bval = $(binp[key]).val();
+                        }
+                    }
+                    else{
+                        bval = null;
+                    }
+                    return self.lst.utils.naturalSort(aval, bval, options);
+
+                }
+
+            };
+            self.lst.sort(node.innerHTML, options);
+            self.lastKey = key;
+        }
+    },
     function __init__(self, node){
         var initNode = document.getElementById('athena-init-args-' + node.id.split(':')[1]);
         if (initNode){
@@ -23,7 +78,7 @@ TimeClock.Widgets.List.methods(
         self.valueNames = [];
 
         if (self.table.tHead.rows.length>1 && self.table.tBodies[0].rows.length > 0) {
-            for (var i=0; i< self.table.tHead.rows[1].cells.length; i++){
+            for (var i=0; i< self.table.tBodies[0].rows[0].cells.length; i++){
                 if (self.table.tBodies[0].rows[0].cells[i].className!=undefined){
                     self.valueNames.push(self.table.tBodies[0].rows[0].cells[i].className);
                 }
@@ -32,8 +87,8 @@ TimeClock.Widgets.List.methods(
             self.options = {
                 valueNames: self.valueNames
             };
+            console.log(90, self.valueNames);
             self.lst = new List(self.node, self.options);
-            $(self.table).tablesorter();
         }
 
     },
@@ -70,18 +125,7 @@ TimeClock.Widgets.List.methods(
                         valueNames: self.valueNames
                     };
                     self.lst = new List(self.node, self.options);
-                    $(self.table).tablesorter({
-                        textExtraction: function(n) {
-                            var inp = n.getElementsByTagName('input');
-                            if (inp.length){
-                                if (inp[0].type=='checkbox'){
-                                    return inp[0].checked ? "checked" : '';
-                                }
-                                return inp[0].value;
-                            }
-                            return '';
-                        }
-                    });
+                    //$(self.table).tablesorter(self.tsoptions);
                 }
             }
         );
