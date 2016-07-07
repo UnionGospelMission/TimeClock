@@ -62,7 +62,7 @@ class _RenderListRowMixin(AbstractExpandable):
         save = T.input(id='save', type='button', value='Save')[T.Tag('athena:handler')(event='onclick', handler='saveClicked')]
         run = T.input(id='run', type='button', value='Run')[T.Tag('athena:handler')(event='onclick', handler='runReport')]
         format_ = T.select(id='format')[
-            [T.option(value=i[1].name)[i[1].name] for i in getUtilitiesFor(IFormatterFactory)]
+            [T.option(value=i[0])[i[0]] for i in getUtilitiesFor(IFormatterFactory)]
         ]
         self.preprocess([name, description, args, run, code, save, format_])
         r = [

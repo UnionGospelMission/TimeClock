@@ -36,7 +36,7 @@ def iterate(cli, inp):
             next(cli)
         except StopIteration:
             pass
-        embed()
+        reactor.stop()
     except SystemExit:
         reactor.stop()
     except Exception as e:

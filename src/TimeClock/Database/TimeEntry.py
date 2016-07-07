@@ -1,4 +1,5 @@
 from TimeClock.Database.Employee import Employee
+from TimeClock.Database.TimePeriod import TimePeriod
 from axiom.upgrade import registerAttributeCopyingUpgrader
 from twisted.python.components import registerAdapter
 from TimeClock.ITimeClock.IDateTime import ITimeDelta
@@ -7,7 +8,7 @@ from ..ITimeClock.IDateTime import IDateTime
 
 from TimeClock.Axiom import Store
 from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
-from TimeClock.Util import Null
+from TimeClock.Util import Null, NULL
 from TimeClock.Utils import overload
 from axiom.attributes import reference, boolean
 from zope.interface import implementer
@@ -78,6 +79,7 @@ registerAttributeCopyingUpgrader(
 
 def newTimeEntry(x):
     te = TimeEntry(store=Store.Store)
+    te.period = TimePeriod(store=Store.Store)
     return te
 
 registerAdapter(newTimeEntry, Null, ITimeEntry)

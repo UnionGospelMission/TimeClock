@@ -6,10 +6,12 @@ from TimeClock.Axiom import Transaction
 from TimeClock.Axiom.Store import Store
 from TimeClock.Database import Commands
 from TimeClock.Database.Commands.ApproveTime import ApproveTime
+from TimeClock.Database.Commands.ApproveVacation import ApproveVacation
 from TimeClock.Database.Employee import Employee
 from TimeClock.Database.Supervisor import Supervisor
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
+from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
 from TimeClock.ITimeClock.IDateTime import IDateTime
@@ -50,11 +52,19 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
     ltl = None
     l1 = None
     l2 = None
-    startTime = 0
-    endTime = '2100-01-01'
+    startTime = None
+    endTime = None
+    def __init__(self, cmd):
+        super().__init__(cmd)
+        self.name = cmd.name
+        if isinstance(cmd, ApproveTime):
+            self.entryType = IEntryType("Work")
+        if isinstance(cmd, ApproveVacation):
+            self.entryType = IEntryType("Vacation")
+
     @overload
     def handleEvent(self, evt: TimeEntryCreatedEvent):
-        if evt.timeEntry.employee is self.ltl.element:
+        if evt.timeEntry.employee is self.ltl.element and evt.timeEntry.type == self.entryType:
             self.l2.addRow(evt.timeEntry)
     @overload
     def handleEvent(self, event: IEvent):
@@ -96,11 +106,18 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
         else:
             return []
         o = []
-        shifts = self.selected.powerupsFor(ITimeEntry)
-        startTime = IDateTime(self.startTime)
-        endTime = IDateTime(self.endTime)
+
+        shifts = list(i for i in self.selected.powerupsFor(ITimeEntry) if i.type == self.entryType)
+        if self.startTime:
+            startTime = IDateTime
+        else:
+            startTime = None
+        if self.endTime:
+            endTime = IDateTime(self.endTime)
+        else:
+            endTime = None
         for shift in shifts:
-            if not (shift.endTime() < startTime or shift.startTime() > endTime):
+            if not ((startTime and shift.endTime() < startTime) or (endTime and shift.startTime() > endTime)):
                 s = IListRow(shift)
                 s.prepare(self.l2)
                 o.append(s)
@@ -113,3 +130,4 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
 
 
 registerAdapter(ApproveShifts, ApproveTime, IAthenaRenderable)
+registerAdapter(ApproveShifts, ApproveVacation, IAthenaRenderable)

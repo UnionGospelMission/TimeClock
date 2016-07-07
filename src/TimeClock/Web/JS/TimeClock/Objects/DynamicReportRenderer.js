@@ -60,7 +60,15 @@ TimeClock.Objects.DynamicReportRenderer.methods(
             mimetype = retval[1];
             var blob = new Blob([report], {type: mimetype});
             var url = URL.createObjectURL(blob);
-            window.open(url,'_blank');
+            var a = document.createElement("a");
+            a.style = "display: none";
+            document.body.appendChild(a);
+            a.href = url;
+            a.download = self.nodeById('name').value + "." + self.nodeById('format').value;
+            a.target = '_blank';
+            a.click();
+            //window.open(url,'_blank');
+            document.body.removeChild(a);
         });
     },
     function saveClicked(self, node, evt){

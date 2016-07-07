@@ -149,6 +149,10 @@ def getBenefitAvailable(eid: str, bid: str) -> float:
 def getBenefitAvailable(eid: IEmployee, bid: str) -> float:
     return getBenefitAvailable(eid.employee_id, bid)
 
+if pymssql:
+    pseudoname = 'Administrator'
+else:
+    pseudoname = 'Solomon Database Unavailable'
 
 dummyEntry = {'DfltWrkloc': 'OFF   ',
               'StrtDate': datetime.datetime(2016, 6, 25, 0, 0),
@@ -162,7 +166,7 @@ dummyEntry = {'DfltWrkloc': 'OFF   ',
               'Status': 'A',
               'CpnyID': 'UGM       ',
               'EmpId': '1      ',
-              'Name': 'John D. Doe Administrator                                           ',
+              'Name': pseudoname,
               'Addr1': 'XXXXX E. XXXXXX Ave.                                       ',
               'SSN': '123456789',
               'City': 'Spokane                       ',

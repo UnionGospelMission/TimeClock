@@ -104,10 +104,9 @@ class Employee(Item):
 
     @Transaction
     def clockOut(self) -> ITimeEntry:
-        timeEntry = list(self.powerupsFor(ITimeEntry))
-        if (not timeEntry) or timeEntry[-1].period._endTime!=None:
+        timeEntry = self.timeEntry
+        if (not timeEntry) or timeEntry.period._endTime!=None:
             raise InvalidTransformation("User not currently clocked in")
-        timeEntry = timeEntry[-1]
         timeEntry.period.end()
         self.timeEntry = None
         e = ClockInOutEvent(self)

@@ -51,13 +51,20 @@ class _RenderListRowMixin(AbstractExpandable):
         et = self._timeEntry.period.endTime(False)
         ctx.fillSlots('index', self._timeEntry.storeID)
         approved = T.input(id='approved', type='checkbox', checked=self._timeEntry.approved)
-        workLocationID = T.select(id='workLocation', value=self._timeEntry.workLocation.workLocationID)[
-            [T.option(value=i.workLocationID, selected=self._timeEntry.workLocation == i)[i.description] for i in
-             self._timeEntry.getEmployee().getWorkLocations()]
-        ]
-        subAccount = T.select(id='subAccount', value=self._timeEntry.subAccount.sub)[
-            [T.option(value=i.sub, selected=self._timeEntry.subAccount==i)[i.name] for i in self._timeEntry.getEmployee().getSubAccounts()]
-        ]
+
+        if self._timeEntry.workLocation:
+            workLocationID = T.select(id='workLocation', value=self._timeEntry.workLocation.workLocationID)[
+                [T.option(value=i.workLocationID, selected=self._timeEntry.workLocation == i)[i.description] for i in
+                 self._timeEntry.getEmployee().getWorkLocations()]
+            ]
+        else:
+            workLocationID = T.input(id='workLocation', disabled=True, value='None')
+        if self._timeEntry.subAccount:
+            subAccount = T.select(id='subAccount', value=self._timeEntry.subAccount.sub)[
+                [T.option(value=i.sub, selected=self._timeEntry.subAccount==i)[i.name] for i in self._timeEntry.getEmployee().getSubAccounts()]
+            ]
+        else:
+            subAccount = T.input(id='subAccount', disabled=True, value="None")
         startTime = T.input(id='startTime', value=st.strftime('%Y-%m-%d %H:%M:%S %Z') if st else 'None')
         endTime = T.input(id='endTime', value=et.strftime('%Y-%m-%d %H:%M:%S %Z') if et else 'None')
         duration = T.input(id='duration', value=str(self._timeEntry.period.duration()))
