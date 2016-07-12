@@ -23,8 +23,9 @@ from axiom.attributes import text
 
 
 @implementer(ICommand, IItem)
-class ScheduleVacation(Item):
-    name = text(default="Schedule Vacation")
+class ScheduleTimeOff(Item):
+    typeName = 'timeclock_database_commands_schedulevacation_schedulevacation'
+    name = text(default="Schedule Time Off")
     @overload
     def hasPermission(self, caller: IPerson) -> bool:
         return True

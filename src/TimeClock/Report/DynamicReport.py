@@ -20,6 +20,7 @@ from axiom.item import Item
 from zope.interface import implementer
 
 from TimeClock.ITimeClock.IReport.IReport import IReport
+from nevow import tags
 
 
 @implementer(IReport)
@@ -58,14 +59,15 @@ class DynamicReport(Item):
         return function
 
     @overload
-    def runReport(self, FormatFactory: IFormatterFactory, parameters: [object]) -> bytes:
+    def runReport(self, FormatFactory: IFormatterFactory, parameters: [object]):
         formatter = IFormat(FormatFactory())
         return self.runReport(formatter, parameters)
     @overload
-    def runReport(self, formatter: IFormat, parameters: [object]) -> bytes:
+    def runReport(self, formatter: IFormat, parameters: [object]):
         function = self.prepare()
         dis.dis(compile(self.code, self.name, "exec"))
         globs = dict(
+            formatter=formatter,
             formatHeader=formatter.formatHeader,
             formatFooter=formatter.formatFooter,
             formatRow=formatter.formatRow,
@@ -82,14 +84,17 @@ class DynamicReport(Item):
             str=str,
             tuple=tuple,
             list=list,
-            today=DateTime.today
+            today=DateTime.today,
+            tr=tags.tr,
+            td=tags.td,
+            tbody=tags.tbody
         )
 
         exc = Sandbox(None, function,
                       parameters,
                       globals_=globs,
-                      functions=globs.values(),
-                      attributes_accessible=(Item, Employee, SolomonEmployee, SubAccount, DateTime),
+                      functions=list(globs.values()) + formatter.functions,
+                      attributes_accessible=(Item, Employee, SolomonEmployee, SubAccount, DateTime, formatter),
                       )
         g = exc.execute(10000, 10)
         n = next(g)

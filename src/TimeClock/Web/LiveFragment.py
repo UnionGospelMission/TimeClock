@@ -5,7 +5,7 @@ from nevow.athena import LiveFragment as LF
 from nevow.context import WovenContext
 from nevow.stan import Tag
 
-EventBus = IEventBus("Web")
+EventBus = None
 
 
 class LiveFragment(LF, metaclass=LiveFragmentMeta):
@@ -29,6 +29,8 @@ class LiveFragment(LF, metaclass=LiveFragmentMeta):
                 return getattr(self.api, methodName)
             raise e
     def __init__(self, *args, **kw):
+        global EventBus
+        EventBus = IEventBus("Web")
         super().__init__(*args, **kw)
         if self.fixCheckboxes not in self.preprocessors:
             self.preprocessors.append(self.fixCheckboxes)

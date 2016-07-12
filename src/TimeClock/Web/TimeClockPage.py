@@ -13,7 +13,7 @@ from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderers.Commands.SetSupervisees import SetSupervisees
 from TimeClock.Web.LiveFragment import LiveFragment
 from TimeClock.Web.Utils import formatShortName
-from nevow.athena import LivePage, expose, AutoJSPackage, AutoCSSPackage
+from nevow.athena import LivePage, expose, AutoJSPackage, AutoCSSPackage, MappingResource, _collectPackageBelow
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 

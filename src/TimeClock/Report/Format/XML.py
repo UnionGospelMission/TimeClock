@@ -21,7 +21,7 @@ class XML(object):
         self.header = tags.thead()
         self.body = tags.tbody()
         self.tag = tags.table()[self.header, self.body]
-
+        self.functions = []
     @coerce
     def formatRow(self, row: IReportData) -> bytes:
         tr = tags.tr()[

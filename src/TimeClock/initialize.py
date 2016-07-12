@@ -1,7 +1,8 @@
 from TimeClock.AD import runWithConnection
 from TimeClock.Database.API.API import API
-from TimeClock.Database.Commands.ApproveVacation import ApproveVacation
-from TimeClock.Database.Commands.ScheduleVacation import ScheduleVacation
+from TimeClock.Database.Commands import ScheduleTimeOff
+from TimeClock.Database.Commands.ApproveTimeOff import ApproveTimeOff
+from TimeClock.Database.Commands.ScheduleTimeOff import ScheduleTimeOff
 from TimeClock.Database.Commands.AssignTask import AssignTask
 from TimeClock.Database.Commands.CreateTask import CreateTask
 from TimeClock.Database.Commands.ManageSubAccounts import ManageSubAccounts
@@ -76,8 +77,8 @@ def initializeCommands(Store: store.Store):
     Store.powerUp(Store.findOrCreate(ManageWorkLocations, name="Manage Work Locations"), ICommand)
     Store.powerUp(Store.findOrCreate(CreateTask), ICommand)
     Store.powerUp(Store.findOrCreate(AssignTask), ICommand)
-    Store.powerUp(Store.findOrCreate(ScheduleVacation), ICommand)
-    Store.powerUp(Store.findOrCreate(ApproveVacation), ICommand)
+    Store.powerUp(Store.findOrCreate(ScheduleTimeOff), ICommand)
+    Store.powerUp(Store.findOrCreate(ApproveTimeOff), ICommand)
 
 
 def commandFinder(Store: store.Store):
@@ -125,15 +126,27 @@ def initializeAPIs(Store: store.Store):
     AdministratorAPI.powerUp(findCommand("CreateTask"), ICommand)
     AdministratorAPI.powerUp(findCommand("ManageSubAccounts"), ICommand)
     AdministratorAPI.powerUp(findCommand("ManageWorkLocations"), ICommand)
-    AdministratorAPI.powerUp(findCommand("ScheduleVacation"), ICommand)
-    AdministratorAPI.powerUp(findCommand("ApproveVacation"), ICommand)
+    AdministratorAPI.powerUp(findCommand("ScheduleTimeOff"), ICommand)
+    AdministratorAPI.powerUp(findCommand("ApproveTimeOff"), ICommand)
+    sv = findCommand("ScheduleVacation")
+    if sv:
+        for api in [AdministratorAPI, EmployeeAPI, SupervisorAPI]:
+            if sv in api.powerupsFor(ICommand):
+                api.powerDown(sv, ICommand)
+        sv.deleteFromStore(Store)
+    sv = findCommand("ApproveVacation")
+    if sv:
+        for api in [AdministratorAPI, EmployeeAPI, SupervisorAPI]:
+            if sv in api.powerupsFor(ICommand):
+                api.powerDown(sv, ICommand)
+        sv.deleteFromStore(Store)
 
     EmployeeAPI.powerUp(findCommand("ClockIn"), ICommand)
     EmployeeAPI.powerUp(findCommand("ClockOut"), ICommand)
     EmployeeAPI.powerUp(findCommand("ViewHours"), ICommand)
     EmployeeAPI.powerUp(findCommand("ViewAverageHours"), ICommand)
     EmployeeAPI.powerUp(findCommand("ChangePassword"), ICommand)
-    EmployeeAPI.powerUp(findCommand("ScheduleVacation"), ICommand)
+    EmployeeAPI.powerUp(findCommand("ScheduleTimeOff"), ICommand)
 
     SupervisorAPI.powerUp(findCommand("ClockOut"), ICommand)
     SupervisorAPI.powerUp(findCommand("ViewHours"), ICommand)
@@ -146,8 +159,8 @@ def initializeAPIs(Store: store.Store):
     SupervisorAPI.powerUp(findCommand("ChangePassword"), ICommand)
     SupervisorAPI.powerUp(findCommand("AssignTask"), ICommand)
     SupervisorAPI.powerUp(findCommand("CreateTask"), ICommand)
-    SupervisorAPI.powerUp(findCommand("ScheduleVacation"), ICommand)
-    SupervisorAPI.powerUp(findCommand("ApproveVacation"), ICommand)
+    SupervisorAPI.powerUp(findCommand("ScheduleTimeOff"), ICommand)
+    SupervisorAPI.powerUp(findCommand("ApproveTimeOff"), ICommand)
 
 
 def initializeWorkLocations(Store: store.Store):

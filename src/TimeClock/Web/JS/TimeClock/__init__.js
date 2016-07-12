@@ -46,7 +46,9 @@ TimeClock.methods(
 
     },
     function onClose(self, node){
-        self.node.parentNode.removeChild(self.node);
+        if (self.node && self.node.parentNode) {
+            self.node.parentNode.removeChild(self.node);
+        }
         if (self.widgetParent){
             self.widgetParent.removeChildWidget(self);
         }
@@ -80,5 +82,4 @@ TimeClock.methods(
 
 
 );
-
 

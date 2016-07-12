@@ -19,6 +19,7 @@ class CSV(object):
     def __init__(self, other=None):
         self.other = other
         self.rows = []
+        self.functions = []
     @coerce
     def formatRow(self, row: IReportData) -> bytes:
         self.rows.append(str.join(',', (row[i] for i in self.columns)).encode('charmap') + b'\n')

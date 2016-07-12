@@ -15,16 +15,16 @@ from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 
 
-class ScheduleVacation(AbstractRenderer, AbstractHideable):
+class ScheduleTimeOff(AbstractRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
-    jsClass = 'TimeClock.Commands.ScheduleVacation'
+    jsClass = 'TimeClock.Commands.ScheduleTimeOff'
     subaccounts = None
-    name = 'Schedule Vacation'
-    def __init__(self, cmd: Commands.ScheduleVacation.ScheduleVacation):
+    name = 'Schedule Time Off'
+    def __init__(self, cmd: Commands.ScheduleTimeOff.ScheduleTimeOff):
         super().__init__(cmd)
         self.cmd = cmd
     def render_class(self, ctx: WovenContext, data):
-        return "ScheduleVacation"
+        return "ScheduleTimeOff"
     def render_genericCommand(self, ctx: WovenContext, data):
         startTime = tags.input(id='startTime', type='text', class_='IDateTime', placeholder='Start Time')
         endTime = tags.input(id='endTime', type='text', class_='IDateTime', placeholder='End Time')
@@ -32,8 +32,8 @@ class ScheduleVacation(AbstractRenderer, AbstractHideable):
         return self.preprocess([startTime, endTime, submit])
     @expose
     @Transaction
-    def scheduleVacation(self, startTime, endTime):
+    def scheduleTimeOff(self, startTime, endTime):
         self.cmd.execute(self.employee, IDateTime(startTime), IDateTime(endTime))
 
 
-registerAdapter(ScheduleVacation, Commands.ScheduleVacation.ScheduleVacation, IAthenaRenderable)
+registerAdapter(ScheduleTimeOff, Commands.ScheduleTimeOff.ScheduleTimeOff, IAthenaRenderable)

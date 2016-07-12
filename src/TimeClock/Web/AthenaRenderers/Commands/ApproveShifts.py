@@ -6,7 +6,7 @@ from TimeClock.Axiom import Transaction
 from TimeClock.Axiom.Store import Store
 from TimeClock.Database import Commands
 from TimeClock.Database.Commands.ApproveTime import ApproveTime
-from TimeClock.Database.Commands.ApproveVacation import ApproveVacation
+from TimeClock.Database.Commands.ApproveTimeOff import ApproveTimeOff
 from TimeClock.Database.Employee import Employee
 from TimeClock.Database.Supervisor import Supervisor
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
@@ -59,7 +59,7 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
         self.name = cmd.name
         if isinstance(cmd, ApproveTime):
             self.entryType = IEntryType("Work")
-        if isinstance(cmd, ApproveVacation):
+        if isinstance(cmd, ApproveTimeOff):
             self.entryType = IEntryType("Vacation")
 
     @overload
@@ -109,7 +109,7 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
 
         shifts = list(i for i in self.selected.powerupsFor(ITimeEntry) if i.type == self.entryType)
         if self.startTime:
-            startTime = IDateTime
+            startTime = IDateTime(self.startTime)
         else:
             startTime = None
         if self.endTime:
@@ -130,4 +130,4 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
 
 
 registerAdapter(ApproveShifts, ApproveTime, IAthenaRenderable)
-registerAdapter(ApproveShifts, ApproveVacation, IAthenaRenderable)
+registerAdapter(ApproveShifts, ApproveTimeOff, IAthenaRenderable)

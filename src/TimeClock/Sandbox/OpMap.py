@@ -10,257 +10,262 @@ class OpMap(object):
     def getOp(opname):
         return getattr(OpMap, opname)
     @staticmethod
-    def POP_TOP(executor: Sandbox, args: list):
-        executor.stack.get()
+    def POP_TOP(sandbox: Sandbox, args: list):
+        sandbox.stack.get()
         return OpMap.NORETURN
     @staticmethod
-    def ROT_TWO(executor: Sandbox, args: list):
-        executor.stack[-1], executor.stack[-2] = executor.stack[-2], executor.stack.queue[-1]
+    def ROT_TWO(sandbox: Sandbox, args: list):
+        sandbox.stack[-1], sandbox.stack[-2] = sandbox.stack[-2], sandbox.stack.queue[-1]
         return OpMap.NORETURN
     @staticmethod
-    def ROT_THREE(executor: Sandbox, args: list):
-        a = executor.stack[-3:]
+    def ROT_THREE(sandbox: Sandbox, args: list):
+        a = sandbox.stack[-3:]
         a.insert(-3, a.get(-1))
-        executor.stack[-3:] = a
+        sandbox.stack[-3:] = a
         return OpMap.NORETURN
     @staticmethod
-    def DUP_TOP(executor: Sandbox, args: list):
-        executor.stack.put(executor.stack[-1])
-        return OpMap.NORETURN
-
-    @staticmethod
-    def UNARY_NEGATIVE(executor: Sandbox, args: list):
-        executor.stack[-1] = - executor.stack[-1]
+    def DUP_TOP(sandbox: Sandbox, args: list):
+        sandbox.stack.put(sandbox.stack[-1])
         return OpMap.NORETURN
 
     @staticmethod
-    def UNARY_NOT(executor: Sandbox, args: list):
-        executor.stack[-1] = not executor.stack[-1]
+    def UNARY_NEGATIVE(sandbox: Sandbox, args: list):
+        sandbox.stack[-1] = - sandbox.stack[-1]
         return OpMap.NORETURN
 
     @staticmethod
-    def UNARY_INVERT(executor: Sandbox, args: list):
-        executor.stack[-1] = ~ executor.stack[-1]
+    def UNARY_NOT(sandbox: Sandbox, args: list):
+        sandbox.stack[-1] = not sandbox.stack[-1]
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_POWER(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
+    def UNARY_INVERT(sandbox: Sandbox, args: list):
+        sandbox.stack[-1] = ~ sandbox.stack[-1]
+        return OpMap.NORETURN
+
+    @staticmethod
+    def BINARY_POWER(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
         if a > 1000000:
             raise TypeError("Mantissa above 1000000 not allowed")
-        executor.stack.put(b**a)
+        sandbox.stack.put(b**a)
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_MULTIPLY(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
-        executor.stack.put(b*a)
+    def BINARY_MULTIPLY(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
+        sandbox.stack.put(b*a)
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_MATRIX_MULTIPLY(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
-        executor.stack.put(b @ a)
+    def BINARY_MATRIX_MULTIPLY(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
+        sandbox.stack.put(b @ a)
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_FLOOR_DIVIDE(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
-        executor.stack.put(b // a)
+    def BINARY_FLOOR_DIVIDE(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
+        sandbox.stack.put(b // a)
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_TRUE_DIVIDE(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
-        executor.stack.put(b / a)
+    def BINARY_TRUE_DIVIDE(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
+        sandbox.stack.put(b / a)
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_MODULO(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
-        executor.stack.put(b % a)
+    def BINARY_MODULO(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
+        sandbox.stack.put(b % a)
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_ADD(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
-        executor.stack.put(b + a)
+    def BINARY_ADD(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
+        sandbox.stack.put(b + a)
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_SUBTRACT(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
-        executor.stack.put(b - a)
+    def BINARY_SUBTRACT(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
+        sandbox.stack.put(b - a)
         return OpMap.NORETURN
 
     @staticmethod
-    def BINARY_SUBSCR(executor: Sandbox, args: list):
-        a = executor.stack.get()
-        b = executor.stack.get()
-        executor.stack.put(b[a])
+    def BINARY_SUBSCR(sandbox: Sandbox, args: list):
+        a = sandbox.stack.get()
+        b = sandbox.stack.get()
+        sandbox.stack.put(b[a])
         return OpMap.NORETURN
 
     @staticmethod
-    def LOAD_NAME(executor: Sandbox, args: list):
+    def LOAD_NAME(sandbox: Sandbox, args: list):
         name_idx = args[0] + args[1] * 256
-        name = executor.function.names[name_idx]
-        executor.stack.put(executor.loadName(name))
-        return OpMap.NORETURN
-
-    def LOAD_FAST(executor: Sandbox, args: list):
-        name_idx = args[0] + args[1] * 256
-        name = executor.function.varnames[name_idx]
-        executor.stack.put(executor.loadName(name))
+        name = sandbox.function.names[name_idx]
+        sandbox.stack.put(sandbox.loadName(name))
         return OpMap.NORETURN
 
     @staticmethod
-    def STORE_NAME(executor: Sandbox, args: list):
+    def LOAD_FAST(sandbox: Sandbox, args: list):
         name_idx = args[0] + args[1] * 256
-        name = executor.function.names[name_idx]
-        executor.storeName(name, executor.stack.get())
+        name = sandbox.function.varnames[name_idx]
+        sandbox.stack.put(sandbox.loadName(name))
         return OpMap.NORETURN
 
     @staticmethod
-    def CALL_FUNCTION(executor: Sandbox, args: list):
+    def STORE_NAME(sandbox: Sandbox, args: list):
+        name_idx = args[0] + args[1] * 256
+        name = sandbox.function.names[name_idx]
+        sandbox.storeName(name, sandbox.stack.get())
+        return OpMap.NORETURN
+
+    @staticmethod
+    def CALL_FUNCTION(sandbox: Sandbox, args: list):
         argc = args[0]
-        if args[1]!=0:
-            raise TypeError("Keyword arguments not supported")
+        argk = args[1]
+        kargs = {}
+        for idx in range(argk):
+            val = sandbox.stack.get()
+            key = sandbox.stack.get()
+            kargs[key] = val
         args = []
         for idx in range(argc):
-            args.insert(0, executor.stack.get())
-        function = executor.stack.get()
-        executor.stack.put(executor.callFunction(function, args))
+            args.insert(0, sandbox.stack.get())
+        function = sandbox.stack.get()
+        sandbox.stack.put(sandbox.callFunction(function, args, kargs))
         return OpMap.NORETURN
 
     @staticmethod
-    def LOAD_CONST(executor: Sandbox, args: list):
+    def LOAD_CONST(sandbox: Sandbox, args: list):
         const_idx = args[0] + args[1] * 256
-        executor.stack.put(executor.function.constants[const_idx])
+        sandbox.stack.put(sandbox.function.constants[const_idx])
         return OpMap.NORETURN
 
     @staticmethod
-    def MAKE_FUNCTION(executor: Sandbox, args: list):
+    def MAKE_FUNCTION(sandbox: Sandbox, args: list):
         argc = args[0]+args[1]*256
         if argc!=0:
             raise TypeError("Annotations and default arguments are not supported")
-        name = executor.stack.get()
-        code = executor.stack.get()
+        name = sandbox.stack.get()
+        code = sandbox.stack.get()
         args = code.co_varnames[:code.co_argcount]
-        function = Function(name, code, args, executor)
-        executor.stack.put(function)
+        function = Function(name, code, args, sandbox)
+        sandbox.stack.put(function)
         return OpMap.NORETURN
 
     @staticmethod
-    def RETURN_VALUE(executor: Sandbox, args: list):
-        return executor.stack.get()
+    def RETURN_VALUE(sandbox: Sandbox, args: list):
+        return sandbox.stack.get()
 
     @staticmethod
-    def LOAD_ATTR(executor: Sandbox, args: list):
+    def LOAD_ATTR(sandbox: Sandbox, args: list):
         namei = args[0] + args[1] * 256
-        name = executor.function.names[namei]
-        tos = executor.stack.get()
-        executor.stack.put(executor.getAttr(tos, name))
+        name = sandbox.function.names[namei]
+        tos = sandbox.stack.get()
+        sandbox.stack.put(sandbox.getAttr(tos, name))
         return OpMap.NORETURN
 
     @staticmethod
-    def BUILD_LIST(executor: Sandbox, args: list):
+    def BUILD_LIST(sandbox: Sandbox, args: list):
         count = args[0] + args[1]*256
-        o = executor.stack[-count:]
-        executor.stack[-count:] = [o]
+        o = sandbox.stack[-count:]
+        sandbox.stack[-count:] = [o]
         return OpMap.NORETURN
 
     @staticmethod
-    def BUILD_MAP(executor: Sandbox, args: list):
+    def BUILD_MAP(sandbox: Sandbox, args: list):
         count = args[0] + args[1] * 256
         o = {}
         for idx in range(count):
-            val = executor.stack.get()
-            o[executor.stack.get()] = val
-        executor.stack.put(o)
+            val = sandbox.stack.get()
+            o[sandbox.stack.get()] = val
+        sandbox.stack.put(o)
         return OpMap.NORETURN
 
     @staticmethod
-    def SETUP_LOOP(executor: Sandbox, args: list):
+    def SETUP_LOOP(sandbox: Sandbox, args: list):
         delta = args[0] + args[1] * 256
-        executor.blocks.put(executor.function[executor.index:executor.index + delta])
+        sandbox.blocks.put(sandbox.function[sandbox.index:sandbox.index + delta])
         return OpMap.NORETURN
 
     @staticmethod
-    def GET_ITER(executor: Sandbox, args: list):
-        executor.stack[-1]=iter(executor.stack[-1])
+    def GET_ITER(sandbox: Sandbox, args: list):
+        sandbox.stack[-1]=iter(sandbox.stack[-1])
         return OpMap.NORETURN
 
     @staticmethod
-    def FOR_ITER(executor: Sandbox, args: list):
+    def FOR_ITER(sandbox: Sandbox, args: list):
         delta = args[0] + args[1] * 256
         sigil = object()
-        n = next(executor.stack[-1], sigil)
+        n = next(sandbox.stack[-1], sigil)
         if n is sigil:
-            executor.stack.get()
-            executor.index+=delta
+            sandbox.stack.get()
+            sandbox.index+=delta
         else:
-            executor.stack.put(n)
+            sandbox.stack.put(n)
         return OpMap.NORETURN
 
     @staticmethod
-    def JUMP_ABSOLUTE(executor: Sandbox, args: list):
+    def JUMP_ABSOLUTE(sandbox: Sandbox, args: list):
         idx = args[0] + args[1] * 256
-        executor.index = idx
+        sandbox.index = idx
         return OpMap.NORETURN
 
     @staticmethod
-    def POP_BLOCK(executor: Sandbox, args: list):
-        executor.blocks.get()
+    def POP_BLOCK(sandbox: Sandbox, args: list):
+        sandbox.blocks.get()
         return OpMap.NORETURN
 
     @staticmethod
-    def COMPARE_OP(executor: Sandbox, args: list):
+    def COMPARE_OP(sandbox: Sandbox, args: list):
         op = args[0] + args[1] * 256
         operator = cmp_map[op]
-        tos = executor.stack.get()
-        tos1 = executor.stack.get()
+        tos = sandbox.stack.get()
+        tos1 = sandbox.stack.get()
         v = operator(tos1, tos)
-        executor.stack.put(v)
+        sandbox.stack.put(v)
         return OpMap.NORETURN
 
     @staticmethod
-    def POP_JUMP_IF_FALSE(executor: Sandbox, args: list):
+    def POP_JUMP_IF_FALSE(sandbox: Sandbox, args: list):
         target = args[0] + args[1] * 256
-        tos = executor.stack.get()
+        tos = sandbox.stack.get()
         if not tos:
-            executor.index = target
+            sandbox.index = target
         return OpMap.NORETURN
 
     @staticmethod
-    def POP_JUMP_IF_TRUE(executor: Sandbox, args: list):
+    def POP_JUMP_IF_TRUE(sandbox: Sandbox, args: list):
         target = args[0] + args[1] * 256
-        tos = executor.stack.get()
+        tos = sandbox.stack.get()
         if tos:
-            executor.index = target
+            sandbox.index = target
         return OpMap.NORETURN
 
     @staticmethod
-    def JUMP_IF_TRUE_OR_POP(executor: Sandbox, args: list):
+    def JUMP_IF_TRUE_OR_POP(sandbox: Sandbox, args: list):
         target = args[0] + args[1] * 256
-        if executor.stack[-1]:
-            executor.index = target
+        if sandbox.stack[-1]:
+            sandbox.index = target
         else:
-            executor.stack.get()
+            sandbox.stack.get()
         return OpMap.NORETURN
 
     @staticmethod
-    def JUMP_IF_FALSE_OR_POP(executor: Sandbox, args: list):
+    def JUMP_IF_FALSE_OR_POP(sandbox: Sandbox, args: list):
         target = args[0] + args[1] * 256
-        if not executor.stack[-1]:
-            executor.index = target
+        if not sandbox.stack[-1]:
+            sandbox.index = target
         else:
-            executor.stack.get()
+            sandbox.stack.get()
         return OpMap.NORETURN

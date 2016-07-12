@@ -67,9 +67,13 @@ class Sandbox(object):
     def storeName(self, name, value):
         self.local_variables[name] = value
 
-    def callFunction(self, function, arguments):
+    def callFunction(self, function, arguments, keywords=None):
+        if keywords is None:
+            keywords = {}
         if function in self.functions:
-            return function(*arguments)
+            return function(*arguments, **keywords)
+        if keywords:
+            raise TypeError("keyword arguments unsupported")
         if type(function) == Function:
             exc = Sandbox(self, function, arguments)
             gen = exc.execute(self.iterlimit - self.counter, self.timelimit + self.startTime - time.time())

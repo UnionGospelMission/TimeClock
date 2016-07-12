@@ -8,4 +8,4 @@ from . import ViewEmployees
 from . import ViewShifts
 from . import ApproveShifts
 from . import ViewReports
-from . import ScheduleVacation
+from . import ScheduleTimeOff

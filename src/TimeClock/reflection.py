@@ -12,6 +12,7 @@ from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.IEvent.IDatabaseEvent.ICommandEvent import ICommandEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
+
 from TimeClock.Util import NULL
 from nevow import inevow
 from nevow.flat import registerFlattener
@@ -58,3 +59,4 @@ athena._mangleId = mangleId
 
 import TimeClock.API.EventBus
 import TimeClock.Util.TimeEntryValidator
+from TimeClock.Report.Format import Widget

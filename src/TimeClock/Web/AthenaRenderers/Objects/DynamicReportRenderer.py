@@ -182,13 +182,17 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
 
     @expose
     def runReport(self, format_, args):
-        mime = {'csv': 'text/csv', 'json': 'text/json'}.get(format_, 'text/ascii')
+        mime = {'csv': 'text/csv', 'json': 'text/json', 'xml': 'text/xml', 'xls':'application/vnd.ms-excel', 'widget':'livefragment'}.get(format_, 'text/ascii')
         formatter = getUtility(IFormatterFactory, format_)()
         e = PreReportRunEvent(self._report, formatter, args, self.employee)
         IEventBus("Web").postEvent(e)
         if e.cancelled:
             raise ReportCancelled(e.retval)
-        report = self._report.runReport(formatter, args).decode('charmap'), mime
+        report = [self._report.runReport(formatter, args), mime]
+        if isinstance(report[0], bytes):
+            report[0] = report[0].decode('charmap')
+        else:
+            report[0].prepare(self)
         e = PostReportRunEvent(self._report, formatter, args, report, self.employee)
         IEventBus("Web").postEvent(e)
         if e.cancelled:

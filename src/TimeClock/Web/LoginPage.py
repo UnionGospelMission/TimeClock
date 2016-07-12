@@ -38,6 +38,7 @@ class LoginPage(LivePage):
     @implementer(IEventHandler)
     class ClockedInFragment(LiveFragment):
         jsClass = "LoginPage.ClockedIn"
+        label = 'Currently Clocked In'
         docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
         def powerUp(self, object, iface):
             pass
@@ -57,26 +58,34 @@ class LoginPage(LivePage):
             pass
         def render_class(self, *a):
             return 'ClockedIn'
+        def getEmpList(self):
+            return Store.Store.query(Employee, Employee.timeEntry!=None)
         def render_genericCommand(self, ctx: WovenContext, data):
             IEventBus("Database").register(self, IDatabaseEvent)
-            checkedIn = Store.Store.query(Employee, Employee.timeEntry!=None)
+            empList = self.getEmpList()
             ret = tags.table(border='1px solid black')[
                 tags.thead()[
                     tags.tr()[
-                        tags.th(colspan=2)['Currently Clocked In']
+                        tags.th(colspan=2)[self.label]
                     ],
                     tags.tr()[
-                        tags.th()['Employee ID'],
                         tags.th()['Employee Name']
                     ]
                 ],
                 tags.tbody(id='employeeList', border='1px solid black') [
-                    [tags.tr()[tags.td()[i.employee_id], tags.td()[ISolomonEmployee(i).name]] for i in checkedIn]
+                    [tags.tr()[tags.td()[ISolomonEmployee(i).name]] for i in empList]
                 ]
             ]
             for p in self.preprocessors:
                 ret = p(ret)
             return ret
+
+    class NotClockedInFragment(ClockedInFragment):
+        label = 'Currently Clocked Out'
+        def render_class(self, *a):
+            return 'NotClockedIn'
+        def getEmpList(self):
+            return Store.Store.query(Employee, Employee.timeEntry == None)
 
     class LoginFragment(LiveFragment):
         jsClass = "LoginPage.Login"
@@ -124,5 +133,6 @@ class LoginPage(LivePage):
             return newPage.pageId
 
     render_clockedInList = lambda self, *x: self.ClockedInFragment(self, *x)
+    render_notClockedInList = lambda self, *x: self.NotClockedInFragment(self, *x)
 
     render_LoginPage = lambda self, *x: self.LoginFragment(self, *x)

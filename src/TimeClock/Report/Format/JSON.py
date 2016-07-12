@@ -22,6 +22,7 @@ class JSON(object):
         self.first = False
         self.last = False
         self.rows = []
+        self.functions = []
     @coerce
     def formatRow(self, row: IReportData) -> bytes:
         if self.first:
