@@ -35,7 +35,7 @@ class ScheduleTimeOff(Item):
         return caller is employee or IAdministrator(caller, None) or employee in caller.powerupsFor(ISupervisee)
     @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
-        return False
+        return True
     @overload
     def execute(self, caller: IPerson, employee: ISupervisee, start: IDateTime=None, end: IDateTime=None) -> ITimeEntry:
         if self.hasPermission(caller, employee):
