@@ -16,7 +16,8 @@ TimeClock.Objects.EmployeeRenderer.methods(
             TimeClock.ActionPane.fromAthenaID(2).currentCommand = self;
         }
     },
-    function actionsClicked(self, node, event){
+    function actionsClicked(self, node, evt){
+        var event = window.event || evt;
         event.stopPropagation();
         self.nodeById('employeeActions').style.display = self.nodeById('employeeActions').style.display=='block' ? 'none' : 'block';
 

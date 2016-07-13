@@ -167,16 +167,21 @@ class EmployeeRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin):
 
         return self.preprocess(o)
     def render_employeeActions(self, ctx, data):
-        if ISupervisor(self.employee, None) and self._employee in ISupervisor(self.employee).getEmployees():
-            pass
-        elif IAdministrator(self.employee, None):
-            pass
+        if IAdministrator(self.employee, None) and self._employee.active_directory_name is None:
+            row = inevow.IQ(ctx).patternGenerator('employeeActionPattern')
+            import TimeClock.API.Commands
+            from ..Commands.SetPassword import SetPassword
+            sp = SetPassword(TimeClock.API.Commands.ChangePassword)
+            sp.prepare(self)
+            sp._employee = self._employee
+            sp.currentPW = []
+            sp.visible = True
+            ctx.fillSlots('rowName', 'Set Password')
+            ctx.fillSlots('rowValue', sp)
+            return row(data={})
         else:
             return ""
 
-        self.commands = o = []
-
-        return o
     def showCommand(self, idx):
         c = self.commands[int(idx)]['value']
         if c.visible:

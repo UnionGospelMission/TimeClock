@@ -29,6 +29,18 @@ class ChangeAuthentication(Item):
     def hasPermission(self, permissions: [IPermission]):
         return True
     @overload
+    def execute(self, caller: IAdministrator, employee: IEmployee, newpw: str, newpwa: str):
+        c = CommandEvent(caller, self, employee)
+        IEventBus("Commands").postEvent(c)
+        if employee.active_directory_name:
+            raise InvalidTransformation("Cannot change active directory password here")
+        if newpw != newpwa:
+            raise ValueError("Password and password confirmation do not match")
+        if employee.alternate_authentication:
+            employee.alternate_authentication.setPassword(newpw)
+        else:
+            employee.alternate_authentication = StaticAuthenticationMethod(store=self.store).setPassword(newpw)
+    @overload
     def execute(self, caller: IPerson, oldpw: str, newpw: str, newpwa: str):
         caller = IEmployee(caller)
         c = CommandEvent(caller, self)

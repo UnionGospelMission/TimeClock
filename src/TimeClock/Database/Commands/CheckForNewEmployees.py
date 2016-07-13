@@ -3,6 +3,7 @@ from zope.interface import Attribute, implementer, Interface
 from TimeClock.Database.Commands.CommandEvent import CommandEvent
 from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
+from TimeClock.ITimeClock.IDatabase.ILogger import ILogger
 from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
@@ -10,6 +11,7 @@ from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
+from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Solomon import Solomon
 from TimeClock.Util import NULL
 from TimeClock.Utils import overload
@@ -42,7 +44,7 @@ class CheckForNewEmployees(Item):
             if not n_emp:
                 if emp['Status'] != Solomon.ACTIVE:
                     continue
-                print("adding new employee", emp['EmpId'])
+                ILogger("Command Logger").info(str.join(' ', ["adding new employee", emp['EmpId']]))
                 n_emp = IEmployee(NULL)
                 n_emp.employee_id = int(emp['EmpId'])
                 a = ISubAccount(int(emp['DfltExpSub']), None)
@@ -55,8 +57,7 @@ class CheckForNewEmployees(Item):
                     n_emp.powerUp(w, IWorkLocation)
                 o.append(n_emp)
             else:
-                print(45, n_emp)
-                if n_emp.active_directory_name is None and n_emp.alternate_authentication is None:
+                if ISolomonEmployee(n_emp).status == Solomon.ACTIVE and n_emp.active_directory_name is None and n_emp.alternate_authentication is None:
                     o.append(n_emp)
         return o
     @overload

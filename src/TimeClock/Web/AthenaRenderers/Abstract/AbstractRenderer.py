@@ -40,7 +40,7 @@ class AbstractRenderer(LiveFragment):
             self.parent = parent
             self.setFragmentParent(parent)
         for child in self.liveFragmentChildren:
-            child.prepare(self, force)
+            child.prepare(self)
         return self
     def render_name(self, ctx, data):
         return formatShortName(self.name)

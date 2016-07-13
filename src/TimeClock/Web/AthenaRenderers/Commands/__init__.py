@@ -9,3 +9,5 @@ from . import ViewShifts
 from . import ApproveShifts
 from . import ViewReports
 from . import ScheduleTimeOff
+from . import CheckForNewEmployees
+from . import SetPassword

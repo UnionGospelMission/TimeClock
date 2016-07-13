@@ -3,6 +3,7 @@
 // import redirect
 // import TimeClock
 // import TimeClock.Commands
+// import jquery.ui.datetimepicker
 
 "use strict";
 TimeClock.Commands.ApproveShifts = TimeClock.Commands.subclass("TimeClock.Commands.ApproveShifts");

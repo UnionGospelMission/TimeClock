@@ -1,3 +1,4 @@
+import sys
 from axiom.scripts import axiomatic
 
 
@@ -6,7 +7,7 @@ class alwaysEqual(object):
     def __eq__(self, other):
         return True
     def __len__(self):
-        pass
+        return 1
 
 
 class Ignore(object):
@@ -18,8 +19,11 @@ class Options(axiomatic.Options):
     subCommands = ((alwaysEqual(), None, Ignore, ""),)
 
 
-o = Options()
-o.parseOptions()
+if '--help' not in sys.argv and '-h' not in sys.argv:
+    o = Options()
+    o.parseOptions()
+else:
+    axiomatic.Options().parseOptions()
 
 
 def run(argv=None):

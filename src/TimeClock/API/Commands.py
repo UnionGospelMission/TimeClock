@@ -4,6 +4,6 @@ from ..Axiom import Store
 
 
 for c in Store.Store.powerupsFor(ICommand):
-    n = c.name.title().replace(' ')
+    n = c.name.title().replace(' ', '')
     globals()[n] = c
 

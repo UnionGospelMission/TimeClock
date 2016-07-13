@@ -20,7 +20,6 @@ from axiom.attributes import text
 
 @implementer(ICommand, IItem)
 class ApproveTimeOff(Item):
-    typeName = 'timeclock_database_commands_approvevacation_approvevacation'
     name = text(default='Approve Time Off')
     @overload
     def hasPermission(self, caller: IPerson) -> bool:
