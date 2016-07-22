@@ -23,6 +23,9 @@ TimeClock.Objects.methods(
     },
     function newValues(self, args){
         for (var key in args){
+            if (key=='code') {
+                continue;
+            }
             if (args.hasOwnProperty(key)){
                 try{
                     var inp = self.nodeById(key);

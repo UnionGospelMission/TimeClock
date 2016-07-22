@@ -3,7 +3,6 @@ from zope.interface import Attribute
 from TimeClock.ITimeClock.IEvent.IWebEvent.IWebEvent import IWebEvent
 
 
-class IReportChangedEvent(IWebEvent):
+class IReportEditedEvent(IWebEvent):
     report = Attribute("report")
-    previous_values = Attribute("previous_values")
-
+    new_code = Attribute("new_code")

@@ -10,6 +10,7 @@ from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
 from TimeClock.ITimeClock.IEvent.IWebEvent.IReportChangedEvent import IReportChangedEvent
+from TimeClock.ITimeClock.IEvent.IWebEvent.IReportEditedEvent import IReportEditedEvent
 from TimeClock.ITimeClock.IReport.IFormatterFactory import IFormatterFactory
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.ITimeClock.IWeb.IListRow import IListRow
@@ -21,6 +22,7 @@ from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRend
 from TimeClock.Web.Events.PostReportRunEvent import PostReportRunEvent
 from TimeClock.Web.Events.PreReportRunEvent import PreReportRunEvent
 from TimeClock.Web.Events.ReportChangedEvent import ReportChangedEvent
+from TimeClock.Web.Events.ReportEditedEvent import ReportEditedEvent
 from nevow import inevow
 from nevow import tags as T
 from nevow.athena import expose
@@ -52,6 +54,7 @@ class _RenderListRowMixin(AbstractExpandable):
         return args
     def render_listRow(self, ctx: WovenContext, data=None):
         IEventBus("Web").register(self, IReportChangedEvent)
+        IEventBus("Web").register(self, IReportEditedEvent)
         listCell = inevow.IQ(ctx).patternGenerator("listCell")
         self.expanded = False
         ctx.fillSlots('index', self._report.storeID)
@@ -98,6 +101,7 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
     jsClass = 'TimeClock.Objects.DynamicReportRenderer';
     cssModule = "jquery.ui.datetimepicker"
     commands = None
+    tempValue = None
     visible = True
     def getReport(self):
         return self._report
@@ -113,6 +117,12 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
             changed = event.previous_values
             keys = list(changed.keys())
             self.callRemote("newValues", {k: d[k] for k in keys})
+    @overload
+    def handleEvent(self, event: IReportEditedEvent):
+        if event.report is self._report:
+            if self.tempValue != event.new_code:
+                self.callRemote("newValues", {'code': event.new_code})
+                self.tempValue = event.new_code
     @overload
     def handleEvent(self, event: IEvent):
         pass
@@ -136,6 +146,7 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
 
     def render_reportDetails(self, ctx, data):
         IEventBus("Web").register(self, IReportChangedEvent)
+        IEventBus("Web").register(self, IReportEditedEvent)
         row = inevow.IQ(ctx).patternGenerator('reportDataPattern')
 
         o = []
@@ -164,6 +175,13 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
                         oldVals['args'] = self._report.getArgs()
                     setattr(self._report, k, vals[k])
         return oldVals
+
+    @expose
+    def editorChanged(self, val):
+        if self.tempValue == val:
+            return
+        e = ReportEditedEvent(self._report, val)
+        IEventBus("Web").postEvent(e)
 
     @expose
     @Transaction

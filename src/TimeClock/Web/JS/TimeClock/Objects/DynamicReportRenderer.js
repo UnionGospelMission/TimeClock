@@ -27,6 +27,11 @@ TimeClock.Objects.DynamicReportRenderer.methods(
         ace.config.set("basePath", "/jsmodule/Ace");
         self.editor.setTheme("ace/theme/twilight");
         self.editor.getSession().setMode("ace/mode/python");
+        self.editor.on("change", function(e){
+            if (!self.suppress){
+                self.callRemote('editorChanged', self.editor.getValue());
+            }
+        });
         $('.IDateTime', self.node).datetimepicker(self.options);
         $(self.node).keypress(function(event) {
             if (!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) return true;
@@ -38,7 +43,17 @@ TimeClock.Objects.DynamicReportRenderer.methods(
     function newValues(self, args){
         TimeClock.Objects.DynamicReportRenderer.upcall(self, 'newValues', args);
         if (args.code != undefined) {
-            self.editor.setValue(args.code);
+            if (self.editor.getValue()!=args.code){
+                self.suppress = true;
+                var cpos = self.editor.getCursorPosition();
+                var focused = self.editor.isFocused();
+                self.editor.setValue(args.code);
+                self.editor.gotoLine(cpos.row + 1, cpos.column);
+                if (focused) {
+                    self.editor.focus();
+                }
+                self.suppress = false;
+            }
         }
         if (args.args!=undefined){
             self.nodeById('arguments').innerHTML = args.args;
