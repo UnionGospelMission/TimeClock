@@ -18,8 +18,14 @@ TimeClock.Objects.TimeEntryRenderer.methods(
     },
     function newValues(self, args) {
         TimeClock.Objects.TimeEntryRenderer.upcall(self, 'newValues', args);
-        self.setDateTimePicker(self.nodeById('startTime'));
-        self.setDateTimePicker(self.nodeById('endTime'));
+        try {
+            self.setDateTimePicker(self.nodeById('startTime'));
+            self.setDateTimePicker(self.nodeById('endTime'));
+        }
+        catch (e) {
+
+        }
+
     },
     function setDateTimePicker(self, node){
         var options = {
