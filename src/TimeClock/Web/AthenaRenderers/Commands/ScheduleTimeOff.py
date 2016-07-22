@@ -27,7 +27,7 @@ class ScheduleTimeOff(AbstractRenderer, AbstractHideable):
         return "ScheduleTimeOff"
     def render_genericCommand(self, ctx: WovenContext, data):
         startTime = tags.input(id='startTime', type='text', class_='IDateTime', placeholder='Start Time')
-        endTime = tags.input(id='endTime', type='text', class_='IDateTime', placeholder='End Time')
+        endTime = tags.input(id='endTime', type='number', step='0.5', placeholder='End Time')
         submit = tags.input(type='button', value='Schedule Vacation')[tags.Tag('athena:handler')(event='onclick', handler='scheduleVacation')]
         return self.preprocess([startTime, endTime, submit])
     @expose

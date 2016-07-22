@@ -6,6 +6,7 @@ cmp_map = [lt, le, eq, ne, gt, ge, contains, lambda x, y: not contains(x, y), is
 
 class OpMap(object):
     NORETURN = object()
+    CALLFUNCTION = object()
     @staticmethod
     def getOp(opname):
         return getattr(OpMap, opname)
@@ -143,7 +144,7 @@ class OpMap(object):
             args.insert(0, sandbox.stack.get())
         function = sandbox.stack.get()
         sandbox.stack.put(sandbox.callFunction(function, args, kargs))
-        return OpMap.NORETURN
+        return OpMap.CALLFUNCTION
 
     @staticmethod
     def LOAD_CONST(sandbox: Sandbox, args: list):
@@ -176,8 +177,27 @@ class OpMap(object):
         return OpMap.NORETURN
 
     @staticmethod
+    def JUMP_FORWARD(sandbox: Sandbox, args: list):
+        idx = args[0] + args[1] * 256
+        sandbox.index += idx
+        return OpMap.NORETURN
+
+    @staticmethod
+    def BUILD_TUPLE(sandbox: Sandbox, args: list):
+        count = args[0] + args[1] * 256
+        if count == 0:
+            sandbox.stack.put([])
+            return OpMap.NORETURN
+        o = tuple(sandbox.stack[-count:])
+        sandbox.stack[-count:] = [o]
+        return OpMap.NORETURN
+
+    @staticmethod
     def BUILD_LIST(sandbox: Sandbox, args: list):
-        count = args[0] + args[1]*256
+        count = args[0] + args[1] * 256
+        if count == 0:
+            sandbox.stack.put([])
+            return OpMap.NORETURN
         o = sandbox.stack[-count:]
         sandbox.stack[-count:] = [o]
         return OpMap.NORETURN

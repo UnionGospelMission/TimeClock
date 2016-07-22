@@ -84,6 +84,8 @@ class CalendarData(object):
 
 
 
+
+
 registerAdapter(CalendarData, list, ICalendarData)
 registerAdapter(CalendarData, tuple, ICalendarData)
 registerAdapter(CalendarData, ITimePeriod, ICalendarData)

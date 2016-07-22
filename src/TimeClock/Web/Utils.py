@@ -1,3 +1,5 @@
+import re
+
 from TimeClock.Util.OrderedDict import OrderedDict
 
 

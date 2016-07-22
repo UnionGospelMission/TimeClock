@@ -33,7 +33,7 @@ from nevow.loaders import xmlfile
 from nevow import tags as T
 
 
-tzpattern = re.compile('([A-Z0-9a-z]{3})$')
+
 
 
 class _RenderListRowMixin(AbstractExpandable):
@@ -183,11 +183,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
 
     def doCompare(self, keys, vals):
         oldVals = {}
-        default_tzoffset = (arrow.get(time.localtime()) - arrow.get(time.gmtime())).total_seconds() / 60
-        if default_tzoffset > 0:
-            default_tzoffsetstr = '%02i:%02i' % (int(default_tzoffset / 60), int(default_tzoffset) % 60)
-        else:
-            default_tzoffsetstr = '%03i:%02i' % (int(default_tzoffset / 60), int(default_tzoffset) % 60)
+
         for key in keys:
             if key not in vals:
                 continue
@@ -198,36 +194,15 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
                 val = ISubAccount(int(vals[key]))
             elif key == 'startTime':
                 oldv = self._timeEntry.period.startTime()
-                tz = tzpattern.search(vals[key])
-                if tz and tz != 'AUTO':
-                    tz = tz.group(0)
-                    tzoffset = Utils.TZOffsets[tz]
-                    if tzoffset > 0:
-                        tzoffsetstr = '%02i:%02i' % (int(tzoffset / 60), int(tzoffset) % 60)
-                    else:
-                        tzoffsetstr = '%03i:%02i' % (int(tzoffset / 60), int(tzoffset) % 60)
-                    val = IDateTime(vals[key].replace(tz, '').strip() + tzoffsetstr)
-                else:
-                    val = IDateTime(vals[key].strip() + default_tzoffsetstr)
-
+                val = (Utils.getIDateTime(vals[key]))
                 if oldv.strftime('%Y-%m-%d %H:%M:%S %Z') != val.strftime('%Y-%m-%d %H:%M:%S %Z'):
                     self._timeEntry.period.start(val)
                     oldVals[key] = oldv
                 continue
             elif key == 'endTime':
                 oldv = self._timeEntry.period.endTime(False)
+                val = (Utils.getIDateTime(vals[key]))
 
-                tz = tzpattern.search(vals[key])
-                if tz and tz != 'AUTO':
-                    tz = tz.group(0)
-                    tzoffset = Utils.TZOffsets[tz]
-                    if tzoffset > 0:
-                        tzoffsetstr = '%02i:%02i' % (int(tzoffset / 60), int(tzoffset) % 60)
-                    else:
-                        tzoffsetstr = '%03i:%02i' % (int(tzoffset / 60), int(tzoffset) % 60)
-                    val = IDateTime(vals[key].replace(tz, '').strip() + tzoffsetstr)
-                else:
-                    val = IDateTime(vals[key].strip() + default_tzoffsetstr)
                 if oldv.strftime('%Y-%m-%d %H:%M:%S %Z') != val.strftime('%Y-%m-%d %H:%M:%S %Z'):
                     self._timeEntry.period.end(val)
                     oldVals[key] = oldv

@@ -51,7 +51,7 @@ class List(AbstractRenderer, AbstractExpandable, AbstractHideable):
             raise TypeError("Row of length %i expected, got %i" % (len(self.cols), row.length))
         self.list.append(row)
         if self.rendered:
-            self.callRemote("append", row)
+            self.callRemote("serverAppend", row)
 
     def removeRow(self, item):
         for i in self.list:

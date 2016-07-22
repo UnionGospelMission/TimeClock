@@ -14,6 +14,7 @@ TimeClock.Objects.DynamicReportRenderer.methods(
             timeFormat: 'HH:mm:ss z',
             dateFormat: 'yy-mm-dd',
             showTimezone: true,
+            timezone: 'AUTO',
             timezoneList: [
                 { value: "AUTO",  label: 'AUTO' },
                 { value: 'PDT', label: 'PDT'},
@@ -27,6 +28,11 @@ TimeClock.Objects.DynamicReportRenderer.methods(
         self.editor.setTheme("ace/theme/twilight");
         self.editor.getSession().setMode("ace/mode/python");
         $('.IDateTime', self.node).datetimepicker(self.options);
+        $(self.node).keypress(function(event) {
+            if (!(event.which == 115 && event.ctrlKey) && !(event.which == 19)) return true;
+            self.saveClicked(null, event);
+            return false;
+        });
     },
 
     function newValues(self, args){
@@ -85,11 +91,12 @@ TimeClock.Objects.DynamicReportRenderer.methods(
         });
     },
     function saveClicked(self, node, evt){
+        console.log(89);
         var event = window.event || evt;
         if (event!=undefined){
             event.stopPropagation();
         }
-
+        console.log(94);
         var vars = {};
         var e = self.node.getElementsByTagName('input');
         for (var idx=0; idx< e.length;idx++){

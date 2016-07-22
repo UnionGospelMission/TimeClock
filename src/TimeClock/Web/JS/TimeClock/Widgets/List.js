@@ -72,10 +72,19 @@ TimeClock.Widgets.List.methods(
         else{
             self.args = [-1];
         }
+        self.toProcess=0;
         TimeClock.Widgets.List.upcall(self, "__init__", node);
         self.limit = parseInt(self.args[0]);
         self.table = self.node.getElementsByTagName('table')[0];
         self.valueNames = [];
+
+        self.searchFunction = function(match, item, val) {
+            if (self.isSelected(item)) {
+                item.found = true;
+                return true;
+            }
+            return match(item);
+        };
 
         if (self.table.tHead.rows.length>1 && self.table.tBodies[0].rows.length > 0) {
             for (var i=0; i< self.table.tBodies[0].rows[0].cells.length; i++){
@@ -85,19 +94,22 @@ TimeClock.Widgets.List.methods(
 
             }
             self.options = {
-                valueNames: self.valueNames
+                valueNames: self.valueNames,
+                searchFunction: self.searchFunction
             };
-            console.log(90, self.valueNames);
             self.lst = new List(self.node, self.options);
         }
 
+    },
+    function isSelected(self, itm) {
+        return itm.elm.style.backgroundColor=='teal' || itm.elm.style.backgroundColor=='green'
     },
     function getSelected(self){
         var o = [];
         var a = self.getAll();
         for (var i in a){
             if (a.hasOwnProperty(i)){
-                if (a[i].elm.style.backgroundColor=='teal' || a[i].elm.style.backgroundColor=='green'){
+                if (self.isSelected(a[i])){
                     o.push(TimeClock.get(a[i].elm));
                 }
             }
@@ -109,10 +121,30 @@ TimeClock.Widgets.List.methods(
         self.removeChildWidget(n);
         n.node.parentNode.removeChild(n.node);
     },
+    function serverAppend(self, newnode) {
+        self.toProcess++;
+        if (self.toProcess < 1){
+            self.toProcess = 1;
+        }
+        self.append(newnode);
+    },
     function append(self, newnode){
         self.addChildWidgetFromWidgetInfo(newnode).addCallback(
             function childAdded(newwidget){
-                self.table.tBodies[0].appendChild(newwidget.node);
+                var idx = idx = self.table.tBodies[0].rows.length;
+                try {
+                    var sb = TimeClock.get(self.table.tBodies[0].rows[self.table.tBodies[0].rows.length-1]);
+                    if (sb) {
+                        if (sb.__class__ == TimeClock.Widgets.SaveList) {
+                            idx--;
+                        }
+                    }
+                }
+                catch (exc) {
+
+                }
+
+                self.table.tBodies[0].insertBefore(newwidget.node, self.table.tBodies[0].rows[idx]);
                 if (--self.toProcess==0){
                     self.valueNames = [];
                     for (var i=0; i< self.table.tHead.rows[1].cells.length; i++){
@@ -122,19 +154,16 @@ TimeClock.Widgets.List.methods(
 
                     }
                     self.options = {
-                        valueNames: self.valueNames
+                        valueNames: self.valueNames,
+                        searchFunction: self.searchFunction
                     };
                     self.lst = new List(self.node, self.options);
-                    //$(self.table).tablesorter(self.tsoptions);
                 }
             }
         );
     },
     function select(self, selected, newelements){
         if (newelements){
-            console.log(52);
-            console.log(newelements);
-            console.log(54, selected);
             while (self.childWidgets.length>0){
                 var m = self.childWidgets.pop();
                 if (self.lst!=undefined){

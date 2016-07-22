@@ -18,7 +18,7 @@ from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
 from TimeClock.Util import NULL
-from axiom.attributes import text, integer, reference, boolean
+from axiom.attributes import text, integer, reference, boolean, AND
 from axiom.item import Item
 from ..Exceptions import InvalidTransformation
 from ..ITimeClock.IDatabase.ISubAccount import ISubAccount, IAbstractSubAccount
@@ -133,11 +133,22 @@ class Employee(Item):
     @overload
     def getEntries(self, area: ISubAccount) -> [ITimeEntry]:
         entries = self.powerupsFor(ITimeEntry)
-        return [e for e in entries if e.area == area]
+        return [e for e in entries if e.subAccount == area]
 
     @overload
     def getEntries(self, area: ISubAccount, entryType: IEntryType) -> [ITimeEntry]:
         return [e for e in self.getEntries(area) if e.type == entryType]
+
+    @overload
+    def getEntries(self, area: ISubAccount, loc: IWorkLocation, approved: bool, entryType: IEntryType, startTime: IDateTime,
+                   endTime: IDateTime) -> [
+        ITimeEntry]:
+        return [e for e in self.getEntries(area, startTime, endTime) if e.type == entryType and e.workLocation == loc and e.approved == approved]
+
+    @overload
+    def getEntries(self, area: ISubAccount, loc: IWorkLocation, entryType: IEntryType, startTime: IDateTime, endTime: IDateTime) -> [
+        ITimeEntry]:
+        return [e for e in self.getEntries(area, startTime, endTime) if e.type == entryType and e.workLocation == loc]
 
     @overload
     def getEntries(self, area: ISubAccount, entryType: IEntryType, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
@@ -172,6 +183,17 @@ class Employee(Item):
     def viewHours(self, start: IDateTime, end: IDateTime) -> ICalendarData:
         cd = ICalendarData(self.getEntries(entryType="Work"))
         return cd.between(start, end)
+
+    @overload
+    def viewHours(self, area: ISubAccount, loc: IWorkLocation, approved: bool, entryType: IEntryType, start: IDateTime, end: IDateTime) -> ICalendarData:
+        from TimeClock.Database.TimeEntry import TimeEntry
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry,), comparison=AND(
+            TimeEntry.approved==approved,
+            TimeEntry.employee==self,
+            TimeEntry.workLocation==loc,
+            TimeEntry.subAccount==area
+        ))
+        return ICalendarData(list(entries)).between(start, end)
 
     @coerce
     def viewAverageHours(self, startTime: IDateTime, endTime: IDateTime) -> ICalendarData:

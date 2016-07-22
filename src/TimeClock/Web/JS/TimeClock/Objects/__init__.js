@@ -13,10 +13,10 @@ TimeClock.Objects.methods(
         self.expanded = !self.expanded;
         if (self.expanded){
             self.nodeById('expand-button').style.display='none';
-            self.nodeById('unexpand-button').style.display='block';
-            self.nodeById('expanded').style.display='block';
+            self.nodeById('unexpand-button').style.display='inline';
+            self.nodeById('expanded').style.display='inline';
         }else{
-            self.nodeById('expand-button').style.display='block';
+            self.nodeById('expand-button').style.display='inline';
             self.nodeById('unexpand-button').style.display='none';
             self.nodeById('expanded').style.display='none';
         }

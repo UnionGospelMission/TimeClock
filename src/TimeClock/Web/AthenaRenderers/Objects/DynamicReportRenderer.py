@@ -2,6 +2,7 @@ from twisted.python.components import registerAdapter
 from zope.component import getUtilitiesFor, getUtility
 from zope.interface import implementer, directlyProvides
 
+from TimeClock import Utils
 from TimeClock.Axiom import Transaction
 from TimeClock.Exceptions import DatabaseChangeCancelled, ReportCancelled
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
@@ -38,7 +39,7 @@ class _RenderListRowMixin(AbstractExpandable):
     def getArgs(self):
         args = []
         for argName, argType in self._report.getArgs():
-            arg = T.input(id=argName, placeholder=argName)
+            arg = T.input(id=argName, placeholder=argName, title=argName)
             if argType == 'int':
                 arg(type='number', step=1)
             elif argType == 'float':
@@ -186,6 +187,13 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
         formatter = getUtility(IFormatterFactory, format_)()
         e = PreReportRunEvent(self._report, formatter, args, self.employee)
         IEventBus("Web").postEvent(e)
+        args = list(args)
+        params = self._report.getArgs()
+        for idx, param in enumerate(params):
+            if isinstance(param, tuple) and len(param)==2:
+                ptype = param[1]
+                if ptype == 'IDateTime':
+                    args[idx] = Utils.getIDateTime(args[idx])
         if e.cancelled:
             raise ReportCancelled(e.retval)
         report = [self._report.runReport(formatter, args), mime]

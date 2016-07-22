@@ -94,6 +94,8 @@ class SetSupervisors(AbstractRenderer, AbstractHideable):
 
     @Transaction
     def setMappingFor(self, e: EmployeeRenderer, accounts: [EmployeeRenderer]):
+        if not e:
+            raise Exceptions.DatabasException("No employee selected")
         if self.args[0].hasPermission(self.employee):
             oldsup = e.getEmployee().supervisor
             if len(accounts) > 1:

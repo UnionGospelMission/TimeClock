@@ -31,6 +31,8 @@ class Overloaded(object):
     def __init__(self):
         self.__name__ = 'undefined'
         self.functions = []
+    def __repr__(self):
+        return '<OverloadedFunction %r>' % self.functions[0]
     def add(self, func):
         self.functions.append(func)
         self.__name__ = func.__name__

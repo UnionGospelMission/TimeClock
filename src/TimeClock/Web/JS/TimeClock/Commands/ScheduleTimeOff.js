@@ -20,7 +20,7 @@ TimeClock.Commands.ScheduleTimeOff.methods(
             ]
         };
         $(self.nodeById('startTime')).datetimepicker(options);
-        $(self.nodeById('endTime')).datetimepicker(options);
+        //$(self.nodeById('endTime')).(options);
     },
     function scheduleTimeOff(self, node) {
         self.busyCallRemote('scheduleTimeOff', self.nodeById('startTime').value, self.nodeById('endTime').value);

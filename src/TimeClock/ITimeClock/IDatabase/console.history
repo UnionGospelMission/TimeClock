@@ -1,0 +1,162 @@
+
+# 2016-06-21 16:26:42.038723
++TimeClock.ITimeClock.IDatabase.IEmployee.IEmployee
+
+# 2016-06-21 16:26:43.408899
++TimeClock.ITimeClock.IDatabase.IEmployee.IEmployee(1)
+
+# 2016-06-21 16:26:54.070370
++TimeClock.ITimeClock.IDatabase.IEmployee.IEmployee(1).isAdministrator()
+
+# 2016-06-21 16:28:05.122852
++TimeClock.Web.LiveFragment.LiveFragment.instances
+
+# 2016-06-21 16:28:25.954103
++TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer.instances
+
+# 2016-06-21 16:28:30.444235
++TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer.instances[-1]
+
+# 2016-06-21 16:28:32.503933
++TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer.instances[-1].employee
+
+# 2016-06-21 16:28:59.927774
++z=TimeClock.Web.Events.EmployeeChangedEvent.EmployeeChangedEvent(_, {})
+
+# 2016-06-21 16:29:11.492970
++TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer.instances[-1].handleEvent(z)
+
+# 2016-06-21 16:31:47.440852
++TimeClock.ITimeClock.IEvent.IEventBus.IEventBus("Web")
+
+# 2016-06-21 16:31:52.138718
++TimeClock.ITimeClock.IEvent.IEventBus.IEventBus("Web").powerupsFor
+
+# 2016-06-21 16:32:03.059741
++TimeClock.ITimeClock.IEvent.IEventBus.IEventBus("Web").powerupsFor(IEmployeeChangedEvent)
+
+# 2016-06-21 16:32:28.716053
++from TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent import IEmployeeChangedEvent
+
+# 2016-06-21 16:32:30.615766
++TimeClock.ITimeClock.IEvent.IEventBus.IEventBus("Web").powerupsFor(IEmployeeChangedEvent)
+
+# 2016-06-21 16:32:33.877978
++list(_)
+
+# 2016-06-21 16:32:46.015749
++z
+
+# 2016-06-21 16:32:56.623978
++TimeClock.ITimeClock.IEvent.IEventBus.IEventBus("Web")
+
+# 2016-06-21 16:36:56.178190
++TimeClock.ITimeClock.IEvent.IEventBus.IEventBus("Web").powerupsFor(TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent.IEmployeeChangedEvent
++)
+
+# 2016-06-21 16:36:59.371986
++list(_)
+
+# 2016-06-21 16:37:02.690350
++_[0]
+
+# 2016-06-21 16:37:03.927426
++x=_
+
+# 2016-06-21 16:37:08.960112
++x.handleEvent(z)
+
+# 2016-06-21 16:37:45.185722
++z.getType()
+
+# 2016-06-21 16:38:20.792171
++z.__class__
+
+# 2016-06-21 16:38:23.296968
++def getType(self):
++        return ITaskChangedEvent
+
+# 2016-06-21 16:38:30.262602
++z.__class__.getType
+
+# 2016-06-21 16:38:35.223358
++z.__class__.getType=getType
+
+# 2016-06-21 16:38:38.532148
++z.getType()
+
+# 2016-06-21 16:38:46.534208
++from TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent import IEmployeeChangedEvent
+
+# 2016-06-21 16:38:47.863955
++z.getType()
+
+# 2016-06-21 16:39:09.333066
++ITaskChangedEvent = IEmployeeChangedEvent
+
+# 2016-06-21 16:39:10.579290
++z.getType()
+
+# 2016-06-22 00:54:14.792085
++TimeClock.ITimeClock.IDatabase.IEmployee.IEmployee(1)
+
+# 2016-06-22 00:54:20.200619
++TimeClock.ITimeClock.IDatabase.IEmployee.IEmployee(1).isAdministrator()
+
+# 2016-06-22 00:54:39.206933
++TimeClock.ITimeClock.IDatabase.IAd
+
+# 2016-06-22 00:54:41.754403
++TimeClock.ITimeClock.IDatabase.IAdm
+
+# 2016-06-22 00:54:49.298065
++TimeClock.ITimeClock.IDatabase.IAdministrator
+
+# 2016-06-22 00:55:02.590253
++from TimeClock.Database.Administrator import Administrator
+
+# 2016-06-22 00:55:06.360000
++Administrator
+
+# 2016-06-22 00:55:08.971203
++db.query(_)
+
+# 2016-06-22 00:55:10.875733
++list(_)
+
+# 2016-06-22 00:55:51.838476
++TimeClock.ITimeClock.IDatabase.IEmployee.IEmployee(1).powerUp(_[0], TimeClock.ITimeClock.IDatabase.IAdministrator.IAdministrator
++)
+
+# 2016-06-22 00:56:36.324239
++import time
+
+# 2016-06-22 00:56:51.558757
++time.sleep(10)
+
+# 2016-06-29 19:14:20.459953
++i.IEmployee(1)
+
+# 2016-06-29 19:14:21.907777
++a=_
+
+# 2016-06-29 19:14:23.354173
++a.timeEntry
+
+# 2016-07-12 14:36:14.493160
++a=_
+
+# 2016-07-12 14:36:17.206645
++a.getAPI()
+
+# 2016-07-12 14:36:22.681593
++a.getAPI().scheduleTimeOff
+
+# 2016-07-12 14:36:33.197821
++a.getAPI()
+
+# 2016-07-12 14:36:34.530560
++api=_
+
+# 2016-07-12 14:36:41.070780
++api.getCommandShortNames()

@@ -12,6 +12,7 @@ from TimeClock.ITimeClock.IEvent.IWebEvent.IReportChangedEvent import IReportCha
 from TimeClock.ITimeClock.IEvent.IWebEvent.ITimeEntryChangedEvent import ITimeEntryChangedEvent
 from TimeClock.ITimeClock.IReport.IReport import IReport
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
+from TimeClock.ITimeClock.IWeb.IListRow import IListRow
 from TimeClock.Report.DynamicReport import DynamicReport
 from TimeClock.Utils import overload
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
@@ -35,7 +36,7 @@ class ViewReports(AbstractRenderer, AbstractHideable):
     l = None
     @overload
     def handleEvent(self, evt: ReportCreatedEvent):
-        self.l.addRow(evt.report)
+        self.l.addRow(IListRow(evt.report))
     @overload
     def handleEvent(self, event: IEvent):
         pass

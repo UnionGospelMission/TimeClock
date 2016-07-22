@@ -4,22 +4,22 @@
 
 LoginPage.ClockedIn = Nevow.Athena.Widget.subclass("LoginPage.ClockedIn");
 LoginPage.ClockedIn.methods(
-    function clockedIn(self, eid, name) {
+    function clockedIn(self, name) {
         var elist = self.nodeById('employeeList');
         var tr = document.createElement('tr');
-        var td1 = document.createElement('td');
+        //var td1 = document.createElement('td');
         var td2 = document.createElement('td');
-        td1.innerHTML = eid;
+        //td1.innerHTML = eid;
         td2.innerHTML = name;
-        tr.appendChild(td1);
+        //tr.appendChild(td1);
         tr.appendChild(td2);
         elist.appendChild(tr);
     },
-    function clockedOut(self, eid, name) {
+    function clockedOut(self, name) {
         var elist = self.nodeById('employeeList');
         for (var i=0; i< elist.rows.length; i++) {
             var row = elist.rows[i];
-            if (row.cells[0].innerHTML == eid) {
+            if (row.cells[0].innerHTML == name) {
                 elist.removeChild(row);
                 i--;
             }

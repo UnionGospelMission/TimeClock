@@ -49,9 +49,9 @@ class LoginPage(LivePage):
         @overload
         def handleEvent(self, event: ClockInOutEvent):
             if event.clockedIn:
-                self.callRemote("clockedIn", event.employee.employee_id, ISolomonEmployee(event.employee).name);
+                self.callRemote("clockedIn", ISolomonEmployee(event.employee).name);
             else:
-                self.callRemote("clockedOut", event.employee.employee_id, ISolomonEmployee(event.employee).name);
+                self.callRemote("clockedOut", ISolomonEmployee(event.employee).name);
 
         @overload
         def handleEvent(self, event: IEvent):

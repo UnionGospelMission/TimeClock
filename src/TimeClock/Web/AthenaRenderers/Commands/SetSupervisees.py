@@ -9,6 +9,7 @@ from TimeClock.Database.Employee import Employee
 from TimeClock.Database.Supervisor import Supervisor
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
+from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
@@ -96,9 +97,14 @@ class SetSupervisees(AbstractRenderer, AbstractHideable):
 
     @Transaction
     def setMappingFor(self, s: EmployeeRenderer, accounts: [EmployeeRenderer]):
+        if not s or not s.getEmployee():
+            raise Exceptions.DatabasException("No supervisor selected")
         sup = ISupervisor(s.getEmployee(), None)
         if not sup:
             raise Exceptions.DatabasException("%s is not a supervisor" % s.name)
+        for emp in sup.getEmployees():
+            emp.supervisor = None
+            sup.powerDown(emp, ISupervisee)
         if self.args[0].hasPermission(self.employee):
             for e in accounts:
                 try:

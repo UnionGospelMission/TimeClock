@@ -1,7 +1,18 @@
 import dis
 
+import time
+
+import io
+
+import datetime
+
+from TimeClock.API.CalendarData import CalendarData
 from TimeClock.Database.Employee import Employee
 from TimeClock.Database.SubAccount import SubAccount
+from TimeClock.Database.WorkLocation import WorkLocation
+from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
+from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
+from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.IDateTime import IDateTime
 from TimeClock.ITimeClock.IReport.IFormatterFactory import IFormatterFactory
 from TimeClock.Sandbox.Sandbox import Sandbox
@@ -11,7 +22,6 @@ from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IReport.IFormat import IFormat
 from TimeClock.Axiom import Store
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
-from TimeClock.Solomon.SolomonEmployee import SolomonEmployee
 from TimeClock.Util.DateTime import DateTime
 from TimeClock.Utils import overload
 from axiom.attributes import text
@@ -65,20 +75,24 @@ class DynamicReport(Item):
     @overload
     def runReport(self, formatter: IFormat, parameters: [object]):
         function = self.prepare()
-        dis.dis(compile(self.code, self.name, "exec"))
+        debug = io.StringIO()
+        # dis.dis(compile(self.code, self.name, "exec"), file=debug)
         globs = dict(
             formatter=formatter,
             formatHeader=formatter.formatHeader,
             formatFooter=formatter.formatFooter,
             formatRow=formatter.formatRow,
             parameters=parameters,
+            arguments=parameters,
             print=print,
             IDateTime=IDateTime,
             ISubAccount=ISubAccount,
             IEmployee=IEmployee,
             ISolomonEmployee=ISolomonEmployee,
+            ICalendarData=ICalendarData,
             allEmployees=lambda: list(Store.Store.query(Employee)),
-            allSubAccounts=lambda: list(Store.Store.query(SubAccount)),
+            allSubAccounts=lambda: (i for i in Store.Store.query(SubAccount) if i.active),
+            allWorkLocations=lambda: (i for i in Store.Store.query(WorkLocation) if i.active),
             int=int,
             float=float,
             str=str,
@@ -87,19 +101,40 @@ class DynamicReport(Item):
             today=DateTime.today,
             tr=tags.tr,
             td=tags.td,
-            tbody=tags.tbody
+            tbody=tags.tbody,
+            now=time.time
         )
-
+        functions = list(globs.values()) + formatter.functions
+        functions.append(DateTime.strftime)
+        functions.extend([
+            CalendarData.sumBetween,
+            CalendarData.between,
+            CalendarData.addTime,
+            Employee.getEntries,
+            datetime.timedelta.total_seconds,
+            SubAccount.getEmployees,
+            Employee.getWorkLocations,
+            WorkLocation.getEmployees,
+            Employee.getWorkLocations,
+            Employee.viewHours
+        ])
         exc = Sandbox(None, function,
                       parameters,
                       globals_=globs,
-                      functions=list(globs.values()) + formatter.functions,
-                      attributes_accessible=(Item, Employee, SolomonEmployee, SubAccount, DateTime, formatter),
+                      functions=functions,
+                      attributes_accessible=(Item, IEmployee, ISolomonEmployee, ISubAccount, IDateTime, formatter, ICalendarData, ITimeEntry, IWorkLocation, datetime.timedelta),
                       )
         g = exc.execute(10000, 10)
         n = next(g)
-        while n == Sandbox.SUSPEND:
-            n = n.tell(1)
+        while True:
+            if n == Sandbox.SUSPEND_TIME:
+                n = g.send(10)
+            elif n == Sandbox.SUSPEND_INST:
+                n = g.send(10000)
+            else:
+                break
+            if exc.counter > 1000000:
+                raise TimeoutError("Report has exceeded 1,000,000 instructions")
         return formatter.getReport()
 
     def getDescription(self) -> str:

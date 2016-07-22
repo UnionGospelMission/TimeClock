@@ -49,7 +49,7 @@ class SetSubAccounts(AbstractRenderer, AbstractHideable):
         return "SetSubAccounts"
     def render_genericCommand(self, ctx: WovenContext, data):
         l1 = List(list(Store.query(Employee)), ["Employee ID", "Name"])
-        l2 = List(list(Store.query(SubAccount)), ["Sub Account", "Name", "Active"])
+        l2 = List([i for i in list(Store.query(SubAccount)) if i.active], ["Sub Account", "Name", "Active"])
         self.ltl = ltl = ListToListSelector(l1, l2)
         ltl.closeable = False
         ltl.prepare(self)

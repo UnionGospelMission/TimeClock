@@ -35,7 +35,17 @@ class SetSupervisor(Item):
         if employee.supervisor:
             employee.supervisor.powerDown(employee, ISupervisee)
         employee.supervisor = supervisor
-        supervisor.powerUp(employee, ISupervisee)
+        if supervisor:
+            supervisor.powerUp(employee, ISupervisee)
+    @overload
+    def execute(self, caller: IAdministrator, employee: IEmployee, supervisor: type(None)):
+        c = CommandEvent(caller, self, employee, supervisor)
+        IEventBus("Commands").postEvent(c)
+        if employee.supervisor:
+            employee.supervisor.powerDown(employee, ISupervisee)
+        employee.supervisor = supervisor
+        if supervisor:
+            supervisor.powerUp(employee, ISupervisee)
     @overload
     def execute(self, caller: IPerson, *parameters: object):
         print(44, caller, parameters)

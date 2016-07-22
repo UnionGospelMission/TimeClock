@@ -6,8 +6,8 @@ TimeClock.Widgets.SaveList.methods(
     function saveAll(self, node, evt){
         var e = window.event || evt;
         var widgets = self.widgetParent.getAll();
-        for (var idx=0;idx<widgets.length;){
-            var w = widgets[idx++];
+        for (var idx=0;idx<widgets.length;idx++){
+            var w = widgets[idx];
             var s = TimeClock.get(w.elm);
             if (s==self){
                 continue;
