@@ -4,8 +4,9 @@ from twisted.python.components import registerAdapter
 from tzlocal import get_localzone
 from zope.interface import implementer
 
+import TimeClock
 from TimeClock.ITimeClock.IDateTime import IDateTime
-from TimeClock.Utils import coerce
+from TimeClock.Utils import coerce, getIDateTime
 from arrow import Arrow, get
 zonename = get_localzone().zone
 
@@ -35,7 +36,10 @@ class DateTime(Arrow):
         return self.date().replace(months=1).replace(day=day)
     @classmethod
     def get(cls, expr):
-        return DateTime.fromdatetime(get(expr))
+        expr = expr.replace(' -', '-')
+        if expr[-1].isdigit():
+            return DateTime.fromdatetime(get(expr))
+        return getIDateTime(expr)
 
     def astimezone(self, tz):
         return self.fromdatetime(super().astimezone(tz))

@@ -17,6 +17,7 @@ from TimeClock.Report.DynamicReport import DynamicReport
 from TimeClock.Utils import overload
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.AthenaRenderers.Widgets.SaveList import SaveList
 from TimeClock.Web.Events.ReportCreatedEvent import ReportCreatedEvent
@@ -28,7 +29,7 @@ from nevow.loaders import xmlfile
 
 
 @implementer(IAthenaRenderable, IEventHandler)
-class ViewReports(AbstractRenderer, AbstractHideable):
+class ViewReports(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
     jsClass = 'TimeClock.Commands.ViewReports'
     subaccounts = None

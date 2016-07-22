@@ -67,6 +67,7 @@ class _RenderListRowMixin(AbstractExpandable):
         if iface == IListRow:
             self.docFactory = self.listDocFactory
             directlyProvides(self, IListRow)
+            self.visible = True
             return self
     @staticmethod
     def listRow(e):
@@ -253,6 +254,7 @@ class EmployeeRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin):
         super().prepare(parent)
         if hasattr(parent, 'cols'):
             self.length = max(min(len(parent.cols), 3), 2)
+        return self
 
 
 registerAdapter(EmployeeRenderer.listRow, IEmployee, IListRow)

@@ -9,13 +9,14 @@ from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Utils import overload, coerce
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from nevow import tags
 from nevow.athena import expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 
 
-class ScheduleTimeOff(AbstractRenderer, AbstractHideable):
+class ScheduleTimeOff(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
     jsClass = 'TimeClock.Commands.ScheduleTimeOff'
     subaccounts = None

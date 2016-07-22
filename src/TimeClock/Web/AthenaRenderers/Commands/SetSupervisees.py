@@ -16,11 +16,14 @@ from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
 from TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent import IEmployeeChangedEvent
 from TimeClock.ITimeClock.IEvent.IWebEvent.ISupervisorCreatedRemovedEvent import ISupervisorCreatedRemovedEvent
+from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.ITimeClock.IWeb.IListRow import IListRow
+from TimeClock.Solomon import Solomon
 from TimeClock.Utils import coerce, overload
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer import EmployeeRenderer
 from TimeClock.Web.AthenaRenderers.Objects.WorkLocationRenderer import WorkLocationRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
@@ -29,18 +32,27 @@ from TimeClock.Web.Events.SupervisorAssignmentChangedEvent import SupervisorAssi
 from TimeClock.Web.Events.SupervisorCreatedEvent import SupervisorCreatedEvent
 from TimeClock.Web.Events.SupervisorRemovedEvent import SupervisorRemovedEvent
 from TimeClock.Web.Events.WorkLocationAssignmentChangedEvent import WorkLocationAssignmentChangedEvent
+from nevow.athena import expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 
 
 @implementer(IEventHandler)
-class SetSupervisees(AbstractRenderer, AbstractHideable):
+class SetSupervisees(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
     jsClass = 'TimeClock.Commands'
     workLocations = None
     name = 'Set Supervisees'
     selected = None
     ltl = None
+    loaded = False
+    @expose
+    def load(self, active: bool = True, inactive: bool = False):
+        if not self.loaded:
+            self.ltl.l2.list = [IListRow(i).prepare(self.ltl.l2) for i in list(Store.query(Employee)) if
+                                ISolomonEmployee(i).status == Solomon.ACTIVE]
+            self.ltl.l2.callRemote('select', self.ltl.l2.list, True)
+            self.loaded = True
 
     @overload
     def handleEvent(self, event: SupervisorAssignmentChangedEvent):
@@ -69,8 +81,8 @@ class SetSupervisees(AbstractRenderer, AbstractHideable):
             if sup.employee and ISupervisor(sup.employee, None) is sup:
                 sups.append(sup.employee)
 
-        l2 = List(list(Store.query(Employee)), ["Supervisor ID", "Name"])
-        l1 = List(sups, ["Employee ID", "Name"])
+        l2 = List([], ["Employee ID", "Name"])
+        l1 = List(sups, ["Supervisor ID", "Name"])
         self.ltl = ltl = ListToListSelector(l1, l2)
         ltl.prepare(self)
         ltl.visible = True

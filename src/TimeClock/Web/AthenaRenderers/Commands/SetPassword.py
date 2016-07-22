@@ -6,13 +6,14 @@ from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from nevow import tags
 from nevow.athena import expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 
 
-class SetPassword(AbstractRenderer, AbstractHideable):
+class SetPassword(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
     jsClass = 'TimeClock.Commands.SetPassword'
     subaccounts = None

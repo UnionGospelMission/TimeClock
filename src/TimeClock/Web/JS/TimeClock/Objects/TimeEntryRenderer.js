@@ -11,8 +11,13 @@ TimeClock.Objects.TimeEntryRenderer.methods(
         TimeClock.Objects.TimeEntryRenderer.upcall(self, "__init__", node);
 
         setTimeout(function(){
-            self.setDateTimePicker(self.nodeById('startTime'));
-            self.setDateTimePicker(self.nodeById('endTime'));
+            try {
+                self.setDateTimePicker(self.nodeById('startTime'));
+                self.setDateTimePicker(self.nodeById('endTime'));
+            }
+            catch (e) {
+
+            }
         }, 500);
 
     },

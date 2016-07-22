@@ -4,6 +4,8 @@
 // import TimeClock
 // import TimeClock.Commands
 // import jquery.ui.datetimepicker
+// import TimeClock.Objects.TimeEntryRenderer
+
 
 "use strict";
 TimeClock.Commands.ViewShifts = TimeClock.Commands.subclass("TimeClock.Commands.ViewShifts");
@@ -24,7 +26,7 @@ TimeClock.Commands.ViewShifts.methods(
         $(self.nodeById('startTime')).datetimepicker(options);
         $(self.nodeById('endTime')).datetimepicker(options);
     },
-    function timeWindowChanged(self, node){
+    function timeWindowChanged(self, node) {
         self.busyCallRemote("timeWindowChanged", self.nodeById('startTime').value, self.nodeById('endTime').value).addCallback(
             function newEntries(newnodes) {
                 self.childWidgets[0].select(newnodes, true);

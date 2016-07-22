@@ -71,6 +71,7 @@ class _RenderListRowMixin(AbstractExpandable):
         if iface == IListRow:
             self.docFactory = self.listDocFactory
             directlyProvides(self, IListRow)
+            self.visible = True
             return self
     @staticmethod
     def listRow(e):
@@ -92,6 +93,7 @@ class WorkLocationRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMix
         super().prepare(parent)
         if hasattr(parent, 'cols'):
             self.length = max(min(len(parent.cols), 4), 3)
+        return self
     def powerUp(self, obj, iface):
         self.powerups[iface] = self.powerups.get(iface, [])
         self.powerups[iface].append(obj)

@@ -8,6 +8,7 @@ from TimeClock.Database.SubAccount import SubAccount
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.AthenaRenderers.Widgets.SaveList import SaveList
 from TimeClock.Web.LiveFragment import LiveFragment
@@ -16,7 +17,7 @@ from nevow.loaders import xmlfile
 
 
 @implementer(IAthenaRenderable)
-class ManageSubAccounts(AbstractRenderer, AbstractHideable):
+class ManageSubAccounts(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/ManageSubAccounts.xml", "ManageSubAccountsPattern")
     jsClass = 'TimeClock.Commands'
     subaccounts = None

@@ -6,6 +6,6 @@ from nevow import inevow
 
 
 class IAthenaRenderable(inevow.IRenderer):
-    def prepare(parent: LiveFragment):
+    def prepare(parent: LiveFragment) -> LiveFragment:
         pass
     employee = Attribute("employee")

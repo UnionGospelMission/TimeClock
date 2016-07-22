@@ -14,7 +14,6 @@ TimeClock.Commands.methods(
         if (node.style.display!='none' && node.dataset.name){
             TimeClock.ActionPane.fromAthenaID(2).currentCommand = self;
         }
-
     },
     function runCommand(self, node){
         var args = self.getArgs(node);
@@ -25,6 +24,11 @@ TimeClock.Commands.methods(
     },
     function getArgs(self, node){
         return $(node).serializeArray();
+    },
+    function show(self, node){
+        console.log(31, self);
+        TimeClock.Commands.upcall(self, "show", node);
+        self.busyCallRemote("load");
     }
 
 

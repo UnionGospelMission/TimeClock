@@ -5,6 +5,7 @@ from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.ITimeClock.IWeb.IListRow import IListRow
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.AthenaRenderers.Widgets.SaveList import SaveList
 from nevow import tags
@@ -13,7 +14,7 @@ from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 
 
-class CheckForNewEmployees(AbstractRenderer):
+class CheckForNewEmployees(AbstractCommandRenderer):
     name = 'Check For New Employees'
     jsClass = 'TimeClock.Commands.CheckForNewEmployees'
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")

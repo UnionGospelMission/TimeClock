@@ -122,6 +122,7 @@ TimeClock.Widgets.List.methods(
         n.node.parentNode.removeChild(n.node);
     },
     function serverAppend(self, newnode) {
+        console.log(125, newnode);
         self.toProcess++;
         if (self.toProcess < 1){
             self.toProcess = 1;
@@ -164,11 +165,20 @@ TimeClock.Widgets.List.methods(
     },
     function select(self, selected, newelements){
         if (newelements){
+            var sl;
             while (self.childWidgets.length>0){
                 var m = self.childWidgets.pop();
-                if (self.lst!=undefined){
-                    self.lst.remove(m.node);
+                if (m.__class__==TimeClock.Widgets.SaveList) {
+                    sl = m;
                 }
+                else {
+                    if (self.lst!=undefined){
+                        self.lst.remove(m.node);
+                    }
+                }
+            }
+            if (sl) {
+                self.childWidgets.push(sl);
             }
             self.toProcess = selected.length;
             for (var indx=0; indx<selected.length;indx++){

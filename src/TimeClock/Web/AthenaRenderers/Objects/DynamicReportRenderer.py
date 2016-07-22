@@ -83,6 +83,7 @@ class _RenderListRowMixin(AbstractExpandable):
         if iface == IListRow:
             self.docFactory = self.listDocFactory
             directlyProvides(self, IListRow)
+            self.visible = True
             return self
     @staticmethod
     def listRow(e):

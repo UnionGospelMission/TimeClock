@@ -66,6 +66,7 @@ class _RenderListRowMixin(AbstractExpandable):
         if iface == IListRow:
             self.docFactory = self.listDocFactory
             directlyProvides(self, IListRow)
+            self.visible = True
             return self
     @staticmethod
     def listRow(e):
@@ -85,6 +86,7 @@ class SubAccountRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin
         super().prepare(parent)
         if hasattr(parent, 'cols'):
             self.length = max(min(len(parent.cols), 4), 3)
+        return self
     def getSub(self):
         return self._subAccount
 

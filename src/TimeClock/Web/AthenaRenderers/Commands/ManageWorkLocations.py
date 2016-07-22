@@ -7,6 +7,7 @@ from TimeClock.Database.WorkLocation import WorkLocation
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.AthenaRenderers.Widgets.SaveList import SaveList
 from nevow.context import WovenContext
@@ -14,7 +15,7 @@ from nevow.loaders import xmlfile
 
 
 @implementer(IAthenaRenderable)
-class ManageWorkLocations(AbstractRenderer, AbstractHideable):
+class ManageWorkLocations(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
     jsClass = 'TimeClock.Commands'
     workLocations = None

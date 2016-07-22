@@ -18,6 +18,7 @@ from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.Utils import overload
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.Events.SubAccountAssignmentChangedEvent import SubAccountAssignmentChangedEvent
 from TimeClock.Web.Events.TimeEntryChangedEvent import TimeEntryChangedEvent
 from TimeClock.Web.Events.TimeEntryCreatedEvent import TimeEntryCreatedEvent
@@ -30,7 +31,7 @@ from nevow import flat
 
 
 @implementer(IEventHandler)
-class ClockInOut(AbstractRenderer, AbstractHideable):
+class ClockInOut(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
     jsClass = 'TimeClock.Commands.ClockInOut'
     workLocations = None

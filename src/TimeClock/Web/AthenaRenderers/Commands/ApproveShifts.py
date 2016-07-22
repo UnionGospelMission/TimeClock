@@ -23,9 +23,11 @@ from TimeClock.ITimeClock.IEvent.IWebEvent.ITimeEntryChangedEvent import ITimeEn
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.ITimeClock.IWeb.IListRow import IListRow
+from TimeClock.Solomon import Solomon
 from TimeClock.Utils import coerce, overload
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
+from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer import EmployeeRenderer
 from TimeClock.Web.AthenaRenderers.Objects.TimeEntryRenderer import TimeEntryRenderer
 from TimeClock.Web.AthenaRenderers.Objects.WorkLocationRenderer import WorkLocationRenderer
@@ -43,7 +45,7 @@ from nevow.stan import directive
 
 
 @implementer(IEventHandler)
-class ApproveShifts(AbstractRenderer, AbstractHideable):
+class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
     jsClass = 'TimeClock.Commands.ApproveShifts'
     workLocations = None
@@ -54,6 +56,22 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
     l2 = None
     startTime = None
     endTime = None
+    loaded = False
+    def getEmployees(self):
+        if self.employee.isAdministrator():
+            employees = [i for i in list(Store.query(Employee)) if ISolomonEmployee(i).status == Solomon.ACTIVE]
+        elif self.employee.isSupervisor():
+            employees = [i for i in list(Store.query(Employee, Employee.supervisor == ISupervisor(self.employee))) if
+                         ISolomonEmployee(i).status == Solomon.ACTIVE]
+        else:
+            employees = []
+        return employees
+    @expose
+    def load(self, active: bool = True, inactive: bool = False):
+        if not self.loaded:
+            self.ltl.l1.list = [IListRow(i).prepare(self.ltl.l1) for i in self.getEmployees()]
+            self.ltl.l1.callRemote('select', self.ltl.l1.list, True)
+            self.loaded = True
     def __init__(self, cmd):
         super().__init__(cmd)
         self.name = cmd.name
@@ -73,12 +91,8 @@ class ApproveShifts(AbstractRenderer, AbstractHideable):
         IEventBus("Web").register(self, ITimeEntryChangedEvent)
         return "ApproveShifts"
     def render_genericCommand(self, ctx: WovenContext, data):
-        if self.employee.isAdministrator():
-            employees = [i for i in list(Store.query(Employee)) if ISolomonEmployee(i).status == 'A']
-        elif self.employee.isSupervisor():
-            employees = [i for i in list(Store.query(Employee, Employee.supervisor == ISupervisor(self.employee))) if ISolomonEmployee(i).status == 'A']
-        else:
-            employees = []
+
+        employees = []
         self.l1 = l1 = List(employees, ["Employee ID", "Name"])
         self.l2 = l2 = List([], ["Work Location", "Sub Account", "Start Time", "End Time", "Duration", "Approved"])
         self.ltl = ltl = ListToListSelector(l1, l2)

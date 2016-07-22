@@ -33,9 +33,6 @@ from nevow.loaders import xmlfile
 from nevow import tags as T
 
 
-
-
-
 class _RenderListRowMixin(AbstractExpandable):
     length = 6
     _workLocation = None
@@ -89,6 +86,7 @@ class _RenderListRowMixin(AbstractExpandable):
         if iface == IListRow:
             self.docFactory = self.listDocFactory
             directlyProvides(self, IListRow)
+            self.visible = True
             return self
     @staticmethod
     def listRow(e):
