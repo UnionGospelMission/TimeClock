@@ -22,3 +22,5 @@ from . import ViewReports
 from . import ScheduleTimeOff
 from . import CheckForNewEmployees
 from . import SetPassword
+from . import ApproveTimeOff
+from . import ViewBenefits

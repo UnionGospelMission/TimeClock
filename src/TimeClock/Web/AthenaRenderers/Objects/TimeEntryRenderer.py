@@ -9,6 +9,7 @@ from zope.interface import implementer, directlyProvides
 from TimeClock import Utils
 from TimeClock.Axiom import Transaction
 from TimeClock.Exceptions import DatabaseChangeCancelled
+from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
@@ -34,7 +35,7 @@ from nevow import tags as T
 
 
 class _RenderListRowMixin(AbstractExpandable):
-    length = 6
+    length = 8
     _workLocation = None
     ctr = -1
     def render_searchclass(self, ctx, data):
@@ -48,7 +49,7 @@ class _RenderListRowMixin(AbstractExpandable):
         et = self._timeEntry.period.endTime(False)
         ctx.fillSlots('index', self._timeEntry.storeID)
         approved = T.input(id='approved', type='checkbox', checked=self._timeEntry.approved)
-
+        te_type = T.input(id='entryType', type='text', disabled=True, value=self._timeEntry.type.name)
         if self._timeEntry.workLocation:
             workLocationID = T.select(id='workLocation', value=self._timeEntry.workLocation.workLocationID)[
                 [T.option(value=i.workLocationID, selected=self._timeEntry.workLocation == i)[i.description] for i in
@@ -62,25 +63,40 @@ class _RenderListRowMixin(AbstractExpandable):
             ]
         else:
             subAccount = T.input(id='subAccount', disabled=True, value="None")
-        startTime = T.input(id='startTime', value=st.strftime('%Y-%m-%d %H:%M:%S %Z') if st else 'None')
-        endTime = T.input(id='endTime', value=et.strftime('%Y-%m-%d %H:%M:%S %Z') if et else 'None')
-        duration = T.input(id='duration', value=str(self._timeEntry.period.duration()))
+        if self._timeEntry.type==IEntryType("Work"):
+            ET = T.input(id='endTime', value=et.strftime('%Y-%m-%d %H:%M:%S %Z') if et else 'None')
+            et = listCell(data=dict(listItem=ET))
+            reject = T.input(id='denied', type='checkbox', checked=self._timeEntry.denied)
+            rj = listCell(data=dict(listItem=reject))
+        else:
+            ET = T.input(id='entryType', value=self._timeEntry.type.getTypeName())
+            et = listCell(data=dict(listItem=ET))
+            reject = T.input(id='denied', type='checkbox', checked=self._timeEntry.denied)
+            rj = listCell(data=dict(listItem=reject))
 
+        startTime = T.input(id='startTime', value=st.strftime('%Y-%m-%d %H:%M:%S %Z') if st else 'None')
+
+        duration = T.input(id='duration', value=str(self._timeEntry.period.duration()))
+        if self._timeEntry.employee.timeEntry is self._timeEntry:
+            ET(disabled=True)
         if not self.employee.isAdministrator() or self.parent.selectable or self.employee is self._timeEntry.employee:
             approved(disabled=True)
             workLocationID(disabled=True)
             subAccount(disabled=True)
             startTime(disabled=True)
-            endTime(disabled=True)
+            ET(disabled=True)
             duration(disabled=True)
+            reject(disabled=True)
 
-        self.preprocess([approved, workLocationID, subAccount, startTime, endTime, duration])
-        r = [listCell(data=dict(listItem=workLocationID)),
+        self.preprocess([approved, workLocationID, subAccount, startTime, ET, duration, reject])
+        r = [listCell(data=dict(listItem=te_type)),
+             listCell(data=dict(listItem=workLocationID)),
              listCell(data=dict(listItem=subAccount)),
              listCell(data=dict(listItem=startTime)),
-             listCell(data=dict(listItem=endTime)),
+             et,
              listCell(data=dict(listItem=duration)),
-             listCell(data=dict(listItem=approved))]
+             listCell(data=dict(listItem=approved)),
+             rj]
         return r
     def __conform__(self, iface):
         if iface == IListRow:
@@ -102,7 +118,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
     cssModule = "jquery.ui.datetimepicker"
     commands = None
     visible = True
-    def getWLoc(self):
+    def getEntry(self):
         return self._timeEntry
 
     def powerUp(self, obj, iface):
@@ -117,6 +133,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
             d['duration'] = str(self._timeEntry.period.duration())
             d['workLocation'] = d['workLocation'].workLocationID
             d['subAccount'] = d['subAccount'].sub
+            d['entryType'] = self._timeEntry.type.name
             changed = event.previous_values
             keys = list(changed.keys())
             keys.append('duration')
@@ -205,7 +222,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
                     self._timeEntry.period.end(val)
                     oldVals[key] = oldv
                 continue
-            elif key == 'approved':
+            elif key == 'approved' or key == 'denied':
                 val = vals[key]
             if getattr(self._timeEntry, key) != val:
                 oldVals[key] = getattr(self._timeEntry, key)
@@ -221,9 +238,9 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
         keys = []
         sup = ISupervisor(self.employee, None)
         if self.employee.isAdministrator() and self.employee is not self._timeEntry.employee:
-            keys = ['workLocation', 'subAccount', 'startTime', 'endTime', 'approved']
+            keys = ['workLocation', 'subAccount', 'startTime', 'endTime', 'approved', 'denied']
         elif sup and self._timeEntry.employee in sup.getEmployees() and not self._timeEntry.approved:
-            keys = ['workLocation', 'subAccount', 'startTime', 'endTime', 'approved']
+            keys = ['approved']
         if not self._timeEntry.endTime(False):
             if 'approved' in keys:
                 keys.remove('approved')

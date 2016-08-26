@@ -29,6 +29,9 @@ TimeClock.Commands.ApproveShifts.methods(
         self.busyCallRemote("timeWindowChanged", self.nodeById('startTime').value, self.nodeById('endTime').value);
         self.childWidgets[0].refresh();
 
+    },
+    function addTime(self, node) {
+        self.busyCallRemote('addTime');
     }
 );
 

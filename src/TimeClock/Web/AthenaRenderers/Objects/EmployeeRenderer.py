@@ -40,6 +40,11 @@ instances = []
 class _RenderListRowMixin(AbstractExpandable):
     length = 2
     ctr = -1
+    keys = ('employee_id', 'name', 'expanded')
+    def setKeys(self, *keys):
+        self.keys = keys
+        self.length = len(keys)
+        return self
     def render_searchclass(self, ctx, data):
         self.ctr += 1
         return 'employee-%i' % self.ctr
@@ -56,12 +61,12 @@ class _RenderListRowMixin(AbstractExpandable):
             ]
         else:
             r = []
-
-        r.extend([listCell(data=dict(listItem=self._employee.employee_id))[Tag('athena:handler')(event='ondblclick', handler='expand')],
-                  listCell(data=dict(listItem=self.name))[Tag('athena:handler')(event='ondblclick', handler='expand')],
-                ])
-        if not self.parent.selectable:
-            r.append(T.td(style='display:none', id='expanded')[self.tableDocFactory.load(ctx, self.preprocessors)])
+        for k in self.keys:
+            if k == 'expanded':
+                if not self.parent.selectable:
+                    r.append(T.td(style='display:none', id='expanded')[self.tableDocFactory.load(ctx, self.preprocessors)])
+                continue
+            r.append(listCell(data=dict(listItem=getattr(self._employee, k)))[Tag('athena:handler')(event='ondblclick', handler='expand')])
         return r
     def __conform__(self, iface):
         if iface == IListRow:
@@ -253,7 +258,7 @@ class EmployeeRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin):
     def prepare(self, parent: LiveFragment, force: bool = False):
         super().prepare(parent)
         if hasattr(parent, 'cols'):
-            self.length = max(min(len(parent.cols), 3), 2)
+            self.length = max(min(len(parent.cols), 3), 1)
         return self
 
 

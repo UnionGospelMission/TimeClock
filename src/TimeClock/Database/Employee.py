@@ -42,6 +42,9 @@ class Employee(Item):
     supervisor = reference()
     timeEntry = reference()
     hourly_by_task = boolean(default=False)
+    @property
+    def name(self):
+        return ISolomonEmployee(self).name
 
     @coerce
     def getTasks(self) -> [IAssignedTask]:
@@ -133,7 +136,7 @@ class Employee(Item):
     @overload
     def getEntries(self, area: ISubAccount) -> [ITimeEntry]:
         entries = self.powerupsFor(ITimeEntry)
-        return [e for e in entries if e.subAccount == area]
+        return [e for e in entries if e.subAccount == area and not e.denied]
 
     @overload
     def getEntries(self, area: ISubAccount, entryType: IEntryType) -> [ITimeEntry]:

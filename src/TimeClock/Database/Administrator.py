@@ -1,5 +1,4 @@
 from TimeClock.Axiom import Store
-from TimeClock.Database import Employee
 from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission

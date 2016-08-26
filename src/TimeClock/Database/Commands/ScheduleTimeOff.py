@@ -2,7 +2,9 @@ from zope.interface import implementer
 
 from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
+from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
+from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.Util import NULL
 from ...ITimeClock.IDateTime import IDateTime
 
@@ -31,31 +33,35 @@ class ScheduleTimeOff(Item):
         return True
 
     @overload
-    def hasPermission(self, caller: ISupervisor, employee: ISupervisee) -> bool:
-        return caller is employee or IAdministrator(caller, None) or employee in caller.powerupsFor(ISupervisee)
+    def hasPermission(self, caller: IPerson, employee: ISupervisee) -> bool:
+        return caller is employee or IAdministrator(caller, None) or (ISupervisor(caller, None) and employee in ISupervisor(caller).powerupsFor(ISupervisee))
     @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return True
     @overload
-    def execute(self, caller: IPerson, employee: ISupervisee, start: IDateTime=None, end: IDateTime=None) -> ITimeEntry:
+    def execute(self, caller: IPerson, employee: ISupervisee, start: IDateTime=None, duration: float = None, typ: IEntryType=None, sub: ISubAccount=None, loc: IWorkLocation=None) -> ITimeEntry:
         if self.hasPermission(caller, employee):
-            c = CommandEvent(caller, self, employee, start, end)
+            c = CommandEvent(caller, self, employee, start, duration, typ)
             if IEventBus("Commands").postEvent(c):
                 entry = ITimeEntry(NULL)
-                entry.type = IEntryType("Vacation")
+                entry.type = IEntryType(typ)
                 entry.employee = employee
-                if start:
-                    entry.start(start)
-                if end:
-                    entry.end(end)
+                entry.start(start)
+                entry.end(entry.startTime().replace(hours=duration))
+                entry.subAccount = sub
+                entry.workLocation = loc
                 employee.powerUp(entry, ITimeEntry)
                 return entry
         else:
+            print(caller)
+            print(employee)
             raise PermissionDenied()
     @overload
-    def execute(self, caller: IPerson, start: IDateTime = None, end: IDateTime = None) -> ITimeEntry:
-        return self.execute(caller, caller, start, end)
+    def execute(self, caller: IPerson, start: IDateTime, duration: float, typ: IEntryType) -> ITimeEntry:
+        return self.execute(caller, caller, start, duration, typ)
 
     @overload
     def execute(self, caller: IEmployee, *parameters: object):
+        print(59, caller)
+        print(60, parameters)
         raise NotImplementedError("%s called with invalid parameters" % self.name)

@@ -9,7 +9,6 @@ from TimeClock.ITimeClock.IEvent.IDatabaseEvent import IDatabaseEvent
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
-from TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent import IEmployeeChangedEvent
 from TimeClock.ITimeClock.IEvent.IWebEvent.ISubAccountChangedEvent import ISubAccountChangedEvent
 from TimeClock.ITimeClock.IEvent.IWebEvent.IWebEvent import IWebEvent
 from TimeClock.ITimeClock.IEvent.IWebEvent.IWorkLocationChangedEvent import IWorkLocationChangedEvent

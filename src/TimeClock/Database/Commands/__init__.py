@@ -7,4 +7,5 @@ from . import ViewReports
 from . import ScheduleTimeOff
 from . import CheckForNewEmployees
 from . import ChangeAuthentication
-
+from . import ApproveTimeOff
+from . import ViewBenefits

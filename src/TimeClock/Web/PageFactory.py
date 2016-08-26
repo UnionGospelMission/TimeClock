@@ -7,7 +7,7 @@ from zope.interface import implementer
 
 @implementer(inevow.IResource)
 class PageFactory(object):
-    def __init__(self, iajs, port=None):
+    def __init__(self, iajs, port=None, proto='TCP'):
         self.iajs_module = iajs
         self.iajs = None
         v = vars(iajs)
@@ -33,7 +33,7 @@ class PageFactory(object):
             self.iajs.AthenaPage.render_athenaHandler = render_athenaHandler
         jsDeps.mapping.update(self.iajs.jsDeps)
         if port:
-            self.iajs.Ports = (("TCP", int(port)),)
+            self.iajs.Ports = ((proto, int(port)),)
         self.AthenaPage = type("AthenaPage", (self.iajs.AthenaPage,), {})
         self.AthenaPage.renderHTTP = self.renderHTTP
 

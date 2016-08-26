@@ -24,7 +24,6 @@ class IEmployee(IPerson):
     employee_id = Attribute("employee_id", 'int')
     alternate_authentication = Attribute("alternate_authentication", 'reference')
     supervisor = Attribute("supervisor", 'reference')
-
     hourly_by_task = Attribute("hourly_by_task", 'bool')
 
     def getCompensationType() -> tuple:

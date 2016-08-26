@@ -1,0 +1,24 @@
+<html lang="en" xmlns:n="http://nevow.com/ns/nevow/0.1">
+<head>
+    <link rel="shortcut icon" type="image/gif" href="/favicon.gif"/>
+    <n:invisible n:render="liveglue" />
+    <title>Time Clock Station</title>
+</head>
+<body>
+
+
+    <div n:render="Menu">Menu</div>
+    <div class="menu" id="Menu" n:pattern="MenuPattern" n:render="liveElement" xmlns:athena="http://divmod.org/ns/athena/0.7">
+        <div id="greeter"><h5>The current time is <span id="currentTime"><invisible n:render="currentTime"/></span></h5></div>
+        <input type="button" value="Logout"><athena:handler event="onclick" handler="logout"/></input>
+    </div>
+    <div n:render="Action">ActionPane</div>
+    <div class="ActionPane" id="ActionPane" n:pattern="ActionPattern" n:render="liveElement" xmlns:athena="http://divmod.org/ns/athena/0.7">
+        <athena:handler event="onclick" handler="listClicked"/>
+        <n:invisible n:render = "ClockInOut" />
+        <n:invisible n:render = "ClockedIn" />
+        <n:invisible n:render = "ClockedOut" />
+    </div>
+
+</body>
+</html>

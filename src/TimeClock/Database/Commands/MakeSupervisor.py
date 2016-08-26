@@ -1,7 +1,6 @@
 from zope.interface import implementer
 
 import TimeClock
-from TimeClock.Database import Permissions
 from TimeClock.Database.Commands.CommandEvent import CommandEvent
 from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.ICommand import ICommand

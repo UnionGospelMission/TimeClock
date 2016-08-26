@@ -24,13 +24,11 @@ from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHide
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
 from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer import EmployeeRenderer
-from TimeClock.Web.AthenaRenderers.Objects.WorkLocationRenderer import WorkLocationRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.AthenaRenderers.Widgets.ListToListSelector import ListToListSelector
 from TimeClock.Web.Events.SupervisorAssignmentChangedEvent import SupervisorAssignmentChangedEvent
 from TimeClock.Web.Events.SupervisorCreatedEvent import SupervisorCreatedEvent
 from TimeClock.Web.Events.SupervisorRemovedEvent import SupervisorRemovedEvent
-from TimeClock.Web.Events.WorkLocationAssignmentChangedEvent import WorkLocationAssignmentChangedEvent
 from nevow.athena import expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
@@ -80,7 +78,9 @@ class SetSupervisors(AbstractCommandRenderer, AbstractHideable):
                 sups.append(sup.employee)
 
         l1 = List([], ["Employee ID", "Name"])
+        l1.name = 'Employees'
         l2 = List(sups, ["Supervisor ID", "Name"])
+        l2.name = 'Supervisors'
         l2.limit = 1
         self.ltl = ltl = ListToListSelector(l1, l2)
         ltl.prepare(self)

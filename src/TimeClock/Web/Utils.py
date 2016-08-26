@@ -1,10 +1,8 @@
-import re
-
 from TimeClock.Util.OrderedDict import OrderedDict
 
 
 def formatShortName(n):
-    n=n.title().replace(' ', '')
+    n = n.title().replace(' ', '')
     return n[0].lower() + n[1:]
 
 

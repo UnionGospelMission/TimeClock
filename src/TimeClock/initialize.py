@@ -7,6 +7,7 @@ from TimeClock.Database.Commands.AssignTask import AssignTask
 from TimeClock.Database.Commands.CreateTask import CreateTask
 from TimeClock.Database.Commands.ManageSubAccounts import ManageSubAccounts
 from TimeClock.Database.Commands.ManageWorkLocations import ManageWorkLocations
+from TimeClock.Database.Commands.ViewBenefits import ViewBenefits
 from TimeClock.Database.Commands.ViewReports import ViewReports
 from TimeClock.Database.Permissions import Permission
 from TimeClock.ITimeClock.IAPI import IAPI
@@ -79,6 +80,7 @@ def initializeCommands(Store: store.Store):
     Store.powerUp(Store.findOrCreate(AssignTask), ICommand)
     Store.powerUp(Store.findOrCreate(ScheduleTimeOff), ICommand)
     Store.powerUp(Store.findOrCreate(ApproveTimeOff), ICommand)
+    Store.powerUp(Store.findOrCreate(ViewBenefits), ICommand)
 
 
 def commandFinder(Store: store.Store):
@@ -128,6 +130,7 @@ def initializeAPIs(Store: store.Store):
     AdministratorAPI.powerUp(findCommand("ManageWorkLocations"), ICommand)
     AdministratorAPI.powerUp(findCommand("ScheduleTimeOff"), ICommand)
     AdministratorAPI.powerUp(findCommand("ApproveTimeOff"), ICommand)
+    AdministratorAPI.powerUp(findCommand("ViewBenefits"), ICommand)
     sv = findCommand("ScheduleVacation")
     if sv:
         for api in [AdministratorAPI, EmployeeAPI, SupervisorAPI]:
@@ -147,6 +150,7 @@ def initializeAPIs(Store: store.Store):
     EmployeeAPI.powerUp(findCommand("ViewAverageHours"), ICommand)
     EmployeeAPI.powerUp(findCommand("ChangePassword"), ICommand)
     EmployeeAPI.powerUp(findCommand("ScheduleTimeOff"), ICommand)
+    EmployeeAPI.powerUp(findCommand("ViewBenefits"), ICommand)
 
     SupervisorAPI.powerUp(findCommand("ClockOut"), ICommand)
     SupervisorAPI.powerUp(findCommand("ViewHours"), ICommand)
@@ -161,6 +165,7 @@ def initializeAPIs(Store: store.Store):
     SupervisorAPI.powerUp(findCommand("CreateTask"), ICommand)
     SupervisorAPI.powerUp(findCommand("ScheduleTimeOff"), ICommand)
     SupervisorAPI.powerUp(findCommand("ApproveTimeOff"), ICommand)
+    SupervisorAPI.powerUp(findCommand("ViewBenefits"), ICommand)
 
 
 def initializeWorkLocations(Store: store.Store):

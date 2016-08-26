@@ -11,7 +11,6 @@ from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRend
 from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.AthenaRenderers.Widgets.SaveList import SaveList
-from TimeClock.Web.LiveFragment import LiveFragment
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
 

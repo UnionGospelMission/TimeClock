@@ -3,7 +3,6 @@ from zope.interface import implementer
 from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
 from ...ITimeClock.IDateTime import IDateTime
 
-from TimeClock import AD
 from TimeClock.Database.Commands.CommandEvent import CommandEvent
 from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.ICommand import ICommand
@@ -29,7 +28,7 @@ class EditTime(Item):
 
     @overload
     def hasPermission(self, caller: ISupervisor, employee: ISupervisee, entry: ITimeEntry) -> bool:
-        return IAdministrator(caller, None) or (not entry.approved and employee in caller.powerupsFor(ISupervisee))
+        return IAdministrator(caller, None)
     @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return False

@@ -1,6 +1,5 @@
 from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
-from TimeClock.ITimeClock.IDatabase.IAssignedTask import IAssignedTask
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
 from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee

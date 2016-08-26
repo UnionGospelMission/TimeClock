@@ -23,7 +23,15 @@ TimeClock.Commands.ScheduleTimeOff.methods(
         //$(self.nodeById('endTime')).(options);
     },
     function scheduleTimeOff(self, node) {
-        self.busyCallRemote('scheduleTimeOff', self.nodeById('startTime').value, self.nodeById('endTime').value);
+        self.busyCallRemote('scheduleTimeOff', self.nodeById('startTime').value, self.nodeById('hours').value, self.nodeById('type').value, self.nodeById('sub').value, self.nodeById('wloc').value).addCallback(
+            function() {
+                var d = document.createElement('div');
+                d.innerHTML = 'Time off requested';
+                $(d).dialog();
+                self.nodeById('startTime').value='';
+                self.nodeById('hours').value='';
+            }
+        );
     }
 );
 

@@ -3,7 +3,6 @@ from twisted.python.components import registerAdapter
 from TimeClock.Database import Commands
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
-from TimeClock.ITimeClock.IWeb.IListRow import IListRow
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
 from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List

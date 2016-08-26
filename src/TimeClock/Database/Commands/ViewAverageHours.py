@@ -16,7 +16,6 @@ from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
-from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.Utils import overload, coerce
 

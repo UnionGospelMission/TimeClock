@@ -1,11 +1,9 @@
 from zope.interface import implementer
 
-from TimeClock import AD
 from TimeClock.Database.Commands.CommandEvent import CommandEvent
 from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
-from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
 from TimeClock.ITimeClock.IDatabase.IPerson import IPerson

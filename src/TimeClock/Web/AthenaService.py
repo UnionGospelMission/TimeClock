@@ -1,9 +1,11 @@
 import importlib
 
 import twisted
+from twisted.internet.protocol import Factory
+
+from axiom.upgrade import registerAttributeCopyingUpgrader
 from twisted.internet import ssl
 
-import TimeClock
 from nevow.appserver import NevowSite
 from twisted.application.service import IServiceCollection
 from twisted.internet import reactor
@@ -20,11 +22,15 @@ from .PageFactory import PageFactory
 
 @implementer(twisted.application.service.IService)
 class AthenaService(Item):
+    schemaVersion = 2
     port = integer()
     iajs_fqpn = text()
     name = text()
     parent = reference()
     factory = reference()
+    certificate = text()
+    privkey = text()
+    protocol = text(default='TCP')
     @property
     def iajs(self):
         importlib.import_module(self.iajs_fqpn)
@@ -33,8 +39,17 @@ class AthenaService(Item):
     def new(options):
         self = AthenaService()
         port = options.get('port', None)
+        proto = options.get('protocol', 'TCP')
+        cert = options.get('certificate', None)
+        pkey = options.get('privkey', None)
         if port:
             self.port = int(port)
+        if proto:
+            self.protocol = proto
+        if cert:
+            self.certificate = cert
+        if pkey:
+            self.privkey = pkey
         self.iajs_fqpn = options['iajs']
         return self
     def installOn(self, store):
@@ -54,7 +69,7 @@ class AthenaService(Item):
         from ..PTPython import embed
         embed()
 
-        pf = PageFactory(self.iajs, self.port)
+        pf = PageFactory(self.iajs, self.port, self.protocol)
         for i in pf.iajs.Ports:
             if i[0]=='TCP':
                 reactor.listenTCP(i[1], NevowSite(pf))
@@ -63,10 +78,17 @@ class AthenaService(Item):
                 reactor.listenUDP(i[1], NevowSite(pf))
                 continue
             if i[0]=='SSL':
-                reactor.listenSSL(i[1], ssl.DefaultOpenSSLContextFactory(
-                    self.options['key'], self.options['crt']), pf)
+                factory = NevowSite(pf)
+                reactor.listenSSL(i[1], factory, ssl.DefaultOpenSSLContextFactory(
+                    self.privkey, self.certificate))
 
     def stopService(self):
         return
     def privilegedStartService(self):
         return
+
+registerAttributeCopyingUpgrader(
+    AthenaService,
+    1,
+    2
+)

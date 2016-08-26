@@ -4,6 +4,7 @@ from TimeClock.Web.AthenaRenderers.Abstract.AbstractExpandable import AbstractEx
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
 from TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer import EmployeeRenderer
+from TimeClock.Web.AthenaRenderers.Objects.TimeEntryRenderer import TimeEntryRenderer
 from nevow import inevow
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
@@ -55,10 +56,15 @@ class List(AbstractRenderer, AbstractExpandable, AbstractHideable):
 
     def removeRow(self, item):
         for i in self.list:
-            if isinstance(i, EmployeeRenderer) and i.getEmployee() is item:
+            if isinstance(i, EmployeeRenderer) and i.getEmployee() is item and hasattr(i, '_athenaID'):
                 self.callRemote('remove', i._athenaID)
                 self.list.remove(i)
                 return
+            if isinstance(i, TimeEntryRenderer):
+                if i.getEntry() is item and hasattr(i, '_athenaID'):
+                    self.callRemote('remove', i._athenaID)
+                    self.list.remove(i)
+                #return
 
     def getInitialArguments(self):
         return (self.limit, )

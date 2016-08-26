@@ -10,5 +10,6 @@ class ITimeEntry(ITimePeriod):
     workLocation = Attribute("workLocation")
     type = Attribute("type")
     approved = Attribute("approved")
+    denied = Attribute("denied")
     period = Attribute("period")
 

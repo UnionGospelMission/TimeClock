@@ -82,3 +82,7 @@
 .ui-timepicker-no-scrollbar .ui-timepicker {
     border: none;
 }
+
+input[disabled] {
+    pointer-events:none
+}

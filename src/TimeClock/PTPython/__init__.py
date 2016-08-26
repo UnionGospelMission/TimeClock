@@ -44,12 +44,12 @@ def iterate(cli, inp):
         reactor.stop()
 
 
-def cleanup(cli):
+def cleanup(cli, tpcli):
     try:
         next(cli)
     finally:
-        cli.rm.__exit__()
-        cli._redraw()
+        #tpcli.rm.__exit__()
+        tpcli._redraw()
 
 
 def getloop():
@@ -113,15 +113,16 @@ def embed():
         }
         repl = PythonRepl(lambda: locs, lambda: locs, vi_mode=False, history_filename='console.history')
         loop = TwistedEventLoop()
-        cli = TwistedPythonCommandLineInterface(python_input=repl, eventloop=loop).run()
+        tpcli = TwistedPythonCommandLineInterface(python_input=repl, eventloop=loop)
+        cli = tpcli.run()
         inp = next(cli)
-        atexit.register(cleanup, cli)
+        atexit.register(cleanup, cli, tpcli)
         next(inp)
 
         reactor.callLater(0.1, iterate, cli, inp)
         if not reembed:
             patchStop(reactor.stop.__func__)
         sys.stdout = open(1, 'w')
-    else:
-        print("Not embedding console", embedded, TwistedPythonCommandLineInterface, sys.stdin.isatty())
+    # else:
+    #     print("Not embedding console", embedded, TwistedPythonCommandLineInterface, sys.stdin.isatty())
 

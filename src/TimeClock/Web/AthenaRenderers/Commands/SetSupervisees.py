@@ -4,7 +4,6 @@ from zope.interface import implementer
 from TimeClock import Exceptions
 from TimeClock.Axiom import Transaction
 from TimeClock.Axiom.Store import Store
-from TimeClock.Database import Commands
 from TimeClock.Database.Employee import Employee
 from TimeClock.Database.Supervisor import Supervisor
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
@@ -17,7 +16,6 @@ from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
 from TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent import IEmployeeChangedEvent
 from TimeClock.ITimeClock.IEvent.IWebEvent.ISupervisorCreatedRemovedEvent import ISupervisorCreatedRemovedEvent
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
-from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.ITimeClock.IWeb.IListRow import IListRow
 from TimeClock.Solomon import Solomon
 from TimeClock.Utils import coerce, overload
@@ -25,13 +23,11 @@ from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHide
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
 from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer import EmployeeRenderer
-from TimeClock.Web.AthenaRenderers.Objects.WorkLocationRenderer import WorkLocationRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.AthenaRenderers.Widgets.ListToListSelector import ListToListSelector
 from TimeClock.Web.Events.SupervisorAssignmentChangedEvent import SupervisorAssignmentChangedEvent
 from TimeClock.Web.Events.SupervisorCreatedEvent import SupervisorCreatedEvent
 from TimeClock.Web.Events.SupervisorRemovedEvent import SupervisorRemovedEvent
-from TimeClock.Web.Events.WorkLocationAssignmentChangedEvent import WorkLocationAssignmentChangedEvent
 from nevow.athena import expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
@@ -82,7 +78,9 @@ class SetSupervisees(AbstractCommandRenderer, AbstractHideable):
                 sups.append(sup.employee)
 
         l2 = List([], ["Employee ID", "Name"])
+        l2.name = 'Employees'
         l1 = List(sups, ["Supervisor ID", "Name"])
+        l1.name = 'Supervisors'
         self.ltl = ltl = ListToListSelector(l1, l2)
         ltl.prepare(self)
         ltl.visible = True

@@ -25,8 +25,10 @@ class TimeEntry(Item):
     type = reference()
     period = reference()
     approved = boolean(default=False)
+    denied = boolean(default=False)
     employee = reference()
-    schemaVersion = 2
+
+    schemaVersion = 3
 
     def startTime(self) -> IDateTime:
         return self.period.startTime()
@@ -75,6 +77,13 @@ registerAttributeCopyingUpgrader(
     1,
     2,
     TimeEntry.getEmployee
+)
+
+registerAttributeCopyingUpgrader(
+    TimeEntry,
+    2,
+    3,
+
 )
 
 def newTimeEntry(x):

@@ -1,3 +1,4 @@
+from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from axiom.upgrade import registerUpgrader, registerAttributeCopyingUpgrader
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
@@ -19,7 +20,7 @@ class SubAccount(Item):
     sub = integer()
     active = boolean(default=True)
     def getEmployees(self) -> [IEmployee]:
-        return self.powerupsFor(IEmployee)
+        return [i for i in self.powerupsFor(IEmployee) if ISolomonEmployee(i).status == Solomon.ACTIVE]
     def addEmployee(self, employee: IEmployee):
         employee.powerUp(self, ISubAccount)
         self.powerUp(employee, IEmployee)

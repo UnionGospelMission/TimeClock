@@ -1,3 +1,4 @@
+from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from axiom.upgrade import registerAttributeCopyingUpgrader
 from twisted.python.components import registerAdapter
 
@@ -22,7 +23,7 @@ class WorkLocation(Item):
     active = boolean(default=True)
     @coerce
     def getEmployees(self) -> [IEmployee]:
-        return self.powerupsFor(IEmployee)
+        return [i for i in self.powerupsFor(IEmployee) if ISolomonEmployee(i).status == Solomon.ACTIVE]
 
 registerAttributeCopyingUpgrader(
     WorkLocation,

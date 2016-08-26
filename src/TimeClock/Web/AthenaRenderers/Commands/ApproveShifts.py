@@ -1,47 +1,39 @@
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
-from TimeClock import Exceptions
 from TimeClock.Axiom import Transaction
 from TimeClock.Axiom.Store import Store
-from TimeClock.Database import Commands
 from TimeClock.Database.Commands.ApproveTime import ApproveTime
-from TimeClock.Database.Commands.ApproveTimeOff import ApproveTimeOff
 from TimeClock.Database.Employee import Employee
-from TimeClock.Database.Supervisor import Supervisor
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
-from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
+from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
 from TimeClock.ITimeClock.IDateTime import IDateTime
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
-from TimeClock.ITimeClock.IEvent.IWebEvent.IEmployeeChangedEvent import IEmployeeChangedEvent
 from TimeClock.ITimeClock.IEvent.IWebEvent.ITimeEntryChangedEvent import ITimeEntryChangedEvent
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.ITimeClock.IWeb.IAthenaRenderable import IAthenaRenderable
 from TimeClock.ITimeClock.IWeb.IListRow import IListRow
 from TimeClock.Solomon import Solomon
+from TimeClock.Util import NULL
 from TimeClock.Utils import coerce, overload
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractHideable import AbstractHideable
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractRenderer import AbstractRenderer, path
 from TimeClock.Web.AthenaRenderers.Commands import AbstractCommandRenderer
 from TimeClock.Web.AthenaRenderers.Objects.EmployeeRenderer import EmployeeRenderer
-from TimeClock.Web.AthenaRenderers.Objects.TimeEntryRenderer import TimeEntryRenderer
-from TimeClock.Web.AthenaRenderers.Objects.WorkLocationRenderer import WorkLocationRenderer
 from TimeClock.Web.AthenaRenderers.Widgets.List import List
 from TimeClock.Web.AthenaRenderers.Widgets.ListToListSelector import ListToListSelector
 from TimeClock.Web.AthenaRenderers.Widgets.SaveList import SaveList
-from TimeClock.Web.Events.SupervisorAssignmentChangedEvent import SupervisorAssignmentChangedEvent
+from TimeClock.Web.Events.TimeEntryChangedEvent import TimeEntryChangedEvent
 from TimeClock.Web.Events.TimeEntryCreatedEvent import TimeEntryCreatedEvent
-from TimeClock.Web.Events.WorkLocationAssignmentChangedEvent import WorkLocationAssignmentChangedEvent
-from nevow import tags, loaders
+from nevow import tags
 from nevow.athena import expose
 from nevow.context import WovenContext
 from nevow.loaders import xmlfile
-from nevow.stan import directive
 
 
 @implementer(IEventHandler)
@@ -77,13 +69,22 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         self.name = cmd.name
         if isinstance(cmd, ApproveTime):
             self.entryType = IEntryType("Work")
-        if isinstance(cmd, ApproveTimeOff):
-            self.entryType = IEntryType("Vacation")
+            self.entryTypes = self.entryTypes = (
+                IEntryType("Work"),
+                IEntryType("Vacation"),
+                IEntryType("Illness"),
+                IEntryType("Personal"),
+            )
 
     @overload
     def handleEvent(self, evt: TimeEntryCreatedEvent):
-        if evt.timeEntry.employee is self.ltl.element and evt.timeEntry.type == self.entryType:
+        if evt.timeEntry.employee is self.selected:
             self.l2.addRow(evt.timeEntry)
+    @overload
+    def handleEvent(self, evt: TimeEntryChangedEvent):
+        if evt.timeEntry.denied:
+            self.l2.removeRow(evt.timeEntry)
+
     @overload
     def handleEvent(self, event: IEvent):
         pass
@@ -94,7 +95,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
 
         employees = []
         self.l1 = l1 = List(employees, ["Employee ID", "Name"])
-        self.l2 = l2 = List([], ["Work Location", "Sub Account", "Start Time", "End Time", "Duration", "Approved"])
+        self.l2 = l2 = List([], ["Entry Type", "Work Location", "Sub Account", "Start Time", "End Time", "Duration", "Approved", "Denied"])
         self.ltl = ltl = ListToListSelector(l1, l2)
         ltl.mappingReturnsNewElements = True
         ltl.prepare(self)
@@ -107,8 +108,30 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         startTime = tags.input(id='startTime', placeholder='Start Time')[tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
         endTime = tags.input(id='endTime', placeholder='End Time')[
             tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
-        self.preprocess([startTime, endTime])
-        return [startTime, endTime, ltl]
+        addTime = tags.input(id='addTime', type='button', value='Add Time Entry')[
+            tags.Tag('athena:handler')(event='onclick', handler='addTime')]
+        if not IAdministrator(self.employee, None):
+            addTime = ''
+
+        self.preprocess([startTime, endTime, addTime])
+        return [startTime, endTime, tags.br(), addTime, ltl]
+    @expose
+    @Transaction
+    def addTime(self):
+        if IAdministrator(self.employee) and self.selected is not self.employee:
+            if self.selected:
+                ise = ISolomonEmployee(self.selected)
+                a = ITimeEntry(NULL)
+                a.subAccount = ise.defaultSubAccount
+                a.workLocation = ise.defaultWorkLocation
+                a.employee = self.selected
+                a.period = ITimePeriod(NULL)
+                a.type = IEntryType("Work")
+                self.selected.powerUp(a, ITimeEntry)
+                e = TimeEntryCreatedEvent(a)
+                IEventBus("Web").postEvent(e)
+            else:
+                raise Exception("No Employee Selected")
     @expose
     def timeWindowChanged(self, startTime, endTime):
         self.startTime = startTime
@@ -121,7 +144,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
             return []
         o = []
 
-        shifts = list(i for i in self.selected.powerupsFor(ITimeEntry) if i.type == self.entryType)
+        shifts = list(i for i in self.selected.powerupsFor(ITimeEntry) if i.type in self.entryTypes and not i.denied)
         if self.startTime:
             startTime = IDateTime(self.startTime)
         else:
@@ -144,4 +167,4 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
 
 
 registerAdapter(ApproveShifts, ApproveTime, IAthenaRenderable)
-registerAdapter(ApproveShifts, ApproveTimeOff, IAthenaRenderable)
+

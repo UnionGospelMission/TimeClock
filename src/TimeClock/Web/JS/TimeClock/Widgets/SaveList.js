@@ -3,6 +3,9 @@
 
 TimeClock.Widgets.SaveList = TimeClock.Widgets.subclass("TimeClock.Widgets.SaveList");
 TimeClock.Widgets.SaveList.methods(
+    function saveClicked(self, node, evt) {
+
+    },
     function saveAll(self, node, evt){
         var e = window.event || evt;
         var widgets = self.widgetParent.getAll();

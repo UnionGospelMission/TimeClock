@@ -119,7 +119,9 @@ TimeClock.Widgets.List.methods(
     function remove(self, idx){
         var n = TimeClock.fromAthenaID(idx);
         self.removeChildWidget(n);
+        //self.lst.remove(n.node);
         n.node.parentNode.removeChild(n.node);
+        self.lst = new List(self.node, self.options);
     },
     function serverAppend(self, newnode) {
         console.log(125, newnode);
@@ -129,12 +131,12 @@ TimeClock.Widgets.List.methods(
         }
         self.append(newnode);
     },
-    function append(self, newnode){
+    function append(self, newnode) {
         self.addChildWidgetFromWidgetInfo(newnode).addCallback(
             function childAdded(newwidget){
-                var idx = idx = self.table.tBodies[0].rows.length;
+                var idx = self.table.tBodies[0].rows.length;
                 try {
-                    var sb = TimeClock.get(self.table.tBodies[0].rows[self.table.tBodies[0].rows.length-1]);
+                    var sb = TimeClock.get(self.table.tBodies[0].rows[idx-1]);
                     if (sb) {
                         if (sb.__class__ == TimeClock.Widgets.SaveList) {
                             idx--;
@@ -146,9 +148,9 @@ TimeClock.Widgets.List.methods(
                 }
 
                 self.table.tBodies[0].insertBefore(newwidget.node, self.table.tBodies[0].rows[idx]);
-                if (--self.toProcess==0){
+                if (--self.toProcess==0 && self.table.tBodies[0].rows.length > 0){
                     self.valueNames = [];
-                    for (var i=0; i< self.table.tHead.rows[1].cells.length; i++){
+                    for (var i=0; i< self.table.tBodies[0].rows[0].cells.length; i++){
                         if (self.table.tBodies[0].rows[0].cells[i].className!=undefined){
                             self.valueNames.push(self.table.tBodies[0].rows[0].cells[i].className);
                         }
@@ -161,7 +163,25 @@ TimeClock.Widgets.List.methods(
                     self.lst = new List(self.node, self.options);
                 }
             }
-        );
+        ).addErrback(function(){
+            if (--self.toProcess==0) {
+                self.valueNames = [];
+                for (var i=0; i< self.table.tBodies[0].rows[1].cells.length; i++){
+                    if (self.table.tBodies[0].rows[0].cells[i].className!=undefined){
+                        self.valueNames.push(self.table.tBodies[0].rows[0].cells[i].className);
+                    }
+
+                }
+                self.options = {
+                    valueNames: self.valueNames,
+                    searchFunction: self.searchFunction
+                };
+                self.lst = new List(self.node, self.options);
+            }
+            console.log(167);
+            console.log(arguments);
+            console.log(newnode);
+        });
     },
     function select(self, selected, newelements){
         if (newelements){
@@ -171,10 +191,8 @@ TimeClock.Widgets.List.methods(
                 if (m.__class__==TimeClock.Widgets.SaveList) {
                     sl = m;
                 }
-                else {
-                    if (self.lst!=undefined){
-                        self.lst.remove(m.node);
-                    }
+                if (self.lst!=undefined){
+                    self.lst.remove(m.node);
                 }
             }
             if (sl) {
@@ -198,6 +216,9 @@ TimeClock.Widgets.List.methods(
         }
     },
     function getAll(self){
+        if (!self.lst) {
+            return [];
+        }
         return self.lst.filter(function(x){
             return x.elm.tagName == 'TR';
         });

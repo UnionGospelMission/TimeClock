@@ -1,8 +1,12 @@
-import warnings, datetime
+import datetime
+import warnings
 from contextlib import contextmanager
 
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
+from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.Utils import coerce, overload
+
+
 try:
     import pymssql
     from pymssql import connect
@@ -37,7 +41,8 @@ def fetchone(cur):
     return r
 
 
-def fetchall(cur):
+@coerce
+def fetchall(cur) -> list:
     for r in cur:
         yield {i: r[i].strip() if isinstance(r[i], str) else r[i] for i in r}
 
@@ -65,15 +70,13 @@ def getEmployees() -> [dict]:
     else:
         with context() as cur:
             cur.execute("SELECT * FROM employee")
-            for i in fetchall(cur):
-                yield i
+            yield from fetchall(cur)
 
 
 def getSubAccounts() -> [dict]:
     with context() as cur:
         cur.execute("SELECT * FROM subacct")
-        for i in fetchall(cur):
-            yield i
+        yield from fetchall(cur)
 
 
 @overload
@@ -97,8 +100,8 @@ def getSubAccount(eid: str) -> dict:
 def getWorkLocations() -> [dict]:
     with context() as cur:
         cur.execute("SELECT * FROM workloc")
-        for i in fetchall(cur):
-            yield i
+        yield from fetchall(cur)
+
 
 def getWorkLocation(dfltWrkloc: str) -> dict:
     if not pymssql:
@@ -140,14 +143,30 @@ def getBenefit(bid: str) -> dict:
 
 
 @overload
+def getBenefitByClass(bclassid: str) -> dict:
+    with context() as cur:
+        cur.execute("SELECT * FROM benefit WHERE ClassId=%s", (bclassid,))
+        return fetchone(cur)
+
+
+def getAllEarnTypes() -> [IEntryType]:
+    with context() as cur:
+        cur.execute("SELECT * from EarnType")
+        for i in fetchall(cur):
+            yield IEntryType(i)
+
+
+@overload
 def getBenefitAvailable(eid: str, bid: str) -> float:
     z = getBenefit(eid, bid)
-    return z['CurrBYTDAvail'] + z['BYBegBal'] - z['BYTDUsed']
+    return z['BYTDAvail'] + z['BYBegBal'] - z['BYTDUsed']
 
 
 @overload
 def getBenefitAvailable(eid: IEmployee, bid: str) -> float:
     return getBenefitAvailable(eid.employee_id, bid)
+
+
 
 if pymssql:
     pseudoname = 'Administrator'
@@ -172,4 +191,3 @@ dummyEntry = {'DfltWrkloc': 'OFF   ',
               'City': 'Spokane                       ',
               'State': 'WA'
               }
-
