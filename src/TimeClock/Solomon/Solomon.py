@@ -49,7 +49,7 @@ def fetchall(cur) -> list:
 
 @contextmanager
 def context():
-    with connect(host, user=user, database=db, password=pw) as con:
+    with connect(host, user=user, database=db, password=pw, login_timeout=10) as con:
         with con.cursor(as_dict=True) as cur:
             yield cur
 
