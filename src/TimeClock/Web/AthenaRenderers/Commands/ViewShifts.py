@@ -43,7 +43,7 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
     l = None
     @overload
     def handleEvent(self, evt: TimeEntryCreatedEvent):
-        if evt.timeEntry.employee is self.employee and evt.timeEntry.type == IEntryType("Work"):
+        if evt.timeEntry.employee is self.employee:
             self.l.addRow(evt.timeEntry)
     @overload
     def handleEvent(self, event: IEvent):
@@ -62,7 +62,7 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
         self.preprocess([startTime, endTime])
         return [startTime, endTime, l]
     def getEntries(self):
-        return list(i for i in self.employee.powerupsFor(ITimeEntry) if i.type == IEntryType("Work"))
+        return list(self.employee.powerupsFor(ITimeEntry))
     @expose
     def timeWindowChanged(self, startTime, endTime):
         if startTime:

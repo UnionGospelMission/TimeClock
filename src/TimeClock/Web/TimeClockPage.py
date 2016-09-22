@@ -13,6 +13,7 @@ from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderers.Commands.SetSupervisees import SetSupervisees
 
 from TimeClock.Web.LiveFragment import LiveFragment
+from TimeClock.Web.MappingResource import MappingResource
 from TimeClock.Web.Utils import formatShortName
 from nevow.athena import LivePage, expose, AutoJSPackage, AutoCSSPackage, _collectPackageBelow
 from nevow.context import WovenContext
@@ -63,6 +64,10 @@ class TimeClockPage(LivePage):
         return self._localObjects[idx]
     def getAllWidgets(self):
         return self._localObjects.copy()
+
+    def child_jsmodule(self, ctx):
+        return MappingResource(self.jsModules.mapping)
+
 
     def __init__(self, employee: IEmployee):
         super().__init__()

@@ -16,7 +16,7 @@ tcsCookies = []
 @implementer(IAthenaJS)
 class AthenaJS(object):
     AthenaHandler = None
-    LP = LivePage()
+    LP = TimeClockStationPage()
     class AthenaPage(rend.Page):
         def renderHTTP(self, ctx):
             req = inevow.IRequest(ctx)

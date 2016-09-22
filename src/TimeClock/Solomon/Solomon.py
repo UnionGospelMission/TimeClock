@@ -113,6 +113,8 @@ def getWorkLocation(dfltWrkloc: str) -> dict:
 
 @overload
 def getBenefits(eid: str) -> [dict]:
+    if eid == '1' or not pymssql:
+        return []
     with context() as cur:
         cur.execute("SELECT * FROM benemp WHERE EmpID=%s", (eid,))
         return fetchall(cur)
