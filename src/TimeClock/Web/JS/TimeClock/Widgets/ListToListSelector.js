@@ -5,12 +5,17 @@ TimeClock.Widgets.ListToListSelector = TimeClock.Widgets.subclass("TimeClock.Wid
 TimeClock.Widgets.ListToListSelector.methods(
     function __init__(self, node){
         TimeClock.Widgets.ListToListSelector.upcall(self, '__init__', node);
-        var l1 = self.childWidgets[0];
-        var l2 = self.childWidgets[1];
         self.node.style.display='block';
+        setTimeout(function(){
+            self.childWidgets[1].node.style.display='inline-block';
+            self.childWidgets[1].node.style.float='left';
+            self.childWidgets[0].node.style.display='inline-block';
+            self.childWidgets[0].node.style.float='left';
+            self.node.style.display='flex';
+        },100);
+
     },
     function listClicked(self, node, evt){
-        //console.log(13, self, node, evt);
         var e = window.event || evt;
         var l1 = self.childWidgets[0];
         var l2 = self.childWidgets[1];

@@ -124,6 +124,7 @@ TimeClock.Widgets.List.methods(
         self.lst = new List(self.node, self.options);
     },
     function serverAppend(self, newnode) {
+        console.log(125, newnode);
         self.toProcess++;
         if (self.toProcess < 1){
             self.toProcess = 1;

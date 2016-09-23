@@ -1,6 +1,6 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: TimeClock
-Version: 0.0.0.20160826
+Version: 0.9.0
 Summary: UNKNOWN
 Home-page: UNKNOWN
 Author: UNKNOWN
@@ -8,3 +8,15 @@ Author-email: UNKNOWN
 License: UNKNOWN
 Description: UNKNOWN
 Platform: UNKNOWN
+Requires: zope.interface
+Requires: arrow
+Requires: pymssql
+Requires: ldap3
+Requires: pytz
+Requires: tzlocal
+Requires: zope.component
+Requires: cffi
+Requires: pyOpenSSL
+Requires: service_identity
+Requires: ptpython
+Requires: html5print

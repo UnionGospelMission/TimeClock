@@ -24,14 +24,21 @@ TimeClock.Commands.ApproveShifts.methods(
         self.nodeByAttribute("name", "save").style.display='none';
         $(self.nodeById('startTime')).datetimepicker(options);
         $(self.nodeById('endTime')).datetimepicker(options);
+        self.timer = 0;
     },
     function timeWindowChanged(self, node){
-        self.busyCallRemote("timeWindowChanged", self.nodeById('startTime').value, self.nodeById('endTime').value);
-        self.childWidgets[0].refresh();
-
+        if (self.timer==0){
+            self.timer++;
+            self.busyCallRemote("timeWindowChanged", self.nodeById('startTime').value, self.nodeById('endTime').value).addCallback(
+                function(){
+                    self.timer=0;
+                }
+            );
+            self.childWidgets[0].refresh();
+        }
     },
     function addTime(self, node) {
-        self.busyCallRemote('addTime');
+        self.busyCallRemote('addTime', self.nodeById('newTimeType').value);
     }
 );
 

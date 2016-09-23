@@ -1,7 +1,20 @@
+/*
+// import jquery.ui.datetimepicker
+*/
+
 input[disabled] {
     pointer-events:none
 }
 
 .no-close .ui-dialog-titlebar-close {
   display: none;
+}
+
+.scroll-y {
+    overflow-y: auto;
+}
+
+.menu {
+    width: 20%;
+    border: 1px solid black;
 }

@@ -1,6 +1,7 @@
 import time
 from zope.interface import implementer
 
+from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.ITimeClock.IDateTime import IDateTime
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
@@ -26,7 +27,7 @@ class TimeEntryValidator(object):
             event.cancel()
             event.setReturn("Start time set to after end time for shift beginning at %s" % str(event.previous_values.get('startTime', timeEntry.startTime())))
             return
-        if timeEntry.endTime() > IDateTime(time.time()):
+        if timeEntry.endTime() > IDateTime(time.time()) and timeEntry.type == IEntryType('Work'):
             event.cancel()
             event.setReturn("End time is in the future")
             return

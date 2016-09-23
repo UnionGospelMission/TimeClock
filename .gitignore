@@ -7,3 +7,6 @@
 /.idea
 *.pyc
 *__pycache__*
+*.cache
+*PKG-INFO
+*SOURCES.txt

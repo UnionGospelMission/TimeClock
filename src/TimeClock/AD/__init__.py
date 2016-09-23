@@ -4,8 +4,8 @@ from TimeClock.Utils import coerce
 
 def runWithConnection(function, username, pw: str, args=()):
     from ldap3 import Server, Connection, ALL, NTLM
-    server = Server('192.168.0.10', connect_timeout=1)
-    with Connection(server, user=r"UGM\%s" % username, password=pw, authentication=NTLM) as conn:
+    server = Server('192.168.0.10', connect_timeout=10)
+    with Connection(server, user=r"UGM\%s" % username, password=pw, authentication=NTLM, receive_timeout=10) as conn:
         return function(conn, *args)
 
 

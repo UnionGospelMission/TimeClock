@@ -3,6 +3,7 @@ from zope.interface import implementer
 
 from TimeClock.Axiom import Transaction
 from TimeClock.Axiom.Store import Store
+from TimeClock.Database.EntryType import EntryType
 from TimeClock.Database.Commands.ApproveTime import ApproveTime
 from TimeClock.Database.Employee import Employee
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
@@ -69,11 +70,8 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         self.name = cmd.name
         if isinstance(cmd, ApproveTime):
             self.entryType = IEntryType("Work")
-            self.entryTypes = self.entryTypes = (
-                IEntryType("Work"),
-                IEntryType("Vacation"),
-                IEntryType("Illness"),
-                IEntryType("Personal"),
+            self.entryTypes = self.entryTypes = tuple(
+                self.args[0].store.query(EntryType)
             )
 
     @overload
@@ -108,8 +106,13 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         startTime = tags.input(id='startTime', placeholder='Start Time')[tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
         endTime = tags.input(id='endTime', placeholder='End Time')[
             tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
-        addTime = tags.input(id='addTime', type='button', value='Add Time Entry')[
-            tags.Tag('athena:handler')(event='onclick', handler='addTime')]
+        addTime = [
+            tags.input(id='addTime', type='button', value='Add Time Entry')[
+                tags.Tag('athena:handler')(event='onclick', handler='addTime')],
+            tags.select(id='newTimeType')[
+                [tags.option(id=et.getTypeName())[et.getTypeName()] for et in self.entryTypes]
+                ]
+            ]
         if not IAdministrator(self.employee, None):
             addTime = ''
 
@@ -117,7 +120,8 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         return [startTime, endTime, tags.br(), addTime, ltl]
     @expose
     @Transaction
-    def addTime(self):
+    def addTime(self, typ):
+        typ = IEntryType(typ)
         if IAdministrator(self.employee) and self.selected is not self.employee:
             if self.selected:
                 ise = ISolomonEmployee(self.selected)
@@ -126,12 +130,15 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
                 a.workLocation = ise.defaultWorkLocation
                 a.employee = self.selected
                 a.period = ITimePeriod(NULL)
-                a.type = IEntryType("Work")
+                a.type = typ
+                a.period.end(a.period.startTime())
                 self.selected.powerUp(a, ITimeEntry)
                 e = TimeEntryCreatedEvent(a)
                 IEventBus("Web").postEvent(e)
             else:
                 raise Exception("No Employee Selected")
+        else:
+            raise Exception("Permission Denied")
     @expose
     def timeWindowChanged(self, startTime, endTime):
         self.startTime = startTime
@@ -167,4 +174,3 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
 
 
 registerAdapter(ApproveShifts, ApproveTime, IAthenaRenderable)
-

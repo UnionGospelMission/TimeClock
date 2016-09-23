@@ -63,20 +63,22 @@ class _RenderListRowMixin(AbstractExpandable):
             ]
         else:
             subAccount = T.input(id='subAccount', disabled=True, value="None")
+        duration = T.input(id='duration', value=str(self._timeEntry.period.duration()))
         if self._timeEntry.type==IEntryType("Work"):
             ET = T.input(id='endTime', value=et.strftime('%Y-%m-%d %H:%M:%S %Z') if et else 'None')
             et = listCell(data=dict(listItem=ET))
             reject = T.input(id='denied', type='checkbox', checked=self._timeEntry.denied)
             rj = listCell(data=dict(listItem=reject))
+            duration(disabled=True)
         else:
-            ET = T.input(id='entryType', value=self._timeEntry.type.getTypeName())
+            ET = T.input(style='display:none', id='entryType', value=self._timeEntry.type.getTypeName())
             et = listCell(data=dict(listItem=ET))
             reject = T.input(id='denied', type='checkbox', checked=self._timeEntry.denied)
             rj = listCell(data=dict(listItem=reject))
 
         startTime = T.input(id='startTime', value=st.strftime('%Y-%m-%d %H:%M:%S %Z') if st else 'None')
 
-        duration = T.input(id='duration', value=str(self._timeEntry.period.duration()))
+
         if self._timeEntry.employee.timeEntry is self._timeEntry:
             ET(disabled=True)
         if not self.employee.isAdministrator() or self.parent.selectable or self.employee is self._timeEntry.employee:
@@ -131,8 +133,10 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
             d['startTime'] = self._timeEntry.startTime().strftime('%Y-%m-%d %H:%M:%S %Z') if self._timeEntry.startTime() else 'None'
             d['endTime'] = self._timeEntry.endTime(False).strftime('%Y-%m-%d %H:%M:%S %Z') if self._timeEntry.endTime(False) else 'None'
             d['duration'] = str(self._timeEntry.period.duration())
-            d['workLocation'] = d['workLocation'].workLocationID
-            d['subAccount'] = d['subAccount'].sub
+            if d['workLocation']:
+                d['workLocation'] = d['workLocation'].workLocationID
+            if d['subAccount']:
+                d['subAccount'] = d['subAccount'].sub
             d['entryType'] = self._timeEntry.type.name
             changed = event.previous_values
             keys = list(changed.keys())
@@ -200,13 +204,31 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
         oldVals = {}
 
         for key in keys:
+            print(205, key)
             if key not in vals:
                 continue
+
             oldv = getattr(self._timeEntry, key)
-            if key == 'workLocation':
-                val = IWorkLocation(vals[key])
+            if key == 'duration':
+                key = 'endTime'
+                vals[key] = self._timeEntry.startTime()
+                hour, min, second = vals['duration'].split(':')
+                vals[key] = vals[key].replace(hours=int(hour), minutes=int(min), seconds=int(second))
+                val = self._timeEntry.endTime(False)
+                if val != vals[key]:
+                    oldVals[key] = val
+                    self._timeEntry.period.end(vals[key])
+                continue
+            elif key == 'workLocation':
+                if vals[key] and vals[key] != 'None':
+                    val = IWorkLocation(vals[key])
+                else:
+                    val = None
             elif key == 'subAccount':
-                val = ISubAccount(int(vals[key]))
+                if vals[key] and vals[key] != 'None':
+                    val = ISubAccount(int(vals[key]))
+                else:
+                    val = None
             elif key == 'startTime':
                 oldv = self._timeEntry.period.startTime()
                 val = (Utils.getIDateTime(vals[key]))
@@ -239,6 +261,8 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
         sup = ISupervisor(self.employee, None)
         if self.employee.isAdministrator() and self.employee is not self._timeEntry.employee:
             keys = ['workLocation', 'subAccount', 'startTime', 'endTime', 'approved', 'denied']
+            if self._timeEntry.type != IEntryType("Work"):
+                keys[3] = 'duration'
         elif sup and self._timeEntry.employee in sup.getEmployees() and not self._timeEntry.approved:
             keys = ['approved']
         if not self._timeEntry.endTime(False):

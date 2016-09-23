@@ -23,16 +23,21 @@ class GZFile(static.File):
     def __init__(self, path):
         super().__init__(path)
         self._compressed = BytesIO()
-        self._gzipFile = GzipFile(fileobj=self._compressed, mode='wb', compresslevel=9)
+        self._cache_age = 0
+
+    def loadCache(self):
         if self.fp.exists():
-            with self.fp.open('rb') as f:
-                txt = f.read()
-                self._gzipFile.write(txt)
-                self._gzipFile.close()
+            if self._cache_age < self.fp.getModificationTime():
+                self._cache_age = self.fp.getModificationTime()
+                with self.fp.open('rb') as f:
+                    txt = f.read()
+                    _gzipFile = GzipFile(fileobj=self._compressed, mode='wb', compresslevel=9)
+                    _gzipFile.write(txt)
+                    _gzipFile.close()
 
     def renderHTTP(self, ctx):
         self.fp.restat()
-
+        self.loadCache()
         if self.type is None:
             self.type, self.encoding = static.getTypeAndEncoding(self.fp.basename(),
                                                           self.contentTypes,

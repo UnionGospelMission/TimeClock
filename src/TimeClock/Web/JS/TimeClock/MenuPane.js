@@ -24,12 +24,20 @@ TimeClock.MenuPane.methods(
             nbi.style.display='block';
         }
     },
-    function updateTime(self, hours, today){
+    function updateTime(self, hours, today, rtoday, rweek){
         self.nodeById('hoursWorked').innerHTML = hours;
         self.nodeById('hoursWorkedToday').innerHTML = today;
+        self.nodeById('hoursRemainingToday').innerHTML = rtoday;
+        self.nodeById('hoursRemainingThisWeek').innerHTML = rweek;
     },
     function logout(self, node){
         $.redirectPost("/");
+    },
+    function clockedIn(self) {
+        self.nodeById('cinout').innerHTML='in'
+    },
+    function clockedOut(self) {
+        self.nodeById('cinout').innerHTML='out'
     }
 
 );

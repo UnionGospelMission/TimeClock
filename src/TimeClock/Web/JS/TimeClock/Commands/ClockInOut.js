@@ -23,7 +23,9 @@ TimeClock.Commands.ClockInOut.methods(
             }
 
         }
-
+        setTimeout(function(){
+            self.show();
+        }, 200);
     },
     function refresh(self, subs, locs) {
         console.log(29, subs, locs);
