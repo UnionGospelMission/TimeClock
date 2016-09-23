@@ -1,27 +1,8 @@
-from setuptools import setup
-from twisted.python.filepath import FilePath as FP
-
-def getAll(root, *branches):
-    if isinstance(root, str):
-        root = FP(root)
-    o = []
-    for branch in branches:
-        if isinstance(branch, str):
-            fp = root.child(branch)
-        else:
-            fp = branch
-        if fp.isdir():
-            o.extend(getAll(root, *fp.children()))
-        else:
-            o.append('/'.join(fp.segmentsFrom(root)))
-    return o
-
+from distutils.core import setup
 
 setup(
     name='TimeClock',
     version='0.9.0',
-    requires=['zope.interface', 'arrow', 'pymssql', 'ldap3', 'pytz', 'tzlocal', 'zope.component', 'cffi', 'pyOpenSSL',
-              'service_identity', 'ptpython', 'html5print'],
     packages=['', 'TimeClock', 'TimeClock.AD', 'TimeClock.API', 'TimeClock.Web', 'TimeClock.Web.Events',
               'TimeClock.Web.AthenaRenderers', 'TimeClock.Web.AthenaRenderers.Objects',
               'TimeClock.Web.AthenaRenderers.Widgets', 'TimeClock.Web.AthenaRenderers.Abstract',
@@ -32,12 +13,10 @@ setup(
               'TimeClock.PTPython', 'TimeClock.ITimeClock', 'TimeClock.ITimeClock.IWeb', 'TimeClock.ITimeClock.IEvent',
               'TimeClock.ITimeClock.IEvent.IWebEvent', 'TimeClock.ITimeClock.IEvent.IDatabaseEvent',
               'TimeClock.ITimeClock.IReport', 'TimeClock.ITimeClock.IDatabase'],
-    package_dir={'': 'src'},
-    package_data={'TimeClock.Web': getAll('src/TimeClock/Web/', 'JS', 'CSS', 'Pages')},
+    package_dir={'': 'TimeClock/src'},
     url='',
     license='',
     author='',
     author_email='',
-    description='',
-    scripts=['bin/axiomatic']
+    description=''
 )

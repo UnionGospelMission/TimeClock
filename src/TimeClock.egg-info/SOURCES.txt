@@ -66,6 +66,7 @@ src/TimeClock/Database/Commands/SetSubAccounts.py
 src/TimeClock/Database/Commands/SetSupervisor.py
 src/TimeClock/Database/Commands/SetWorkLocations.py
 src/TimeClock/Database/Commands/ViewAverageHours.py
+src/TimeClock/Database/Commands/ViewBenefits.py
 src/TimeClock/Database/Commands/ViewEmployees.py
 src/TimeClock/Database/Commands/ViewHours.py
 src/TimeClock/Database/Commands/ViewReports.py
@@ -171,6 +172,7 @@ src/TimeClock/Web/LiveFragmentMeta.py
 src/TimeClock/Web/LoginPage.py
 src/TimeClock/Web/PageFactory.py
 src/TimeClock/Web/TimeClockPage.py
+src/TimeClock/Web/TimeClockStationPage.py
 src/TimeClock/Web/Utils.py
 src/TimeClock/Web/__init__.py
 src/TimeClock/Web/AthenaRenderers/__init__.py
@@ -179,6 +181,7 @@ src/TimeClock/Web/AthenaRenderers/Abstract/AbstractHideable.py
 src/TimeClock/Web/AthenaRenderers/Abstract/AbstractRenderer.py
 src/TimeClock/Web/AthenaRenderers/Abstract/__init__.py
 src/TimeClock/Web/AthenaRenderers/Commands/ApproveShifts.py
+src/TimeClock/Web/AthenaRenderers/Commands/ApproveTimeOff.py
 src/TimeClock/Web/AthenaRenderers/Commands/CheckForNewEmployees.py
 src/TimeClock/Web/AthenaRenderers/Commands/ClockInOut.py
 src/TimeClock/Web/AthenaRenderers/Commands/ManageSubAccounts.py
@@ -189,6 +192,7 @@ src/TimeClock/Web/AthenaRenderers/Commands/SetSubAccounts.py
 src/TimeClock/Web/AthenaRenderers/Commands/SetSupervisees.py
 src/TimeClock/Web/AthenaRenderers/Commands/SetSupervisors.py
 src/TimeClock/Web/AthenaRenderers/Commands/SetWorkLocations.py
+src/TimeClock/Web/AthenaRenderers/Commands/ViewBenefits.py
 src/TimeClock/Web/AthenaRenderers/Commands/ViewEmployees.py
 src/TimeClock/Web/AthenaRenderers/Commands/ViewReports.py
 src/TimeClock/Web/AthenaRenderers/Commands/ViewShifts.py
@@ -199,10 +203,15 @@ src/TimeClock/Web/AthenaRenderers/Objects/SubAccountRenderer.py
 src/TimeClock/Web/AthenaRenderers/Objects/TimeEntryRenderer.py
 src/TimeClock/Web/AthenaRenderers/Objects/WorkLocationRenderer.py
 src/TimeClock/Web/AthenaRenderers/Objects/__init__.py
+src/TimeClock/Web/AthenaRenderers/TimeClockStationWidgets/ClockInOut.py
+src/TimeClock/Web/AthenaRenderers/TimeClockStationWidgets/ClockedInList.py
+src/TimeClock/Web/AthenaRenderers/TimeClockStationWidgets/ClockedOutList.py
+src/TimeClock/Web/AthenaRenderers/TimeClockStationWidgets/__init__.py
 src/TimeClock/Web/AthenaRenderers/Widgets/List.py
 src/TimeClock/Web/AthenaRenderers/Widgets/ListToListSelector.py
 src/TimeClock/Web/AthenaRenderers/Widgets/SaveList.py
 src/TimeClock/Web/AthenaRenderers/Widgets/StaticListRow.py
+src/TimeClock/Web/AthenaRenderers/Widgets/TimeClockStation.py
 src/TimeClock/Web/AthenaRenderers/Widgets/__init__.py
 src/TimeClock/Web/Events/EmployeeChangedEvent.py
 src/TimeClock/Web/Events/PostReportRunEvent.py
