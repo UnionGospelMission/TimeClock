@@ -1,13 +1,15 @@
 from zope.interface import implementer
 import ldap3
 from TimeClock import AD
-from axiom.attributes import text
+from axiom.attributes import text, boolean
 
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from axiom.item import Item
 
 from TimeClock.ITimeClock.IDatabase.IAuthenticationMethod import IAuthenticationMethod
 from hashlib import sha512
+
+from axiom.upgrade import registerAttributeCopyingUpgrader
 
 
 def getSalt(*args):
@@ -17,11 +19,13 @@ def getSalt(*args):
 
 @implementer(IAuthenticationMethod)
 class CacheAuthenticationMethod(Item):
+    schemaVersion = 2
     password = text()
     salt = text(defaultFactory=getSalt)
+    expired = boolean(default=False)
     def authenticate(self, employee: IEmployee, password: str) -> bool:
         try:
-            valid = AD.authenticate(employee, password)
+            valid = AD.authenticate(employee.active_directory_name, password)
             if valid:
                 newpw = str(sha512((password + self.salt).encode('charmap')).hexdigest())
                 if self.password != newpw:
@@ -34,3 +38,9 @@ class CacheAuthenticationMethod(Item):
         newpw = str(sha512((pw + self.salt).encode('charmap')).hexdigest())
         self.password = newpw
         return self
+
+registerAttributeCopyingUpgrader(
+    CacheAuthenticationMethod,
+    1,
+    2
+)

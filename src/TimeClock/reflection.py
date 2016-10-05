@@ -60,3 +60,5 @@ athena._mangleId = mangleId
 import TimeClock.API.EventBus
 import TimeClock.Util.TimeEntryValidator
 from TimeClock.Report.Format import Widget
+
+from TimeClock.Database.CacheAuthenticationMethod import CacheAuthenticationMethod

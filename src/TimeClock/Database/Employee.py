@@ -42,6 +42,7 @@ class Employee(Item):
     supervisor = reference()
     timeEntry = reference()
     hourly_by_task = boolean(default=False)
+
     @property
     def name(self):
         return ISolomonEmployee(self).name

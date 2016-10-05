@@ -25,6 +25,7 @@ class ChangeAuthentication(Item):
     @overload
     def hasPermission(self, permissions: [IPermission]):
         return True
+
     @overload
     def execute(self, caller: IAdministrator, employee: IEmployee, newpw: str, newpwa: str):
         c = CommandEvent(caller, self, employee)
@@ -37,6 +38,8 @@ class ChangeAuthentication(Item):
             employee.alternate_authentication.setPassword(newpw)
         else:
             employee.alternate_authentication = StaticAuthenticationMethod(store=self.store).setPassword(newpw)
+        employee.alternate_authentication.expired = True
+
     @overload
     def execute(self, caller: IPerson, oldpw: str, newpw: str, newpwa: str):
         caller = IEmployee(caller)
@@ -53,6 +56,7 @@ class ChangeAuthentication(Item):
             caller.alternate_authentication.setPassword(newpw)
         else:
             caller.alternate_authentication = StaticAuthenticationMethod(store=self.store).setPassword(newpw)
+
     @overload
     def execute(self, caller: IPerson, *parameters: object):
         print(42, caller, parameters)

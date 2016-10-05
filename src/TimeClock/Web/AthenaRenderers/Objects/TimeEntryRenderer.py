@@ -3,6 +3,8 @@ import time
 
 import arrow
 import dateutil.parser
+
+from TimeClock.Web.Utils import formatTimeDelta
 from twisted.python.components import registerAdapter
 from zope.interface import implementer, directlyProvides
 
@@ -38,9 +40,11 @@ class _RenderListRowMixin(AbstractExpandable):
     length = 8
     _workLocation = None
     ctr = -1
+
     def render_searchclass(self, ctx, data):
         self.ctr += 1
         return 'timeEntry-%i' % self.ctr
+
     def render_listRow(self, ctx: WovenContext, data=None):
         IEventBus("Web").register(self, ITimeEntryChangedEvent)
         listCell = inevow.IQ(ctx).patternGenerator("listCell")
@@ -63,8 +67,8 @@ class _RenderListRowMixin(AbstractExpandable):
             ]
         else:
             subAccount = T.input(id='subAccount', disabled=True, value="None")
-        duration = T.input(id='duration', value=str(self._timeEntry.period.duration()))
-        if self._timeEntry.type==IEntryType("Work"):
+        duration = T.input(id='duration', value=formatTimeDelta(self._timeEntry.period.duration()))
+        if self._timeEntry.type == IEntryType("Work"):
             ET = T.input(id='endTime', value=et.strftime('%Y-%m-%d %H:%M:%S %Z') if et else 'None')
             et = listCell(data=dict(listItem=ET))
             reject = T.input(id='denied', type='checkbox', checked=self._timeEntry.denied)
@@ -78,17 +82,18 @@ class _RenderListRowMixin(AbstractExpandable):
 
         startTime = T.input(id='startTime', value=st.strftime('%Y-%m-%d %H:%M:%S %Z') if st else 'None')
 
-
         if self._timeEntry.employee.timeEntry is self._timeEntry:
             ET(disabled=True)
         if not self.employee.isAdministrator() or self.parent.selectable or self.employee is self._timeEntry.employee:
-            approved(disabled=True)
+
             workLocationID(disabled=True)
             subAccount(disabled=True)
             startTime(disabled=True)
             ET(disabled=True)
             duration(disabled=True)
-            reject(disabled=True)
+            if self._timeEntry.denied or self._timeEntry.approved or not self.employee.isSupervisor() or self._timeEntry.employee not in ISupervisor(self.employee).getEmployees():
+                reject(disabled=True)
+                approved(disabled=True)
 
         self.preprocess([approved, workLocationID, subAccount, startTime, ET, duration, reject])
         r = [listCell(data=dict(listItem=te_type)),
@@ -116,7 +121,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
     docFactory = xmlfile(path + '/Pages/TimeEntry.xml', 'TimeEntryPattern')
     listDocFactory = xmlfile(path + '/Pages/List.xml', 'liveListRow', ignoreDocType=True)
     tableDocFactory = xmlfile(path + '/Pages/TimeEntry.xml', 'TimeEntryTablePattern')
-    jsClass = 'TimeClock.Objects.TimeEntryRenderer';
+    jsClass = 'TimeClock.Objects.TimeEntryRenderer'
     cssModule = "jquery.ui.datetimepicker"
     commands = None
     visible = True
@@ -132,7 +137,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
             d = self._timeEntry.persistentValues()
             d['startTime'] = self._timeEntry.startTime().strftime('%Y-%m-%d %H:%M:%S %Z') if self._timeEntry.startTime() else 'None'
             d['endTime'] = self._timeEntry.endTime(False).strftime('%Y-%m-%d %H:%M:%S %Z') if self._timeEntry.endTime(False) else 'None'
-            d['duration'] = str(self._timeEntry.period.duration())
+            d['duration'] = formatTimeDelta(self._timeEntry.period.duration())
             if d['workLocation']:
                 d['workLocation'] = d['workLocation'].workLocationID
             if d['subAccount']:
@@ -174,7 +179,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
         subAccount = T.input(id='subAccount', value=self._timeEntry.subAccount.sub)
         startTime = T.input(id='startTime', type='text', value=st.strftime('%Y-%m-%d %H:%M:%S %Z') if st else 'None')
         endTime = T.input(id='endTime', type='text', value=et.strftime('%Y-%m-%d %H:%M:%S %Z') if et else 'None')
-        duration = T.input(id='duration', value=str(self._timeEntry.period.duration()), disabled=True)
+        duration = T.input(id='duration', value=formatTimeDelta(self._timeEntry.period.duration()), disabled=True)
         save = T.input(type='button', value='Save Changes')[
             T.Tag("athena:handler")(event='onclick', handler='saveClicked')]
 
@@ -202,18 +207,15 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
 
     def doCompare(self, keys, vals):
         oldVals = {}
-
         for key in keys:
-            print(205, key)
             if key not in vals:
                 continue
-
             oldv = getattr(self._timeEntry, key)
             if key == 'duration':
                 key = 'endTime'
                 vals[key] = self._timeEntry.startTime()
-                hour, min, second = vals['duration'].split(':')
-                vals[key] = vals[key].replace(hours=int(hour), minutes=int(min), seconds=int(second))
+                hour, minute, second = vals['duration'].split(':')
+                vals[key] = vals[key].replace(hours=int(hour), minutes=int(minute), seconds=int(second))
                 val = self._timeEntry.endTime(False)
                 if val != vals[key]:
                     oldVals[key] = val
@@ -254,6 +256,8 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
     @expose
     @Transaction
     def saveClicked(self, args):
+        if not self._timeEntry.store:
+            return
         if self.employee is self._timeEntry.getEmployee():
             return
         oldVals = {}
@@ -264,7 +268,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
             if self._timeEntry.type != IEntryType("Work"):
                 keys[3] = 'duration'
         elif sup and self._timeEntry.employee in sup.getEmployees() and not self._timeEntry.approved:
-            keys = ['approved']
+            keys = ['approved', 'denied']
         if not self._timeEntry.endTime(False):
             if 'approved' in keys:
                 keys.remove('approved')

@@ -47,10 +47,7 @@ class TimePeriod(Item):
         return self._endTime
 
     def duration(self) -> ITimeDelta:
-        if self.endTime is None:
-            et = IDateTime(time.time())
-        else:
-            et = self.endTime()
+        et = self.endTime()
         return et - self.startTime()
 
 

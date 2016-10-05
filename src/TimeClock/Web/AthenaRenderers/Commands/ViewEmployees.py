@@ -29,8 +29,10 @@ class ViewEmployees(AbstractCommandRenderer, AbstractHideable):
     name = 'View Employees'
     l = None
     loaded = False
+
     def render_class(self, *a):
         return "ViewEmployees"
+
     def render_genericCommand(self, ctx: WovenContext, data):
         self.l = l = List([], ['', "Employee ID", "Name"])
         l.closeable = False
@@ -67,7 +69,6 @@ class ViewEmployees(AbstractCommandRenderer, AbstractHideable):
             i.prepare(self.l)
             i.visible = True
         self.l.callRemote('select', self.l.list, True)
-
 
 
 registerAdapter(ViewEmployees, Commands.ViewEmployees.ViewEmployees, IAthenaRenderable)

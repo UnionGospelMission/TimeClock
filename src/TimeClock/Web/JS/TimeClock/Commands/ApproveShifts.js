@@ -27,7 +27,7 @@ TimeClock.Commands.ApproveShifts.methods(
         self.timer = 0;
     },
     function timeWindowChanged(self, node){
-        if (self.timer==0){
+        if (self.timer==0) {
             self.timer++;
             self.busyCallRemote("timeWindowChanged", self.nodeById('startTime').value, self.nodeById('endTime').value).addCallback(
                 function(){

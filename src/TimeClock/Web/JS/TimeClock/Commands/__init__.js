@@ -38,6 +38,9 @@ TimeClock.Commands.methods(
 
 
         setTimeout(function(){
+            if (!self.node.dataset.toplevel){
+                return;
+            }
             var position = window.getCookie('widget_' + self.node.dataset.name);
             if (position) {
                 var x, y;

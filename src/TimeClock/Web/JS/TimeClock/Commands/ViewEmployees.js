@@ -1,4 +1,5 @@
 // import TimeClock.Commands
+// import TimeClock.Commands.SetPassword
 
 "use strict";
 TimeClock.Commands.ViewEmployees = TimeClock.Commands.subclass("TimeClock.Commands.ViewEmployees");

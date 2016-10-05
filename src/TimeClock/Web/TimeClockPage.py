@@ -1,6 +1,8 @@
 import base64
 
 import time
+
+from TimeClock.Web.AthenaRenderers.Commands.SetPassword import SetPassword
 from twisted.internet import reactor
 from zope.interface import implementer
 
@@ -52,9 +54,12 @@ def getActionItems(self, ctx):
                 o.append(SetSupervisees(i))
             iar = IAthenaRenderable(i, None)
             if iar:
+                if not self.employee.active_directory_name and self.employee.alternate_authentication and self.employee.alternate_authentication.expired:
+                    if not isinstance(iar, SetPassword):
+                        continue
+                    else:
+                        iar.visible = True
                 o.append(iar)
-            else:
-                print(49, i)
     # if IAdministrator(self.employee, None):
     #     o.append()
     from TimeClock.Web.AthenaRenderers.Widgets.TimeClockStation import TimeClockStation
@@ -66,6 +71,10 @@ class TimeClockPage(LivePage):
     cssModule = 'TimeClock'
     docFactory = xmlfile(path + "/Pages/TimeClock.html")
     pages = {}
+
+    def renderHTTP(self, ctx):
+        resp = super().renderHTTP(ctx)
+        return resp
 
     def getWidget(self, idx):
         return self._localObjects[idx]
@@ -129,12 +138,6 @@ class TimeClockPage(LivePage):
 
             reactor.callLater(delay, self.updateTime)
             return "%i:%02i" % (o // 3600, o // 60 % 60)
-        def render_remainingToday(self, ctx):
-            today = DateTime.today()
-            tomorrow = today.replace(days=1)
-            cd = ICalendarData(self.employee.viewHours(today, tomorrow))
-            o = 12 * 60 * 60 - cd.sumBetween(today, tomorrow).total_seconds()
-            return "%i:%02i" % (o // 3600, o // 60 % 60)
         def render_remainingThisWeek(self, ctx):
             today = DateTime.today()
             first_day_of_this_week = today.replace(days=-((today.weekday() + 1) % 7))
@@ -148,7 +151,7 @@ class TimeClockPage(LivePage):
             return "%i:%02i" % (o // 3600, o // 60 % 60)
         def updateTime(self):
             worked = self.render_workedThisWeek(None)
-            self.callRemote("updateTime", worked, self.render_workedToday(None), self.render_remainingToday(None), self.render_remainingThisWeek(None))
+            self.callRemote("updateTime", worked, self.render_workedToday(None), self.render_remainingThisWeek(None))
         def detached(self):
             super()
             self.updateTime = lambda *a: None
@@ -214,6 +217,10 @@ class TimeClockPage(LivePage):
                 o.append(iar)
             if not self.selectedElement:
                 self.selectedElement = list(self.elements.values())[-1]
+            if self.employee.alternate_authentication and not self.employee.active_directory_name and self.employee.alternate_authentication.expired:
+                for ele in self.elements:
+                    if isinstance(self.elements[ele], SetPassword):
+                        self.selectedElement = self.elements[ele]
             self.selectedElement.visible = True
             return o
 

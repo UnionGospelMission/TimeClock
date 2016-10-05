@@ -1,3 +1,12 @@
+import types
+from collections import defaultdict
+
+import datetime
+
+import TimeClock
+from TimeClock.Database.TimeEntry import TimeEntry
+from TimeClock.Database.TimePeriod import TimePeriod
+from TimeClock.Web.AthenaRenderers.Widgets.StaticListRow import StaticListRow
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
@@ -50,6 +59,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
     startTime = None
     endTime = None
     loaded = False
+
     def getEmployees(self):
         if self.employee.isAdministrator():
             employees = [i for i in list(Store.query(Employee)) if ISolomonEmployee(i).status == Solomon.ACTIVE]
@@ -59,12 +69,14 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         else:
             employees = []
         return employees
+
     @expose
     def load(self, active: bool = True, inactive: bool = False):
         if not self.loaded:
             self.ltl.l1.list = [IListRow(i).prepare(self.ltl.l1) for i in self.getEmployees()]
             self.ltl.l1.callRemote('select', self.ltl.l1.list, True)
             self.loaded = True
+
     def __init__(self, cmd):
         super().__init__(cmd)
         self.name = cmd.name
@@ -78,6 +90,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
     def handleEvent(self, evt: TimeEntryCreatedEvent):
         if evt.timeEntry.employee is self.selected:
             self.l2.addRow(evt.timeEntry)
+
     @overload
     def handleEvent(self, evt: TimeEntryChangedEvent):
         if evt.timeEntry.denied:
@@ -86,9 +99,11 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
     @overload
     def handleEvent(self, event: IEvent):
         pass
+
     def render_class(self, ctx: WovenContext, data):
         IEventBus("Web").register(self, ITimeEntryChangedEvent)
         return "ApproveShifts"
+
     def render_genericCommand(self, ctx: WovenContext, data):
 
         employees = []
@@ -103,9 +118,10 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         ltl.setMappingFor = self.setMappingFor
         l2.setSelectable(False)
 
-        startTime = tags.input(id='startTime', placeholder='Start Time')[tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
-        endTime = tags.input(id='endTime', placeholder='End Time')[
-            tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
+        startTime = tags.input(id='startTime', placeholder='Start Time')#[tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
+        endTime = tags.input(id='endTime', placeholder='End Time')
+        #[
+         #   tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
         addTime = [
             tags.input(id='addTime', type='button', value='Add Time Entry')[
                 tags.Tag('athena:handler')(event='onclick', handler='addTime')],
@@ -118,6 +134,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
 
         self.preprocess([startTime, endTime, addTime])
         return [startTime, endTime, tags.br(), addTime, ltl]
+
     @expose
     @Transaction
     def addTime(self, typ):
@@ -139,10 +156,46 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
                 raise Exception("No Employee Selected")
         else:
             raise Exception("Permission Denied")
+
     @expose
     def timeWindowChanged(self, startTime, endTime):
         self.startTime = startTime
         self.endTime = endTime
+
+    def addTotals(self, lst):
+        def render_listRow(self, ctx: WovenContext, data=None):
+            r = self.old_render_listRow(ctx, data)
+            print(178, r)
+            r[1](style='opacity: 0')
+            r[2](style='opacity: 0')
+            r[3](style='opacity: 0')
+            r[4](style='opacity: 0')
+            r[6](style='opacity: 0')
+            r[7](style='opacity: 0')
+            return r
+        totals = defaultdict(datetime.timedelta)
+        total = datetime.timedelta()
+        for s in lst:
+            s = s.getEntry()
+            totals[s.type.getTypeName()] += s.duration()
+            total += s.duration()
+        for typ in totals:
+            ts = totals[typ].total_seconds()
+            subtotal_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Subtotal: %s' % typ), period=TimePeriod(_startTime=IDateTime(self.startTime or 0), _endTime=IDateTime(self.startTime or 0).replace(seconds=ts))))
+            lst.append(subtotal_row)
+            subtotal_row.prepare(self.l2)
+            subtotal_row.old_render_listRow = subtotal_row.render_listRow
+            subtotal_row.render_listRow = types.MethodType(render_listRow, subtotal_row)
+
+        ts = total.total_seconds()
+        total_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Total'), period=TimePeriod(_startTime=IDateTime(self.startTime or 0), _endTime=IDateTime(self.startTime or 0).replace(seconds=ts))))
+        total_row.old_render_listRow = total_row.render_listRow
+        total_row.render_listRow = types.MethodType(render_listRow, total_row)
+        total_row.prepare(self.l2)
+        TimeClock.total_row = total_row
+        lst.append(total_row)
+
+
     @coerce
     def getMappingFor(self, e: EmployeeRenderer):
         if self.employee.isAdministrator() or e.getEmployee() in ISupervisor(self.employee).getEmployees():
@@ -151,7 +204,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
             return []
         o = []
 
-        shifts = list(i for i in self.selected.powerupsFor(ITimeEntry) if i.type in self.entryTypes and not i.denied)
+        shifts = sorted(list(i for i in self.selected.powerupsFor(ITimeEntry) if i.type in self.entryTypes and not i.denied), key=lambda p: p.period._startTime if p.period else TimeClock.Util.DateTime.DateTime.fromtimestamp(0))
         if self.startTime:
             startTime = IDateTime(self.startTime)
         else:
@@ -165,7 +218,10 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
                 s = IListRow(shift)
                 s.prepare(self.l2)
                 o.append(s)
-        o.append(SaveList(6).prepare(self.l2))
+
+        self.addTotals(o)
+
+        o.append(SaveList(8).prepare(self.l2))
         return self.preprocess(o)
 
     @Transaction

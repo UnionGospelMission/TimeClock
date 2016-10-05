@@ -2,7 +2,6 @@ from twisted.python.components import registerAdapter
 from zope.interface import implementer, directlyProvides
 
 from TimeClock.Axiom import Transaction
-from TimeClock.Axiom.Store import Store
 from TimeClock.Exceptions import DatabaseChangeCancelled
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
@@ -41,13 +40,16 @@ class _RenderListRowMixin(AbstractExpandable):
     length = 2
     ctr = -1
     keys = ('employee_id', 'name', 'expanded')
+
     def setKeys(self, *keys):
         self.keys = keys
         self.length = len(keys)
         return self
+
     def render_searchclass(self, ctx, data):
         self.ctr += 1
         return 'employee-%i' % self.ctr
+
     def render_listRow(self, ctx: WovenContext, data=None):
         listCell = inevow.IQ(ctx).patternGenerator("listCell")
         self.expanded = False
@@ -68,12 +70,14 @@ class _RenderListRowMixin(AbstractExpandable):
                 continue
             r.append(listCell(data=dict(listItem=getattr(self._employee, k)))[Tag('athena:handler')(event='ondblclick', handler='expand')])
         return r
+
     def __conform__(self, iface):
         if iface == IListRow:
             self.docFactory = self.listDocFactory
             directlyProvides(self, IListRow)
             self.visible = True
             return self
+
     @staticmethod
     def listRow(e):
         return IListRow(EmployeeRenderer(e))
@@ -173,7 +177,7 @@ class EmployeeRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin):
 
         return self.preprocess(o)
     def render_employeeActions(self, ctx, data):
-        if IAdministrator(self.employee, None) and self._employee.active_directory_name is None:
+        if IAdministrator(self.employee, None) and not self._employee.active_directory_name:
             row = inevow.IQ(ctx).patternGenerator('employeeActionPattern')
             import TimeClock.API.Commands
             from ..Commands.SetPassword import SetPassword

@@ -1,5 +1,5 @@
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
-from TimeClock.Utils import coerce
+from TimeClock.Utils import coerce, overload
 
 
 def runWithConnection(function, username, pw: str, args=()):
@@ -9,7 +9,11 @@ def runWithConnection(function, username, pw: str, args=()):
         return function(conn, *args)
 
 
-@coerce
+@overload
 def authenticate(employee: IEmployee, pw: str):
     return runWithConnection(lambda conn: conn.bind(), employee.active_directory_name, pw)
 
+
+@overload
+def authenticate(employee_id: str, pw: str):
+    return runWithConnection(lambda conn: conn.bind(), employee_id, pw)
