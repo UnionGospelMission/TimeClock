@@ -78,6 +78,7 @@ class TimeClockPage(LivePage):
 
     def getWidget(self, idx):
         return self._localObjects[idx]
+
     def getAllWidgets(self):
         return self._localObjects.copy()
 
@@ -103,12 +104,14 @@ class TimeClockPage(LivePage):
         updateTime = None
         docFactory = xmlfile(path + "/Pages/TimeClock.html", "MenuPattern")
         jsClass = "TimeClock.MenuPane"
+
         def handleEvent(self, event: IEvent):
             if isinstance(event, ClockInOutEvent):
                 if event.clockedIn:
                     self.callRemote('clockedIn')
                 else:
                     self.callRemote('clockedOut')
+
         def __init__(self, parent, ctx: WovenContext):
             super().__init__()
             self.parent = parent
@@ -118,14 +121,17 @@ class TimeClockPage(LivePage):
 
             self.setFragmentParent(parent)
             IEventBus("Database").register(self, IDatabaseEvent)
+
         def render_employeeName(self, ctx):
             return ISolomonEmployee(self.employee).name
+
         def render_workedToday(self, ctx):
             today = DateTime.today()
             tomorrow = today.replace(days=1)
             cd = ICalendarData(self.employee.viewHours(today, tomorrow))
             o = cd.sumBetween(today, tomorrow).total_seconds()
             return "%i:%02i" % (o // 3600, o // 60 % 60)
+
         def render_workedThisWeek(self, ctx):
             today = DateTime.today()
             first_day_of_this_week = today.replace(days=-((today.weekday() + 1) % 7))
@@ -138,6 +144,7 @@ class TimeClockPage(LivePage):
 
             reactor.callLater(delay, self.updateTime)
             return "%i:%02i" % (o // 3600, o // 60 % 60)
+
         def render_remainingThisWeek(self, ctx):
             today = DateTime.today()
             first_day_of_this_week = today.replace(days=-((today.weekday() + 1) % 7))
@@ -148,13 +155,18 @@ class TimeClockPage(LivePage):
             if self.employee.timeEntry:
                 delay -= o % 60
             o = 60 * 60 * 40 - o
+            if o < 0:
+                o = 0
             return "%i:%02i" % (o // 3600, o // 60 % 60)
+
         def updateTime(self):
             worked = self.render_workedThisWeek(None)
             self.callRemote("updateTime", worked, self.render_workedToday(None), self.render_remainingThisWeek(None))
+
         def detached(self):
             super()
             self.updateTime = lambda *a: None
+
         def render_menuItem(self, args):
             request, tag, data = args
             o = []
@@ -167,20 +179,25 @@ class TimeClockPage(LivePage):
                     style = ""
                 o.append(tag.clone()(id='athenaid:1-' + formatShortName(d), name=formatShortName(d), style=style)[d])
             return o
+
         def render_clockedInOut(self, ctx):
             if self.employee.timeEntry:
                 return 'In'
             return 'Out'
+
         def data_menuItem(self, ctx, idata):
             o = []
             for a in getActionItems(self, ctx):
                 if a.getName() not in o:
                     o.append(a.getName())
             return o
+
         def hideClockIn(self):
             self.callRemote("hideClockIn")
+
         def hideClockOut(self):
             self.callRemote("hideClockOut")
+
         @expose
         def navigate(self, element):
             self.parent.action.navigate(element)

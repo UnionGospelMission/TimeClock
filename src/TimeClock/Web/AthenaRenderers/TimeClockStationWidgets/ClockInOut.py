@@ -1,5 +1,6 @@
 from TimeClock.API.APIs import PublicAPI
 from TimeClock.Axiom import Transaction
+from TimeClock.Exceptions import PermissionDenied
 from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
@@ -19,6 +20,7 @@ class ClockInOut(AbstractRenderer, AbstractHideable):
     visible = True
     subAccount = None
     workLocation = None
+
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
@@ -69,6 +71,8 @@ class ClockInOut(AbstractRenderer, AbstractHideable):
     @Transaction
     def clockIn(self, empRenderer: int, passwd: str):
         emp = self.page.getWidget(empRenderer).getEmployee()
+        if emp.alternate_authentication and emp.alternate_authentication.expired:
+            raise PermissionDenied("Your password is expired, please log in and reset your password")
         PublicAPI.login(emp, emp.employee_id, passwd)
         ise = ISolomonEmployee(emp)
         emp.clockIn(ise.defaultSubAccount, ise.defaultWorkLocation)

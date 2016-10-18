@@ -4,6 +4,7 @@ import time
 import arrow
 import dateutil.parser
 
+from TimeClock import Exceptions
 from TimeClock.Web.Utils import formatTimeDelta
 from twisted.python.components import registerAdapter
 from zope.interface import implementer, directlyProvides
@@ -16,7 +17,6 @@ from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.ITimeEntry import ITimeEntry
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
-from TimeClock.ITimeClock.IDateTime import IDateTime
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
@@ -43,16 +43,25 @@ class _RenderListRowMixin(AbstractExpandable):
 
     def render_searchclass(self, ctx, data):
         self.ctr += 1
-        return 'timeEntry-%i' % self.ctr
+        bc = 'timeEntry-%i' % self.ctr
+        return bc
+
+    def render_rowclass(self, ctx, data):
+        if self._timeEntry.original:
+            return 'te-modified'
+        return ''
 
     def render_listRow(self, ctx: WovenContext, data=None):
         IEventBus("Web").register(self, ITimeEntryChangedEvent)
         listCell = inevow.IQ(ctx).patternGenerator("listCell")
+        original = self._timeEntry.original
         self.expanded = False
         st = self._timeEntry.period.startTime()
         et = self._timeEntry.period.endTime(False)
         ctx.fillSlots('index', self._timeEntry.storeID)
-        approved = T.input(id='approved', type='checkbox', checked=self._timeEntry.approved)
+        approved = T.input(id='approved', type='checkbox', checked=self._timeEntry.approved)[
+            T.Tag('athena-handler')(event='onchange', handler='approvedClicked')
+        ]
         te_type = T.input(id='entryType', type='text', disabled=True, value=self._timeEntry.type.name)
         if self._timeEntry.workLocation:
             workLocationID = T.select(id='workLocation', value=self._timeEntry.workLocation.workLocationID)[
@@ -71,7 +80,10 @@ class _RenderListRowMixin(AbstractExpandable):
         if self._timeEntry.type == IEntryType("Work"):
             ET = T.input(id='endTime', value=et.strftime('%Y-%m-%d %H:%M:%S %Z') if et else 'None')
             et = listCell(data=dict(listItem=ET))
-            reject = T.input(id='denied', type='checkbox', checked=self._timeEntry.denied)
+            reject = T.input(id='denied', type='checkbox', checked=self._timeEntry.denied)[
+                T.Tag('athena-handler')(event='onchange', handler='deniedClicked')
+            ]
+
             rj = listCell(data=dict(listItem=reject))
             duration(disabled=True)
         else:
@@ -104,13 +116,20 @@ class _RenderListRowMixin(AbstractExpandable):
              listCell(data=dict(listItem=duration)),
              listCell(data=dict(listItem=approved)),
              rj]
+        if original and original.period:
+            workLocationID(title=original.workLocation.description)
+            subAccount(title=original.subAccount.name)
+            startTime(title=original.startTime().strftime('%Y-%m-%d %H:%M:%S %Z'))
+            ET(title=original.endTime(False).strftime('%Y-%m-%d %H:%M:%S %Z') if original.endTime(False) else 'None')
         return r
+
     def __conform__(self, iface):
         if iface == IListRow:
             self.docFactory = self.listDocFactory
             directlyProvides(self, IListRow)
             self.visible = True
             return self
+
     @staticmethod
     def listRow(e):
         return IListRow(TimeEntryRenderer(e))
@@ -125,12 +144,14 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
     cssModule = "jquery.ui.datetimepicker"
     commands = None
     visible = True
+
     def getEntry(self):
         return self._timeEntry
 
     def powerUp(self, obj, iface):
         self.powerups[iface] = self.powerups.get(iface, [])
         self.powerups[iface].append(obj)
+
     @overload
     def handleEvent(self, event: ITimeEntryChangedEvent):
         if event.timeEntry is self._timeEntry:
@@ -147,6 +168,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
             keys = list(changed.keys())
             keys.append('duration')
             self.callRemote("newValues", {k: d[k] for k in keys})
+
     @overload
     def handleEvent(self, event: IEvent):
         pass
@@ -206,6 +228,10 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
         return o
 
     def doCompare(self, keys, vals):
+        approved = vals.get('approved', self._timeEntry.approved)
+        denied = vals.get('denied', self._timeEntry.denied)
+        if approved and denied:
+            raise Exceptions.DatabasException("Time entry cannot be both approved and denied")
         oldVals = {}
         for key in keys:
             if key not in vals:
@@ -263,6 +289,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
         oldVals = {}
         keys = []
         sup = ISupervisor(self.employee, None)
+        original = self._timeEntry.original or self._timeEntry.copy()
         if self.employee.isAdministrator() and self.employee is not self._timeEntry.employee:
             keys = ['workLocation', 'subAccount', 'startTime', 'endTime', 'approved', 'denied']
             if self._timeEntry.type != IEntryType("Work"):
@@ -276,6 +303,15 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
                 keys.remove('endTime')
         oldVals.update(self.doCompare(keys, args))
         if oldVals:
+            ov = oldVals.copy()
+            ov.pop('approved', None)
+            ov.pop('denied', None)
+            if ov:
+                if not original.store:
+                    original.period.store = self._timeEntry.store
+                    original.store = self._timeEntry.store
+                    self._timeEntry.original = original
+
             e = TimeEntryChangedEvent(self._timeEntry, oldVals)
             IEventBus("Web").postEvent(e)
             if e.cancelled:

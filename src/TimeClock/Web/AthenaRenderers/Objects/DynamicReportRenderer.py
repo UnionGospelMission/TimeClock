@@ -1,3 +1,4 @@
+from TimeClock.Report.Log import Log
 from twisted.python.components import registerAdapter
 from zope.component import getUtilitiesFor, getUtility
 from zope.interface import implementer, directlyProvides
@@ -35,9 +36,14 @@ class _RenderListRowMixin(AbstractExpandable):
     length = 6
     _workLocation = None
     ctr = -1
+
+    def render_rowclass(self, ctx, data):
+        return ''
+
     def render_searchclass(self, ctx, data):
         self.ctr += 1
         return 'report-%i' % self.ctr
+
     def getArgs(self):
         args = []
         for argName, argType in self._report.getArgs():
@@ -52,6 +58,7 @@ class _RenderListRowMixin(AbstractExpandable):
                 arg(type='text', class_='IDateTime')
             args.append(arg)
         return args
+
     def render_listRow(self, ctx: WovenContext, data=None):
         IEventBus("Web").register(self, IReportChangedEvent)
         IEventBus("Web").register(self, IReportEditedEvent)
@@ -103,6 +110,7 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
     commands = None
     tempValue = None
     visible = True
+
     def getReport(self):
         return self._report
 
@@ -117,12 +125,14 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
             changed = event.previous_values
             keys = list(changed.keys())
             self.callRemote("newValues", {k: d[k] for k in keys})
+
     @overload
     def handleEvent(self, event: IReportEditedEvent):
         if event.report is self._report:
             if self.tempValue != event.new_code:
                 self.callRemote("newValues", {'code': event.new_code})
                 self.tempValue = event.new_code
+
     @overload
     def handleEvent(self, event: IEvent):
         pass
@@ -200,31 +210,42 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
             if e.cancelled:
                 raise DatabaseChangeCancelled(e.retval)
 
+    def log(self, msg):
+        self.parent.parent.callRemote('log', msg)
+
+    def progress(self, progress):
+        self.parent.parent.callRemote('progress', progress)
+
     @expose
     def runReport(self, format_, args):
         mime = {'csv': 'text/csv', 'json': 'text/json', 'xml': 'text/xml', 'xls':'application/vnd.ms-excel', 'widget':'livefragment'}.get(format_, 'text/ascii')
         formatter = getUtility(IFormatterFactory, format_)()
+        log = Log(self)
         e = PreReportRunEvent(self._report, formatter, args, self.employee)
+        if e.cancelled:
+            raise ReportCancelled(e.retval)
         IEventBus("Web").postEvent(e)
         args = list(args)
         params = self._report.getArgs()
         for idx, param in enumerate(params):
-            if isinstance(param, tuple) and len(param)==2:
+            if isinstance(param, tuple) and len(param) == 2:
                 ptype = param[1]
                 if ptype == 'IDateTime':
                     args[idx] = Utils.getIDateTime(args[idx])
-        if e.cancelled:
-            raise ReportCancelled(e.retval)
-        report = [self._report.runReport(formatter, args), mime]
-        if isinstance(report[0], bytes):
-            report[0] = report[0].decode('charmap')
-        else:
-            report[0].prepare(self)
-        e = PostReportRunEvent(self._report, formatter, args, report, self.employee)
-        IEventBus("Web").postEvent(e)
-        if e.cancelled:
-            raise ReportCancelled(e.retval)
-        return e.result
+        self._report.runReport(formatter, args, log, callback=self.callback(mime, formatter, args))
+
+    def callback(self, mime, formatter, args):
+        def cb(report):
+            if isinstance(report, bytes):
+                report = report.decode('charmap')
+            else:
+                report.prepare(self)
+            e = PostReportRunEvent(self._report, formatter, args, [report, mime], self.employee)
+            IEventBus("Web").postEvent(e)
+            if e.cancelled:
+                raise ReportCancelled(e.retval)
+            self.callRemote('displayReport', e.result)
+        return cb
 
 registerAdapter(DynamicReportRenderer.listRow, DynamicReport, IListRow)
 registerAdapter(DynamicReportRenderer, DynamicReport, IAthenaRenderable)

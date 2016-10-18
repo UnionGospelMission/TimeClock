@@ -1,5 +1,6 @@
 import time
 
+from TimeClock.Web.Reports import Reports
 from twisted.internet import reactor
 
 from TimeClock.Web.Favicon import Favicon
@@ -41,6 +42,8 @@ class AthenaJS(object):
             return LoginPage()
 
         def locateChild(self, ctx, segments):
+            if segments[0] == 'Reports':
+                return Reports(), segments[1:]
             images = _collectPackageBelow(path + '/Images', 'png')
             if segments and segments[0].startswith('favicon'):
                 return Favicon(), ()

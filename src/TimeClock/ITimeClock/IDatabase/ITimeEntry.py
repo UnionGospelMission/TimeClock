@@ -12,4 +12,9 @@ class ITimeEntry(ITimePeriod):
     approved = Attribute("approved")
     denied = Attribute("denied")
     period = Attribute("period")
+    original = Attribute("original")
 
+    def copy() -> ITimePeriod:
+        pass
+
+ITimeEntry['copy'].annotations['return'] = ITimeEntry

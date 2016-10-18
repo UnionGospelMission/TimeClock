@@ -1,29 +1,40 @@
+from TimeClock.Report.Access.AMap import AMap
 from .Function import Function
 from .Sandbox import Sandbox
 from operator import lt, gt, eq, le, ge, ne, is_, is_not, contains
-cmp_map = [lt, le, eq, ne, gt, ge, contains, lambda x, y: not contains(x, y), is_, is_not]
+
+
+def contains_(a, b):
+    return contains(b, a)
+
+cmp_map = [lt, le, eq, ne, gt, ge, contains_, lambda x, y: not contains_(x, y), is_, is_not]
 
 
 class OpMap(object):
     NORETURN = object()
     CALLFUNCTION = object()
+
     @staticmethod
     def getOp(opname):
         return getattr(OpMap, opname)
+
     @staticmethod
     def POP_TOP(sandbox: Sandbox, args: list):
         sandbox.stack.get()
         return OpMap.NORETURN
+
     @staticmethod
     def ROT_TWO(sandbox: Sandbox, args: list):
         sandbox.stack[-1], sandbox.stack[-2] = sandbox.stack[-2], sandbox.stack.queue[-1]
         return OpMap.NORETURN
+
     @staticmethod
     def ROT_THREE(sandbox: Sandbox, args: list):
         a = sandbox.stack[-3:]
         a.insert(-3, a.get(-1))
         sandbox.stack[-3:] = a
         return OpMap.NORETURN
+
     @staticmethod
     def DUP_TOP(sandbox: Sandbox, args: list):
         sandbox.stack.put(sandbox.stack[-1])
@@ -50,14 +61,14 @@ class OpMap(object):
         b = sandbox.stack.get()
         if a > 1000000:
             raise TypeError("Mantissa above 1000000 not allowed")
-        sandbox.stack.put(b**a)
+        sandbox.stack.put(b ** a)
         return OpMap.NORETURN
 
     @staticmethod
     def BINARY_MULTIPLY(sandbox: Sandbox, args: list):
         a = sandbox.stack.get()
         b = sandbox.stack.get()
-        sandbox.stack.put(b*a)
+        sandbox.stack.put(b * a)
         return OpMap.NORETURN
 
     @staticmethod
@@ -116,6 +127,8 @@ class OpMap(object):
         sandbox.stack.put(sandbox.loadName(name))
         return OpMap.NORETURN
 
+    LOAD_GLOBAL = LOAD_NAME
+
     @staticmethod
     def LOAD_FAST(sandbox: Sandbox, args: list):
         name_idx = args[0] + args[1] * 256
@@ -127,6 +140,13 @@ class OpMap(object):
     def STORE_NAME(sandbox: Sandbox, args: list):
         name_idx = args[0] + args[1] * 256
         name = sandbox.function.names[name_idx]
+        sandbox.storeName(name, sandbox.stack.get())
+        return OpMap.NORETURN
+
+    @staticmethod
+    def STORE_FAST(sandbox: Sandbox, args: list):
+        name_idx = args[0] + args[1] * 256
+        name = sandbox.function.varnames[name_idx]
         sandbox.storeName(name, sandbox.stack.get())
         return OpMap.NORETURN
 
@@ -154,8 +174,8 @@ class OpMap(object):
 
     @staticmethod
     def MAKE_FUNCTION(sandbox: Sandbox, args: list):
-        argc = args[0]+args[1]*256
-        if argc!=0:
+        argc = args[0] + args[1] * 256
+        if argc != 0:
             raise TypeError("Annotations and default arguments are not supported")
         name = sandbox.stack.get()
         code = sandbox.stack.get()
@@ -209,7 +229,7 @@ class OpMap(object):
         for idx in range(count):
             val = sandbox.stack.get()
             o[sandbox.stack.get()] = val
-        sandbox.stack.put(o)
+        sandbox.stack.put(AMap(o))
         return OpMap.NORETURN
 
     @staticmethod
@@ -220,7 +240,7 @@ class OpMap(object):
 
     @staticmethod
     def GET_ITER(sandbox: Sandbox, args: list):
-        sandbox.stack[-1]=iter(sandbox.stack[-1])
+        sandbox.stack[-1] = iter(sandbox.stack[-1])
         return OpMap.NORETURN
 
     @staticmethod
@@ -230,7 +250,7 @@ class OpMap(object):
         n = next(sandbox.stack[-1], sigil)
         if n is sigil:
             sandbox.stack.get()
-            sandbox.index+=delta
+            sandbox.index += delta
         else:
             sandbox.stack.put(n)
         return OpMap.NORETURN
@@ -289,3 +309,13 @@ class OpMap(object):
         else:
             sandbox.stack.get()
         return OpMap.NORETURN
+
+    @staticmethod
+    def UNPACK_SEQUENCE(sandbox: Sandbox, args: list):
+        count = args[0] + args[1] * 256
+        tos = sandbox.stack.get()
+        l = list(tos)
+        if len(l) != count:
+            raise ValueError("Wrong number of values to unpack")
+        for i in tos:
+            sandbox.stack.put(i)

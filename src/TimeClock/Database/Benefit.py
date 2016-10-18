@@ -1,7 +1,7 @@
 from axiom.upgrade import registerAttributeCopyingUpgrader
 from twisted.python.components import registerAdapter
 
-from TimeClock.Axiom.Store import Store
+
 from TimeClock.Solomon import Solomon
 from TimeClock.Util import Null, NULL
 from axiom.attributes import text, boolean
@@ -9,6 +9,7 @@ from zope.interface import implementer
 
 from TimeClock.ITimeClock.IDatabase.IBenefit import IBenefit
 from axiom.item import Item
+import TimeClock
 
 
 
@@ -28,7 +29,7 @@ registerAttributeCopyingUpgrader(
 
 
 def findBenefit(code: str) -> IBenefit:
-    s = list(Store.query(Benefit, Benefit.code == code))
+    s = list(TimeClock.Axiom.Store.Store.query(Benefit, Benefit.code == code))
     if s:
         return s[0]
 
@@ -45,5 +46,5 @@ def findOrCreateBenefit(benentry: dict) -> IBenefit:
 
 
 registerAdapter(findBenefit, str, IBenefit)
-registerAdapter(lambda _: Benefit(store=Store), Null, IBenefit)
+registerAdapter(lambda _: Benefit(store=TimeClock.Axiom.Store.Store), Null, IBenefit)
 registerAdapter(findOrCreateBenefit, dict, IBenefit)

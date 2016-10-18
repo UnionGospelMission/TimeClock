@@ -184,7 +184,6 @@ src/TimeClock/Web/AthenaRenderers/Abstract/AbstractHideable.py
 src/TimeClock/Web/AthenaRenderers/Abstract/AbstractRenderer.py
 src/TimeClock/Web/AthenaRenderers/Abstract/__init__.py
 src/TimeClock/Web/AthenaRenderers/Commands/ApproveShifts.py
-src/TimeClock/Web/AthenaRenderers/Commands/ApproveTimeOff.py
 src/TimeClock/Web/AthenaRenderers/Commands/CheckForNewEmployees.py
 src/TimeClock/Web/AthenaRenderers/Commands/ClockInOut.py
 src/TimeClock/Web/AthenaRenderers/Commands/ManageSubAccounts.py
@@ -287,6 +286,7 @@ src/TimeClock/Web/JS/jquery/timepicker.js
 src/TimeClock/Web/JS/jquery/ui/__init__.js
 src/TimeClock/Web/JS/jquery/ui/datetimepicker.js
 src/TimeClock/Web/Pages/ActionItem.xml
+src/TimeClock/Web/Pages/ApproveTime.xml
 src/TimeClock/Web/Pages/Calendar.xml
 src/TimeClock/Web/Pages/CalendarDay.xml
 src/TimeClock/Web/Pages/ConfirmationRenderer.xml

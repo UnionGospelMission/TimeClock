@@ -61,7 +61,6 @@ class Employee(Item):
             return ise.stdUnitRate, TASK
         return ise.stdUnitRate, HRLY
 
-
     @coerce
     def getWorkLocations(self) -> [IWorkLocation]:
         return self.powerupsFor(IWorkLocation)
@@ -126,8 +125,12 @@ class Employee(Item):
         return ISupervisor(self, False)
 
     @overload
+    def getEntries(self, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
+        return [e for e in self.powerupsFor(ITimeEntry) if e.period.startTime() < endTime and e.period.endTime() > startTime]
+
+    @overload
     def getEntries(self, area: ISubAccount, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
-        return [e for e in self.getEntries(area) if e.period.startTime() > startTime and e.period.endTime() > endTime]
+        return [e for e in self.getEntries(area) if e.period.startTime() < endTime and e.period.endTime() > startTime]
 
     @overload
     def getEntries(self, entryType: IEntryType) -> [ITimeEntry]:

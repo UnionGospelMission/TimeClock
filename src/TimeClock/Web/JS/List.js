@@ -351,7 +351,7 @@ module.exports = function(list) {
           item._values[name] = newValues[name];
         }
         if (notCreate !== true) {
-          list.templater.set(item, item.values());
+          // list.templater.set(item, item.values());
         }
       } else {
         return item._values;

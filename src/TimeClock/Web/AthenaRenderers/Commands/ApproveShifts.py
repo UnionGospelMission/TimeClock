@@ -6,6 +6,7 @@ import datetime
 import TimeClock
 from TimeClock.Database.TimeEntry import TimeEntry
 from TimeClock.Database.TimePeriod import TimePeriod
+from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderers.Widgets.StaticListRow import StaticListRow
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
@@ -56,7 +57,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
     ltl = None
     l1 = None
     l2 = None
-    startTime = None
+    startTime = DateTime.today().replace(day=1).replace(months=-1)
     endTime = None
     loaded = False
 
@@ -83,7 +84,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         if isinstance(cmd, ApproveTime):
             self.entryType = IEntryType("Work")
             self.entryTypes = self.entryTypes = tuple(
-                self.args[0].store.query(EntryType)
+                self.args[0].store.query(EntryType, EntryType.active == True)
             )
 
     @overload
@@ -165,7 +166,6 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
     def addTotals(self, lst):
         def render_listRow(self, ctx: WovenContext, data=None):
             r = self.old_render_listRow(ctx, data)
-            print(178, r)
             r[1](style='opacity: 0')
             r[2](style='opacity: 0')
             r[3](style='opacity: 0')
@@ -194,7 +194,6 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         total_row.prepare(self.l2)
         TimeClock.total_row = total_row
         lst.append(total_row)
-
 
     @coerce
     def getMappingFor(self, e: EmployeeRenderer):

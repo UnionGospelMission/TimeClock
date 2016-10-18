@@ -3,13 +3,19 @@ import arrow
 import time
 
 from TimeClock.ITimeClock.IDateTime import IDateTime
+from TimeClock.Util.I_Coerce import I_Coercer
 from .Util.Coerce import Coercer
 from .Util.Overload import Overloader
 from .Util import fromFunction
 from .Util.subclass import issubclass, Subclass
 
+
 def coerce(func):
     return Coercer(func)
+
+
+def i_coerce(func):
+    return I_Coercer(func)
 
 
 def overload(func):
@@ -48,9 +54,9 @@ TZOffsets = dict(
     AKDT=-480,
     AKST=-540,
     HADT=-540,
-    HAST=-600
+    HAST=-600,
+    UTC=0
 )
-
 
 
 tzpattern = re.compile('([A-Z0-9a-z]{3,4})$')

@@ -9,6 +9,7 @@ from TimeClock.Database.Employee import Employee
 from TimeClock.Database.EntryType import EntryType
 from TimeClock.Database.TimeEntry import TimeEntry
 from TimeClock.Database.TimePeriod import TimePeriod
+from TimeClock.Util.DateTime import DateTime
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
@@ -41,14 +42,16 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
     subaccounts = None
     name = 'View Shifts'
     loaded = False
-    startTime = None
+    startTime = DateTime.today().replace(day=1).replace(months=-1)
     endTime = None
 
     @expose
     def load(self):
         if not self.loaded:
             self.loaded = True
-            l = [IListRow(i) for i in self.getEntries()]
+            startTime = self.startTime or IDateTime(0)
+            endTime = self.endTime or IDateTime(time.time())
+            l = [IListRow(i).prepare(self.l) for i in self.getEntries() if not (i.endTime() < startTime or i.startTime() > endTime)]
             for i in l:
                 self.l.addRow(i)
             self.loaded = True
@@ -86,21 +89,20 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
     @expose
     def timeWindowChanged(self, startTime, endTime):
         if startTime:
-            startTime = IDateTime(startTime)
+            self.startTime = startTime = IDateTime(startTime)
         else:
-            startTime = IDateTime(0)
+            self.startTime = startTime = IDateTime(0)
         if endTime:
-            endTime = IDateTime(endTime)
+            self.endTime = endTime = IDateTime(endTime)
         else:
-            endTime = IDateTime(time.time())
-        entries = [IListRow(i).prepare(self.l) for i in self.getEntries() if not (i.endTime() < startTime or i.startTime() > endTime)]
+            self.endTime = None
+        entries = [IListRow(i).prepare(self.l) for i in self.getEntries() if not (i.endTime() < startTime or (endTime is not None and i.startTime() > endTime))]
         self.l.list = entries
         return entries
 
     def addTotals(self, lst: [ITimeEntry]):
         def render_listRow(self, ctx: WovenContext, data=None):
             r = self.old_render_listRow(ctx, data)
-            print(178, r)
             r[1](style='opacity: 0')
             r[2](style='opacity: 0')
             r[3](style='opacity: 0')

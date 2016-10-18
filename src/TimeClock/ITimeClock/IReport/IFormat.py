@@ -7,11 +7,15 @@ from TimeClock.ITimeClock.IReport.IReportData import IReportData
 
 class IFormat(Interface):
     name = Attribute("name")
+
     def formatRow(row: IReportData) -> bytes:
         pass
+
     def formatHeader(columns: [str]) -> bytes:
         pass
+
     def formatFooter() -> bytes:
         pass
+
     def getReport() -> bytes:
         pass

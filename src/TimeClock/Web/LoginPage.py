@@ -38,7 +38,8 @@ class LoginPage(LivePage):
             employee = IEmployee(username, None)
             if employee is None:
                 return "access denied"
-
+            if employee.alternate_authentication and employee.alternate_authentication.expired:
+                return "Please login to enable quick actions"
             try:
                 PublicAPI.login(employee, username, password)
             except PermissionDenied as e:

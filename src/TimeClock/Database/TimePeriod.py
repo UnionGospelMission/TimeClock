@@ -50,6 +50,9 @@ class TimePeriod(Item):
         et = self.endTime()
         return et - self.startTime()
 
+    def copy(self):
+        return TimePeriod(**self.persistentValues())
+
 
 @overload
 def newTimePeriod(n: Null) -> ITimePeriod:

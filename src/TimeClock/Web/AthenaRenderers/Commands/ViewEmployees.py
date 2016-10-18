@@ -46,7 +46,7 @@ class ViewEmployees(AbstractCommandRenderer, AbstractHideable):
             tags.Tag('athena:handler')(handler='refresh', event='onchange')
         ]
         self.preprocess([showActive, showInactive])
-        return "Show Active", showActive, "Show Inactive", showInactive, l
+        return "Show Active", showActive, tags.br(), "Show Inactive", showInactive, l
 
     @coerce
     def getEmployees(self, active, inactive) -> [IEmployee]:

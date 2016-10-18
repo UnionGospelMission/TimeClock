@@ -64,6 +64,12 @@ class SolomonEmployee(object):
     def getAvailableBenefits(self) -> dict:
         return {i: Solomon.getBenefitAvailable(i) for i in self.getBenefits()}
 
+    @property
+    def stdSlry(self):
+        if 'StdSlry' in self.record:
+            return self.record['StdSlry']
+        return 0
+
 
 registerAdapter(SolomonEmployee, IEmployee, ISolomonEmployee)
 registerAdapter(SolomonEmployee, int, ISolomonEmployee)

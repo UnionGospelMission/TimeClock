@@ -8,7 +8,7 @@ class ISolomonEmployee(Interface):
     defaultSubAccount = Attribute("defaultArea")
     phone = Attribute("Phone")
     defaultWorkLocation = Attribute("defaultWorkLocation")
-    stdSlry = Attribute("Standard Salry")
+    stdSlry = Attribute("Standard Salary")
     status = Attribute("Status")
 
     def getBenefits() -> [IBenefit]:

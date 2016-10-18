@@ -15,8 +15,10 @@ class Coercer(object):
         self.varargs = bool(self.func.__code__.co_flags & 0x04)
         self.kwargs = bool(self.func.__code__.co_flags & 0x08)
         self.__annotations__ = func.__annotations__
+
     def __get__(self, instance, _):
         return BoundFunction(instance, self)
+
     def __call__(self, *a, **kw):
         null = object()
         varargs = []

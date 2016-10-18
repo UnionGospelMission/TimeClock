@@ -5,20 +5,26 @@ import time
 from dis import HAVE_ARGUMENT
 
 from zope.interface import Interface
+from zope.interface.interface import Method
 from zope.interface.verify import verifyObject, verifyClass
 
 from TimeClock import Utils
-from TimeClock.Util import BoundFunction
+from TimeClock.Report.Access.AFunction import AFunction
+from TimeClock.Report.IAccess.IAbstractAccessible import IAbstractAccessible
+from TimeClock.Util import BoundFunction, OverloadedMethod, AnnotatedMethod
 from .Function import Function
 
 
 class LifoQueue(LifoQueue):
     def __init__(self):
         super().__init__()
+
     def __getitem__(self, item):
         return self.queue[item]
+
     def __setitem__(self, item, val):
         self.queue[item] = val
+
     def get(self):
         return super().get(False)
 
@@ -32,8 +38,9 @@ class Sandbox(object):
     counter = None
     iterlimit = None
     timelimit = None
+    sub = None
 
-    def __init__(self, parent, function, arguments, *, globals_=None, functions=(), attributes_accessible = ()):
+    def __init__(self, parent, function, arguments, *, globals_=None, interfaces=()):
         self.parent = parent
         if globals_ is None:
             globals_ = {}
@@ -42,19 +49,18 @@ class Sandbox(object):
             self.blocks = parent.blocks
             self.frames = parent.frames
             self.globals = parent.globals
-            self.functions = parent.functions
-            self.attributes_accessible = parent.attributes_accessible
+            self.interfaces = parent.interfaces
         else:
             self.stack = LifoQueue()
             self.blocks = LifoQueue()
             self.frames = LifoQueue()
             self.globals = globals_
-            self.functions = functions
-            self.attributes_accessible = attributes_accessible
+            self.interfaces = interfaces
         self.local_variables = {}
         self.function = function
         self.arguments = arguments
         self.index = 0
+
     def loadName(self, name):
         if name in self.local_variables:
             return self.local_variables[name]
@@ -68,23 +74,17 @@ class Sandbox(object):
         raise NameError("%s is not defined" % name)
 
     def getAttr(self, obj, attr):
-        if obj in self.attributes_accessible:
-            return getattr(obj, attr)
-        if type(obj) in self.attributes_accessible:
-            return getattr(obj, attr)
-        for i in self.attributes_accessible:
-            if isinstance(i, Interface) or Utils.issubclass(i, Interface):
-                try:
-                    verifyObject(i, obj)
-                except:
-                    try:
-                        verifyClass(i, obj)
-                    except:
-                        continue
-                if attr in i:
-                    return getattr(obj, attr)
-                else:
-                    AttributeError("%r interface attribute access denied for %s" % type(obj, attr))
+        try:
+            verifyObject(IAbstractAccessible, obj)
+        except:
+            print(79, obj, type(obj), attr)
+            raise
+        for iface in obj.__implemented__.interfaces():
+            if issubclass(iface, IAbstractAccessible) and attr in iface:
+                if isinstance(iface[attr], (Method,)):
+                    return AFunction(getattr(obj, attr))
+                return getattr(obj, attr)
+        print(82, obj, attr)
         raise AttributeError("%r attribute access denied" % type(obj))
 
     def storeName(self, name, value):
@@ -93,25 +93,13 @@ class Sandbox(object):
     def callFunction(self, function, arguments, keywords=None):
         if keywords is None:
             keywords = {}
-        if function in self.functions:
-            return [self.PRIMITIVE, function, arguments, keywords]
-        if isinstance(function, types.BuiltinFunctionType) and function.__self__ is not None:
-            for i in self.functions:
-                if hasattr(i, '__get__') and i.__get__(function.__self__) == function:
-                    return [self.PRIMITIVE, function, arguments, keywords]
-        if isinstance(function, (types.MethodType, BoundFunction)):
-            for i in self.functions:
-                if not isinstance(i, BoundFunction):
-                    continue
-                if i.__func__ is function.__func__ and i.oself is None:
-                    return [self.PRIMITIVE, function, arguments, keywords]
-            if function.__func__ in self.functions:
-                return [self.PRIMITIVE, function, arguments, keywords]
-        if keywords:
-            raise TypeError("keyword arguments unsupported")
-        if type(function) == Function:
+        if isinstance(function, AFunction):
+            return [function.TYPE, function.function, arguments] + ([keywords] if keywords is not None else [])
+        if isinstance(function, Function):
             return [self.FUNCTION, function, arguments]
-        raise TypeError("Function %r not allowed" %function)
+        if Utils.issubclass(function, IAbstractAccessible):
+            return [self.PRIMITIVE, function, arguments, keywords]
+        raise TypeError("Function %r not allowed" % function)
 
     def execute(self, iterlimit, timelimit):
         self.startTime = time.time()
@@ -158,14 +146,14 @@ class Sandbox(object):
                     func, args, kw = func[1:]
                     self.stack.put(func(*args, **kw))
                 elif typ is self.FUNCTION:
-                    func, args = func[1:]
-                    sb = Sandbox(self, func, args)
+                    func, args, *_ = func[1:]
+                    self.sub = sb = Sandbox(self, func, args)
                     gen = sb.execute(self.iterlimit - self.counter, self.timelimit + self.startTime - time.time())
                     n = next(gen)
                     while n is self.SUSPEND_INST or n is self.SUSPEND_TIME:
                         r = yield n
                         n = gen.send(r)
-                    print(166, n)
+                    self.sub = None
                     self.stack.put(n)
 
             elif ret != OpMap.NORETURN:

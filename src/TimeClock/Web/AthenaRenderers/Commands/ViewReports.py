@@ -1,7 +1,7 @@
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
-from TimeClock.Axiom import Store
+from TimeClock.Axiom import Store, Transaction
 from TimeClock.Database import Commands
 from TimeClock.ITimeClock.IEvent.IEvent import IEvent
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
@@ -30,12 +30,15 @@ class ViewReports(AbstractCommandRenderer, AbstractHideable):
     subaccounts = None
     name = 'View Reports'
     l = None
+
     @overload
     def handleEvent(self, evt: ReportCreatedEvent):
         self.l.addRow(IListRow(evt.report))
+
     @overload
     def handleEvent(self, event: IEvent):
         pass
+
     def render_genericCommand(self, ctx: WovenContext, data):
         IEventBus("Web").register(self, IReportChangedEvent)
         self.l = l = List(list(Store.Store.query(DynamicReport)), ["", "Report Name", "Report Description", "Report Arguments", 'Format', 'Run Report'])
@@ -45,11 +48,13 @@ class ViewReports(AbstractCommandRenderer, AbstractHideable):
         l.visible = True
         newReport = tags.input(type='button', value='New Report')[tags.Tag('athena:handler')(event='onclick', handler='newReport')]
         self.preprocess([newReport])
-        return newReport, l
+        log = self.preprocess([tags.div(id='log', class_='log')])
+        return newReport, l, log
 
     @expose
+    @Transaction
     def newReport(self):
-        r = DynamicReport(code='', name='new report')
+        r = DynamicReport(name='new report')
         e = ReportCreatedEvent(r)
         IEventBus("Web").postEvent(e)
 

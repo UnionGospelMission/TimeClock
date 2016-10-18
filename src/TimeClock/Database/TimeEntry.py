@@ -27,8 +27,15 @@ class TimeEntry(Item):
     approved = boolean(default=False)
     denied = boolean(default=False)
     employee = reference()
+    original = reference()
 
-    schemaVersion = 3
+    schemaVersion = 4
+
+    def copy(self):
+        attributes = self.persistentValues()
+        nte = TimeEntry(**attributes)
+        nte.period = nte.period.copy()
+        return nte
 
     def startTime(self) -> IDateTime:
         return self.period.startTime()
@@ -83,8 +90,14 @@ registerAttributeCopyingUpgrader(
     TimeEntry,
     2,
     3,
-
 )
+
+registerAttributeCopyingUpgrader(
+    TimeEntry,
+    3,
+    4,
+)
+
 
 def newTimeEntry(x):
     te = TimeEntry(store=Store.Store)

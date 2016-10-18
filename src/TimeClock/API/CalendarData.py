@@ -1,3 +1,4 @@
+from TimeClock.Report.IAccess.IACalendarData import IACalendarData
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 from TimeClock.ITimeClock.IDateTime import ITimeDelta
@@ -55,6 +56,7 @@ class CalendarData(object):
                 continue
             o.append(i)
         return CalendarData(o)
+
     @coerce
     def sumBetween(self, start: IDateTime, end: IDateTime) -> ITimeDelta:
         b = self.between(start, end)
@@ -69,21 +71,16 @@ class CalendarData(object):
             this = et - st
             total += this
         return total
+
     @coerce
     def getData(self, date: IDateTime):
         start = date.date()
         end = date.date().replace(days=1)
         return "%0.2f" % (self.sumBetween(start, end).seconds / 60 / 60)
+
     def addTime(self, dt: IDateTime):
         self.entries.append(dt)
         self.entries.sort(key=lambda x: x.startTime())
-
-
-
-
-
-
-
 
 
 registerAdapter(CalendarData, list, ICalendarData)

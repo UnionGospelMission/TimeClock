@@ -28,12 +28,14 @@ class DateTime(Arrow):
             yield d
             d = d.replace(days=1)
     @classmethod
-    def today(cls):
+    def today(cls) -> Arrow:
         return cls.now().date()
+
     def nextMonth(self, *, day=None):
         if day is None:
             day = self.day
         return self.date().replace(months=1).replace(day=day)
+
     @classmethod
     def get(cls, expr):
         expr = expr.replace(' -', '-')

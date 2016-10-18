@@ -7,7 +7,9 @@ from TimeClock.ITimeClock.IDatabase.IItem import IItem
 class IEntryType(IItem):
     def getDescription() -> str:
         pass
+
     def getTypeName() -> str:
         pass
+
     def getBenefit() -> IBenefit:
         pass

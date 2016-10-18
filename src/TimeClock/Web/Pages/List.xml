@@ -30,6 +30,7 @@
             <athena:handler event="onclick" handler="itemClicked"/>
             <invisible n:render="list">
                 <tr n:pattern="liveListRow" n:render="liveFragment">
+                    <n:attr name="class" n:render="rowclass"/>
                     <invisible n:render="listRow">
                         <td n:render="mapping" n:pattern="listCell">
                             <n:attr name="class" n:render="searchclass"/>

@@ -62,3 +62,5 @@ import TimeClock.Util.TimeEntryValidator
 from TimeClock.Report.Format import Widget
 
 from TimeClock.Database.CacheAuthenticationMethod import CacheAuthenticationMethod
+
+from TimeClock.Database.Benefit import Benefit

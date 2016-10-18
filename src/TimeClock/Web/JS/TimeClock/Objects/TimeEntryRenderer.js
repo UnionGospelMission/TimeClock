@@ -9,9 +9,12 @@ TimeClock.Objects.TimeEntryRenderer = TimeClock.Objects.subclass("TimeClock.Obje
 TimeClock.Objects.TimeEntryRenderer.methods(
     function __init__(self, node){
         TimeClock.Objects.TimeEntryRenderer.upcall(self, "__init__", node);
-
+        self.dirty = false;
         setTimeout(function(){
             try {
+                self.node.onchange=function() {
+                    self.dirty=true;
+                };
                 self.setDateTimePicker(self.nodeById('startTime'));
                 self.setDateTimePicker(self.nodeById('endTime'));
             }
@@ -58,5 +61,19 @@ TimeClock.Objects.TimeEntryRenderer.methods(
                 break;
         }
         $(node).datetimepicker(options);
+    },
+    function approvedClicked(self, node) {
+        self.nodeById('denied').checked = false;
+    },
+    function deniedClicked(self, node) {
+        self.nodeById('approved').checked = false;
+    },
+    function saveClicked(self, node, event) {
+        if (event!=undefined){
+            event.stopPropagation();
+        }
+        if (self.dirty) {
+            TimeClock.Objects.TimeEntryRenderer.upcall(self, "saveClicked", node, event);
+        }
     }
 );

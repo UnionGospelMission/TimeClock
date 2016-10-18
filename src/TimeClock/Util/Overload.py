@@ -19,10 +19,12 @@ class Overloader(Attribute):
         if '__overloader__' not in flocals:
             flocals['__overloader__'] = object.__new__(cls)
         return flocals['__overloader__']
+
     def __init__(self):
         self.__name__='overloader'
         if not hasattr(self, 'functions'):
             self.functions = defaultdict(Overloaded)
+
     def add(self, func):
         return self.functions[func.__name__].add(func)
 

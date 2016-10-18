@@ -16,16 +16,21 @@ from TimeClock.Solomon import Solomon
 class EntryType(Item):
     schemaVersion = 2
     name = text()
-    active = boolean(default=True)
+    active = boolean(default=False)
     description = text()
     id = text()
+
     def getTypeName(self) -> str:
         return self.name
+
     def getDescription(self) -> str:
         return self.description
+
     def getBenefit(self) -> IBenefit:
         ben = Solomon.getBenefitByClass(self.name.upper())
-        return IBenefit(ben)
+        if ben is not None:
+            return IBenefit(ben)
+
     @staticmethod
     def fromSolomon(entry):
         et = IEntryType(entry['BenClassId'])

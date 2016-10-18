@@ -24,11 +24,14 @@ class ScheduleTimeOff(AbstractCommandRenderer, AbstractHideable):
     jsClass = 'TimeClock.Commands.ScheduleTimeOff'
     subaccounts = None
     name = 'Schedule Time Off'
+
     def __init__(self, cmd: Commands.ScheduleTimeOff.ScheduleTimeOff):
         super().__init__(cmd)
         self.cmd = cmd
+
     def render_class(self, ctx: WovenContext, data):
         return "ScheduleTimeOff"
+
     def getSubs(self, se):
         subs = []
         for a in self.employee.getSubAccounts():
@@ -38,6 +41,7 @@ class ScheduleTimeOff(AbstractCommandRenderer, AbstractHideable):
                 return [o]
             subs.append(o)
         return subs
+
     def getWLocs(self, se):
         locs = []
         for b in self.employee.getWorkLocations():
@@ -47,6 +51,7 @@ class ScheduleTimeOff(AbstractCommandRenderer, AbstractHideable):
                 return [o]
             locs.append(o)
         return locs
+
     def render_genericCommand(self, ctx: WovenContext, data):
         startTime = tags.input(id='startTime', type='text', class_='IDateTime', placeholder='Start Time')
         endTime = tags.input(id='hours', type='number', step='0.5', placeholder='Hours')

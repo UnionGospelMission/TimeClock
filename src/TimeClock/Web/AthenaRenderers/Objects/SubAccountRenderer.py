@@ -34,9 +34,14 @@ class _RenderListRowMixin(AbstractExpandable):
     length = 3
     _subAccount = None
     ctr = -1
+
     def render_searchclass(self, ctx, data):
         self.ctr += 1
         return 'subAccount-%i' % self.ctr
+
+    def render_rowclass(self, ctx, data):
+        return ''
+
     def render_listRow(self, ctx: WovenContext, data=None):
         IEventBus("Web").register(self, ISubAccountChangedEvent)
         listCell = inevow.IQ(ctx).patternGenerator("listCell")

@@ -30,15 +30,18 @@ from nevow.loaders import xmlfile
 from nevow import tags as T
 
 
-
-
 class _RenderListRowMixin(AbstractExpandable):
     length = 3
     _workLocation = None
     ctr = -1
+
     def render_searchclass(self, ctx, data):
         self.ctr += 1
         return 'workLocation-%i' % self.ctr
+
+    def render_rowclass(self, ctx, data):
+        return ''
+
     def render_listRow(self, ctx: WovenContext, data=None):
         IEventBus("Web").register(self, IWorkLocationChangedEvent)
         listCell = inevow.IQ(ctx).patternGenerator("listCell")

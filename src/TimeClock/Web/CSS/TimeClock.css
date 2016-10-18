@@ -18,3 +18,12 @@ input[disabled] {
     width: 20%;
     border: 1px solid black;
 }
+
+.menu li:hover {
+    cursor: pointer;
+    cursor: hand;
+}
+
+.te-modified {
+    background-color: yellow;
+}

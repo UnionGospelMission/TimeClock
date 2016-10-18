@@ -46,6 +46,9 @@ class _RenderListRowMixin(AbstractExpandable):
         self.length = len(keys)
         return self
 
+    def render_rowclass(self, ctx, data):
+        return ''
+
     def render_searchclass(self, ctx, data):
         self.ctr += 1
         return 'employee-%i' % self.ctr

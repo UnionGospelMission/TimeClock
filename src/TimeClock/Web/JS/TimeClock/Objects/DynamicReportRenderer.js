@@ -63,47 +63,47 @@ TimeClock.Objects.DynamicReportRenderer.methods(
     function runReport(self, node, evt) {
         var args = [];
         var e = self.nodeById('arguments').getElementsByTagName('input');
-        for (var idx=0; idx< e.length;idx++){
+        for (var idx = 0; idx < e.length; idx++) {
             var ele = e[idx];
-            if (ele.id!=''){
-                if (ele.type!='checkbox'){
+            if (ele.id != '') {
+                if (ele.type != 'checkbox') {
                     args.push(ele.value);
                 }
-                else{
+                else {
                     args.push(ele.checked);
                 }
             }
         }
-
-        self.busyCallRemote("runReport", self.nodeById('format').value, args).addCallback(function(retval){
-            console.log(retval);
-            var report, mimetype;
-            report = retval[0];
-            mimetype = retval[1];
-            if (mimetype=='livefragment'){
-                console.log(63, report);
-                self.addChildWidgetFromWidgetInfo(report).addCallback(
-                    function childAdded(newwidget) {
-                        console.log(65, newwidget);
-                        $(newwidget.node).dialog({close: newwidget.onClose});
-                    }
-                );
-            }
-            else {
-                var blob = new Blob([report], {type: mimetype});
-                var url = URL.createObjectURL(blob);
-                var a = document.createElement("a");
-                a.style = "display: none";
-                document.body.appendChild(a);
-                a.href = url;
-                a.download = self.nodeById('name').value + "." + self.nodeById('format').value;
-                a.target = '_blank';
-                a.click();
-                //window.open(url,'_blank');
-                document.body.removeChild(a);
-            }
-
-        });
+        self.widgetParent.widgetParent.clearLog();
+        self.busyCallRemote("runReport", self.nodeById('format').value, args);
+    },
+    function displayReport(self, retval) {
+        console.log(retval);
+        var report, mimetype;
+        report = retval[0];
+        mimetype = retval[1];
+        if (mimetype=='livefragment'){
+            console.log(63, report);
+            self.addChildWidgetFromWidgetInfo(report).addCallback(
+                function childAdded(newwidget) {
+                    console.log(65, newwidget);
+                    $(newwidget.node).dialog({close: newwidget.onClose});
+                }
+            );
+        }
+        else {
+            var blob = new Blob([report], {type: mimetype});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.style = "display: none";
+            document.body.appendChild(a);
+            a.href = url;
+            a.download = self.nodeById('name').value + "." + self.nodeById('format').value;
+            a.target = '_blank';
+            a.click();
+            //window.open(url,'_blank');
+            document.body.removeChild(a);
+        }
     },
     function saveClicked(self, node, evt){
         console.log(89);

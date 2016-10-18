@@ -1,4 +1,5 @@
 from TimeClock.Axiom.Store import Store
+from TimeClock.Database.CacheAuthenticationMethod import CacheAuthenticationMethod
 from TimeClock.Database.Employee import Employee
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IPermission import IPermission
@@ -19,6 +20,7 @@ def findEmployee(adid: str) -> IEmployee:
 def newEmployee(_):
     from TimeClock.Axiom.Store import Store
     e = Employee(store=Store)
+    e.alternate_authentication = CacheAuthenticationMethod(store=Store)
     e.powerUp(IPermission("Clock In"), IPermission)
     return e
 

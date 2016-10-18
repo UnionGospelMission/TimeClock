@@ -83,7 +83,18 @@ TimeClock.Widgets.List.methods(
                 item.found = true;
                 return true;
             }
-            return match(item);
+            match(item);
+            if (!item.found) {
+                var elm = item.elm;
+                var ih = elm.innerHTML;
+                if (ih.toLowerCase().indexOf(val) > -1) {
+                    item.found = true;
+                    return true;
+                }
+            }
+            else {
+                return true;
+            }
         };
 
         if (self.table.tHead.rows.length>1 && self.table.tBodies[0].rows.length > 0) {
@@ -124,7 +135,6 @@ TimeClock.Widgets.List.methods(
         self.lst = new List(self.node, self.options);
     },
     function serverAppend(self, newnode) {
-        console.log(125, newnode);
         self.toProcess++;
         if (self.toProcess < 1){
             self.toProcess = 1;
@@ -160,8 +170,16 @@ TimeClock.Widgets.List.methods(
                         valueNames: self.valueNames,
                         searchFunction: self.searchFunction
                     };
-                    self.lst = new List(self.node, self.options);
+                    if (self.lst == undefined) {
+                        self.lst = new List(self.node, self.options);
+                    }
+                    else {
+                        self.lst.reIndex();
+                    }
                 }
+
+
+
             }
         ).addErrback(function(){
             if (--self.toProcess==0) {
