@@ -65,8 +65,8 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         if self.employee.isAdministrator():
             employees = [i for i in list(Store.query(Employee)) if ISolomonEmployee(i).status == Solomon.ACTIVE]
         elif self.employee.isSupervisor():
-            employees = [i for i in list(Store.query(Employee, Employee.supervisor == ISupervisor(self.employee))) if
-                         ISolomonEmployee(i).status == Solomon.ACTIVE]
+            sup = ISupervisor(self.employee)
+            employees = [i for i in sup.getEmployees() if ISolomonEmployee(i).status == Solomon.ACTIVE]
         else:
             employees = []
         return employees
@@ -121,8 +121,6 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
 
         startTime = tags.input(id='startTime', placeholder='Start Time')#[tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
         endTime = tags.input(id='endTime', placeholder='End Time')
-        #[
-         #   tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
         addTime = [
             tags.input(id='addTime', type='button', value='Add Time Entry')[
                 tags.Tag('athena:handler')(event='onclick', handler='addTime')],

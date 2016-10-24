@@ -200,7 +200,6 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
             self._report.store = self.employee.store
         oldVals = {}
         keys = []
-        sup = ISupervisor(self.employee, None)
         if self.employee.isAdministrator():
             keys = ['name', 'description', 'code']
         oldVals.update(self.doCompare(keys, args))

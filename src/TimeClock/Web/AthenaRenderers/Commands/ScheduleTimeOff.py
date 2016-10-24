@@ -1,3 +1,5 @@
+from TimeClock import Exceptions
+from TimeClock.Utils import coerce
 from twisted.python.components import registerAdapter
 
 from TimeClock.Axiom import Transaction
@@ -71,10 +73,15 @@ class ScheduleTimeOff(AbstractCommandRenderer, AbstractHideable):
     @expose
     @Transaction
     def scheduleTimeOff(self, startTime: IDateTime, duration: float, typ: IEntryType, sub: ISubAccount, wloc: IWorkLocation):
-        entry = self.cmd.execute(self.employee, self.employee, IDateTime(startTime), float(duration), IEntryType(typ), ISubAccount(sub), IWorkLocation(wloc))
-        c = TimeEntryCreatedEvent(entry)
-        IEventBus("Web").postEvent(c)
-
+        duration = float(duration)
+        if duration > 10:
+            self.callRemote("alert", '<div>Please submit a separate time off request for each day you plan to be gone.</div>')
+            return False
+        else:
+            entry = self.cmd.execute(self.employee, self.employee, IDateTime(startTime), float(duration), IEntryType(typ), ISubAccount(sub), IWorkLocation(wloc))
+            c = TimeEntryCreatedEvent(entry)
+            IEventBus("Web").postEvent(c)
+        return True
 
 
 

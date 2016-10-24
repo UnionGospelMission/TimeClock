@@ -7,12 +7,16 @@
 <body>
     <div n:render="MenuPane">Menu Pane</div>
     <div class="menu" id="Menu" n:pattern="MenuPattern" n:render="liveFragment" xmlns:athena="http://divmod.org/ns/athena/0.7">
-        <ul id="menuList">
-            <li n:data="menuItem" n:render="menuItem"><athena:handler event="onclick" handler="menuClicked" /></li>
-        </ul>
+        <accordian id="menuListContainer">
+            <div>Menu</div>
+                <ul id="menuList">
+                    <li n:data="menuItem" n:render="menuItem"><athena:handler event="onclick" handler="menuClicked" /></li>
+                </ul>
+        </accordian>
+
         <input type="button" value="Logout"><athena:handler event="onclick" handler="logout"/></input>
         <div id="greeter"><h3>Welcome <invisible n:render="employeeName"/>, you are currently clocked <span id="cinout"><invisible n:render="clockedInOut"/></span></h3><h5>You have worked <span id="hoursWorked"><invisible n:render="workedThisWeek"/></span> this week (<span id="hoursWorkedToday"><invisible n:render="workedToday"/></span> today)</h5>
-            <h6>Remaining time: <span id="hoursRemainingThisWeek"><invisible n:render="remainingThisWeek"/></span></h6>
+            <h6><n:attr name="style" n:render="showRemainingTime"/>Remaining time: <span id="hoursRemainingThisWeek"><invisible n:render="remainingThisWeek"/></span></h6>
         </div>
     </div>
     <div n:render="ActionPane">ActionPane</div>

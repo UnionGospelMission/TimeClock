@@ -1,3 +1,4 @@
+from TimeClock.ITimeClock.IDatabase.ISupervisedBy import ISupervisedBy
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
@@ -52,8 +53,10 @@ class SetSupervisees(AbstractCommandRenderer, AbstractHideable):
 
     @overload
     def handleEvent(self, event: SupervisorAssignmentChangedEvent):
-        if event.employee.supervisor and event.employee.supervisor is self.selected:
-            self.ltl.callRemote("refresh");
+        sups = event.employee.getSupervisors()
+        if self.selected in sups or self.selected in event.previous_values:
+            self.ltl.callRemote("refresh")
+
     @overload
     def handleEvent(self, event: SupervisorCreatedEvent):
         iar = IListRow(event.employee)
@@ -112,20 +115,28 @@ class SetSupervisees(AbstractCommandRenderer, AbstractHideable):
         sup = ISupervisor(s.getEmployee(), None)
         if not sup:
             raise Exceptions.DatabasException("%s is not a supervisor" % s.name)
+
+        if not IAdministrator(self.employee, None):
+            raise Exceptions.PermissionDenied("Only administrators can set supervisors")
+
+        accounts = [i.getEmployee() for i in accounts]
+
         for emp in sup.getEmployees():
-            emp.supervisor = None
-            sup.powerDown(emp, ISupervisee)
-        if self.args[0].hasPermission(self.employee):
-            for e in accounts:
-                try:
-                    oldsup = e.getEmployee().supervisor
-                    newsup = sup
-                    self.args[0].execute(IAdministrator(self.employee), e.getEmployee(), newsup)
-                    e = SupervisorAssignmentChangedEvent(e.getEmployee(), oldsup)
-                    IEventBus("Web").postEvent(e)
-                    if e.cancelled:
-                        raise Exceptions.DatabaseChangeCancelled()
-                except Exceptions.DatabaseChangeCancelled:
-                    continue
+            if emp not in accounts:
+                oldsups = emp.getSupervisors()
+                emp.powerDown(sup, ISupervisedBy)
+                sup.powerDown(emp, ISupervisee)
+                e = SupervisorAssignmentChangedEvent(emp, oldsups)
+                IEventBus("Web").postEvent(e)
+                if e.cancelled:
+                    raise Exceptions.DatabaseChangeCancelled()
 
-
+        for emp in accounts:
+            if emp not in sup.getEmployees():
+                oldsups = emp.getSupervisors()
+                emp.powerUp(sup, ISupervisedBy)
+                sup.powerUp(emp, ISupervisee)
+                e = SupervisorAssignmentChangedEvent(emp, oldsups)
+                IEventBus("Web").postEvent(e)
+                if e.cancelled:
+                    raise Exceptions.DatabaseChangeCancelled()

@@ -18,7 +18,6 @@ class IAEmployee(IAbstractAccessible):
     stdSlry = Attribute("Standard Salary")
     status = Attribute("Status")
     hourly_by_task = Attribute('hourly_by_task')
-    supervisor = Attribute('supervisor')
     emergency_contact_name = Attribute('emergency_contact_name')
     emergency_contact_phone = Attribute('emergency_contact_phone')
 
@@ -45,4 +44,9 @@ class IAEmployee(IAbstractAccessible):
     def viewHours(startTime, endTime) -> IACalendarData:
         """
         Returns all IEntryType("Work") time entries between startTime and endTime
+        """
+
+    def getSupervisors():
+        """
+        Returns list of this employees supervisors
         """

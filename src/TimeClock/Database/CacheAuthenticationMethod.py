@@ -23,20 +23,25 @@ class CacheAuthenticationMethod(Item):
     password = text()
     salt = text(defaultFactory=getSalt)
     expired = boolean(default=False)
+
     def authenticate(self, employee: IEmployee, password: str) -> bool:
-        try:
-            valid = AD.authenticate(employee.active_directory_name, password)
-            if valid:
-                newpw = str(sha512((password + self.salt).encode('charmap')).hexdigest())
-                if self.password != newpw:
-                    self.password = newpw
-            return valid
-        except ldap3.core.exceptions.LDAPException:
+        if employee.active_directory_name:
+            try:
+                valid = AD.authenticate(employee.active_directory_name, password)
+                if valid:
+                    newpw = str(sha512((password + self.salt).encode('charmap')).hexdigest())
+                    if self.password != newpw:
+                        self.password = newpw
+                return valid
+            except ldap3.core.exceptions.LDAPException:
+                return str(sha512((password + self.salt).encode('charmap')).hexdigest()) == self.password
+        else:
             return str(sha512((password + self.salt).encode('charmap')).hexdigest()) == self.password
 
     def setPassword(self, pw):
         newpw = str(sha512((pw + self.salt).encode('charmap')).hexdigest())
         self.password = newpw
+        self.expired = False
         return self
 
 registerAttributeCopyingUpgrader(

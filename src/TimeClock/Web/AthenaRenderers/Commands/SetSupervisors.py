@@ -1,3 +1,5 @@
+from TimeClock.ITimeClock.IDatabase.ISupervisedBy import ISupervisedBy
+from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
@@ -54,7 +56,8 @@ class SetSupervisors(AbstractCommandRenderer, AbstractHideable):
     @overload
     def handleEvent(self, event: SupervisorAssignmentChangedEvent):
         if event.employee is self.selected:
-            self.ltl.callRemote("refresh");
+            self.ltl.callRemote("refresh")
+
     @overload
     def handleEvent(self, event: SupervisorCreatedEvent):
         iar = IListRow(event.employee)
@@ -81,7 +84,7 @@ class SetSupervisors(AbstractCommandRenderer, AbstractHideable):
         l1.name = 'Employees'
         l2 = List(sups, ["Supervisor ID", "Name"])
         l2.name = 'Supervisors'
-        l2.limit = 1
+
         self.ltl = ltl = ListToListSelector(l1, l2)
         ltl.prepare(self)
         ltl.visible = True
@@ -93,34 +96,43 @@ class SetSupervisors(AbstractCommandRenderer, AbstractHideable):
     @coerce
     def getMappingFor(self, e: EmployeeRenderer):
         self.selected = IEmployee(e.getEmployee())
-        sup = self.selected.supervisor
-        if sup and (not sup.employee or not ISupervisor(sup.employee, None)):
-            self.selected.supervisor = None
-            sup = None
-        if not sup:
-            return []
-        for i in self.ltl.liveFragmentChildren[1].liveFragmentChildren:
-            if isinstance(i, EmployeeRenderer):
-                if i.getEmployee() is sup.employee:
-                    return [i]
+        sups = self.selected.getSupervisors()
+
+        o = []
+        for sup in sups:
+            if not sup.employee or not ISupervisor(sup.employee, None):
+                self.selected.powerDown(sup, ISupervisedBy)
+                sup.pwerDown(self.selected, ISupervisee)
+                continue
+            for i in self.ltl.liveFragmentChildren[1].liveFragmentChildren:
+                if isinstance(i, EmployeeRenderer):
+                    if i.getEmployee() is sup.employee:
+                        o.append(i)
+        return o
 
     @Transaction
     def setMappingFor(self, e: EmployeeRenderer, accounts: [EmployeeRenderer]):
         if not e:
             raise Exceptions.DatabasException("No employee selected")
         if self.args[0].hasPermission(self.employee):
-            oldsup = e.getEmployee().supervisor
-            if len(accounts) > 1:
-                raise Exceptions.DatabasException("Employee cannot have more than one supervisor")
-            if not accounts:
-                self.args[0].execute(IAdministrator(self.employee), e.getEmployee(), None)
-            else:
-                newsup = ISupervisor(accounts[0].getEmployee())
-                self.args[0].execute(IAdministrator(self.employee), e.getEmployee(), newsup)
-            e = SupervisorAssignmentChangedEvent(e.getEmployee(), oldsup)
-            IEventBus("Web").postEvent(e)
-            if e.cancelled:
-                raise Exceptions.DatabaseChangeCancelled()
+            oldsups = e.getEmployee().getSupervisors()
+            accounts = [i.getEmployee() for i in accounts]
+            for sup in oldsups:
+                if sup.employee not in accounts:
+                    sup.powerDown(e.getEmployee(), ISupervisee)
+                    e.getEmployee().powerDown(sup, ISupervisedBy)
+                    evt = SupervisorAssignmentChangedEvent(e.getEmployee(), oldsups)
+                    IEventBus("Web").postEvent(evt)
+                    if evt.cancelled:
+                        raise Exceptions.DatabaseChangeCancelled()
 
+            for a in accounts:
+                if ISupervisor(a) not in oldsups:
+                    ISupervisor(a).powerUp(e.getEmployee(), ISupervisee)
+                    e.getEmployee().powerUp(ISupervisor(a), ISupervisedBy)
+                    evt = SupervisorAssignmentChangedEvent(e.getEmployee(), oldsups)
+                    IEventBus("Web").postEvent(evt)
+                    if evt.cancelled:
+                        raise Exceptions.DatabaseChangeCancelled()
 
 registerAdapter(SetSupervisors, Commands.SetSupervisor.SetSupervisor, IAthenaRenderable)

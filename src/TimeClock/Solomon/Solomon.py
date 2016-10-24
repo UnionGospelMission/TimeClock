@@ -193,5 +193,6 @@ dummyEntry = {'DfltWrkloc': 'OFF   ',
               'City': 'Spokane                       ',
               'State': 'WA',
               'stdSlry': 0,
-              'stdUnitRate': 9
+              'stdUnitRate': 9,
+              'payGrpId': 'REGHR'
               }

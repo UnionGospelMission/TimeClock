@@ -247,6 +247,7 @@ class OpMap(object):
     def FOR_ITER(sandbox: Sandbox, args: list):
         delta = args[0] + args[1] * 256
         sigil = object()
+
         n = next(sandbox.stack[-1], sigil)
         if n is sigil:
             sandbox.stack.get()
@@ -319,3 +320,10 @@ class OpMap(object):
             raise ValueError("Wrong number of values to unpack")
         for i in tos:
             sandbox.stack.put(i)
+
+    @staticmethod
+    def LIST_APPEND(sandbox: Sandbox, args: list):
+        count = args[0] + args[1] * 256
+        tos = sandbox.stack.get()
+        list.append(sandbox.stack[-count], tos)
+        return OpMap.NORETURN

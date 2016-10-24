@@ -21,7 +21,7 @@ class Reports(File):
             return ret
         if self.fp.path.endswith('py'):
             try:
-                u = requests.post('http://hilite.me/api', data=dict(code=ret, linenos=True), timeout=0.1)
+                u = requests.post('http://hilite.me/api', data=dict(code=ret, linenos=True), timeout=1)
             except:
                 return ret
             if 199 < u.status_code < 300:

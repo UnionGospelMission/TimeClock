@@ -103,7 +103,13 @@ class _RenderListRowMixin(AbstractExpandable):
             startTime(disabled=True)
             ET(disabled=True)
             duration(disabled=True)
-            if self._timeEntry.denied or self._timeEntry.approved or not self.employee.isSupervisor() or self._timeEntry.employee not in ISupervisor(self.employee).getEmployees():
+            if self._timeEntry.denied or \
+                    self._timeEntry.approved or \
+                    not self.employee.isSupervisor() or \
+                    self._timeEntry.employee not in ISupervisor(self.employee).getEmployees() or \
+                    self._timeEntry.subAccount not in ISupervisor(self.employee).getSubAccounts() or \
+                    self.parent.selectable or \
+                    self.employee is self._timeEntry.employee:
                 reject(disabled=True)
                 approved(disabled=True)
 

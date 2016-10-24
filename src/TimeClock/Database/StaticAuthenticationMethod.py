@@ -1,4 +1,6 @@
 from zope.interface import implementer
+
+from TimeClock.Database.CacheAuthenticationMethod import CacheAuthenticationMethod
 from axiom.attributes import text, boolean
 
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
@@ -23,6 +25,12 @@ class StaticAuthenticationMethod(Item):
     expired = boolean(default=True)
 
     def authenticate(self, employee: IEmployee, password: str) -> bool:
+        if employee.active_directory_name:
+            na = CacheAuthenticationMethod(store=self.store)
+            na.salt = self.salt
+            na.password = self.password
+            employee.alternate_authentication = na
+            return na.authenticate(employee, password)
         return str(sha512((password + self.salt).encode('charmap')).hexdigest()) == self.password
 
     def setPassword(self, pw):

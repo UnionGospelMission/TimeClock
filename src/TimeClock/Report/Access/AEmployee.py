@@ -1,10 +1,11 @@
+from TimeClock.ITimeClock.IDatabase.ISubAccount import ISubAccount
 from TimeClock.ITimeClock.IDateTime import IDateTime
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Report.IAccess.IACalendarData import IACalendarData
 from TimeClock.Report.IAccess.IASubAccount import IASubAccount
 from TimeClock.Report.IAccess.IAWorkLocation import IAWorkLocation
 from TimeClock.Util.registerAdapter import adapter
-from TimeClock.Utils import coerce
+from TimeClock.Utils import coerce, overload
 from zope.interface import implementer
 
 from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
@@ -58,10 +59,14 @@ class AEmployee(object):
     def hourly_by_task(self):
         return self._employee.hourly_by_task
 
-    @property
-    def supervisor(self) -> IAEmployee:
-        if self._employee.supervisor:
-            return IAEmployee(self._employee.supervisor.employee)
+    @overload
+    def getSupervisors(self) -> [IAEmployee]:
+        return [IAEmployee(i.employee) for i in self._employee.getSupervisors()]
+
+    @overload
+    def getSupervisors(self, area) -> [IAEmployee]:
+        a = ISubAccount(area)
+        return [IAEmployee(i.employee) for i in self._employee.getSupervisors() if a in i.getSubAccounts()]
 
     @property
     def emergency_contact_name(self):
@@ -86,7 +91,11 @@ class AEmployee(object):
     def getTimeEntries(self, startTime: IDateTime, endTime: IDateTime) -> IACalendarData:
         return self._employee.getEntries(startTime=startTime, endTime=endTime)
 
-    @coerce
-    def viewHours(self, startTime, endTime) -> IACalendarData:
+    @overload
+    def viewHours(self, startTime: IDateTime, endTime: IDateTime) -> IACalendarData:
         return self._employee.viewHours(startTime, endTime)
+
+    @overload
+    def viewHours(self, startTime: IDateTime, endTime: IDateTime, approved: bool) -> IACalendarData:
+        return self._employee.viewHours(startTime, endTime, approved)
 

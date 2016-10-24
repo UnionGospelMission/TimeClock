@@ -24,12 +24,15 @@ TimeClock.Commands.ScheduleTimeOff.methods(
     },
     function scheduleTimeOff(self, node) {
         self.busyCallRemote('scheduleTimeOff', self.nodeById('startTime').value, self.nodeById('hours').value, self.nodeById('type').value, self.nodeById('sub').value, self.nodeById('wloc').value).addCallback(
-            function() {
-                var d = document.createElement('div');
-                d.innerHTML = 'Time off requested';
-                $(d).dialog();
-                self.nodeById('startTime').value='';
-                self.nodeById('hours').value='';
+            function(worked) {
+                if (worked) {
+                    var d = document.createElement('div');
+                    d.innerHTML = 'Time off requested';
+                    $(d).dialog();
+                    self.nodeById('startTime').value='';
+                    self.nodeById('hours').value='';
+                }
+
             }
         );
     }

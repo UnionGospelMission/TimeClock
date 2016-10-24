@@ -7,7 +7,6 @@ from zope.interface import provider
 
 from twisted.python import usage
 from twisted.plugin import IPlugin
-from TimeClock.initialize import initialize
 
 
 
@@ -33,6 +32,8 @@ class PrintAllItems(Options, axiomatic.AxiomaticSubCommandMixin):
 
 
     def postOptions(self):
+        from TimeClock.initialize import initialize
+
         s = self.parent.getStore()
 
         initialize(s, self)

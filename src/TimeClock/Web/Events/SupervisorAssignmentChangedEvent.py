@@ -14,5 +14,6 @@ class SupervisorAssignmentChangedEvent(WebEvent):
     def __init__(self, e: IEmployee, previous_values):
         self.employee = e
         self.previous_values = previous_values
+
     def getType(self):
         return IEmployeeChangedEvent

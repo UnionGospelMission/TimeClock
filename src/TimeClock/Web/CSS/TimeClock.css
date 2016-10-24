@@ -27,3 +27,20 @@ input[disabled] {
 .te-modified {
     background-color: yellow;
 }
+
+
+.ui-draggable, .ui-droppable {
+	background-position: top;
+}
+
+.ui-state-active {
+    border: 1px solid #003eff;
+	background: #007fff;
+	font-weight: normal;
+	color: #ffffff;
+}
+
+.ui-dialog-titlebar-close {
+	text-indent: -9999px;
+	font-size: -9999px;
+}

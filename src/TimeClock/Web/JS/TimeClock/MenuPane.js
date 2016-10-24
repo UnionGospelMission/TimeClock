@@ -7,6 +7,10 @@ TimeClock.MenuPane.methods(
     function __init__(self, node) {
         TimeClock.MenuPane.upcall(self, "__init__", node);
         self.commands = TimeClock.ActionPane.fromAthenaID(2);
+        setTimeout(function() {
+            $(self.nodeById('menuListContainer')).accordion({collapsible: true, active: false});
+            $(self.nodeById('menuList')).menu();
+        }, 1);
     },
     function menuClicked(self, node){
         var name = node.id.split("-")[1];

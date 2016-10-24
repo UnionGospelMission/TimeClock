@@ -7,6 +7,7 @@ from TimeClock.Database.Commands.AssignTask import AssignTask
 from TimeClock.Database.Commands.CreateTask import CreateTask
 from TimeClock.Database.Commands.ManageSubAccounts import ManageSubAccounts
 from TimeClock.Database.Commands.ManageWorkLocations import ManageWorkLocations
+from TimeClock.Database.Commands.SetSupervisorSubAccounts import SetSupervisorSubAccounts
 from TimeClock.Database.Commands.ViewBenefits import ViewBenefits
 from TimeClock.Database.Commands.ViewReports import ViewReports
 from TimeClock.Database.Permissions import Permission
@@ -81,6 +82,7 @@ def initializeCommands(Store: store.Store):
     Store.powerUp(Store.findOrCreate(ScheduleTimeOff), ICommand)
     Store.powerUp(Store.findOrCreate(ApproveTimeOff), ICommand)
     Store.powerUp(Store.findOrCreate(ViewBenefits), ICommand)
+    Store.powerUp(Store.findOrCreate(SetSupervisorSubAccounts), ICommand)
 
 
 def commandFinder(Store: store.Store):
@@ -131,6 +133,7 @@ def initializeAPIs(Store: store.Store):
     AdministratorAPI.powerUp(findCommand("ScheduleTimeOff"), ICommand)
     AdministratorAPI.powerUp(findCommand("ApproveTimeOff"), ICommand)
     AdministratorAPI.powerUp(findCommand("ViewBenefits"), ICommand)
+    AdministratorAPI.powerUp(findCommand("SetSupervisorSubAccounts"), ICommand)
     sv = findCommand("ScheduleVacation")
     if sv:
         for api in [AdministratorAPI, EmployeeAPI, SupervisorAPI]:
@@ -155,7 +158,7 @@ def initializeAPIs(Store: store.Store):
     SupervisorAPI.powerUp(findCommand("ClockOut"), ICommand)
     SupervisorAPI.powerUp(findCommand("ViewHours"), ICommand)
     SupervisorAPI.powerUp(findCommand("ViewAverageHours"), ICommand)
-    SupervisorAPI.powerUp(findCommand("ViewEmployees"), ICommand)
+    # SupervisorAPI.powerUp(findCommand("ViewEmployees"), ICommand)
     SupervisorAPI.powerUp(findCommand("AssumeRole"), ICommand)
     SupervisorAPI.powerUp(findCommand("ClockIn"), ICommand)
     SupervisorAPI.powerUp(findCommand("EditTime"), ICommand)

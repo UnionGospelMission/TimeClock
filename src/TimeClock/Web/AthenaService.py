@@ -52,19 +52,24 @@ class AthenaService(Item):
             self.privkey = pkey
         self.iajs_fqpn = options['iajs']
         return self
+
     def installOn(self, store):
         self.store = store
         store.powerUp(self, twisted.application.service.IService)
+
     def setName(self, name):
         if self.parent:
             raise RuntimeError("Cannot set name after parent")
         self.name = name
+
     def setServiceParent(self, parent):
         IServiceCollection(parent).addService(self)
         if isinstance(parent, Item):
             self.parent = parent
+
     def disownServiceParent(self, parent):
         return self.parent.removeService(self)
+
     def startService(self):
         from ..PTPython import embed
         embed()

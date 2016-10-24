@@ -50,8 +50,8 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
         if not self.loaded:
             self.loaded = True
             startTime = self.startTime or IDateTime(0)
-            endTime = self.endTime or IDateTime(time.time())
-            l = [IListRow(i).prepare(self.l) for i in self.getEntries() if not (i.endTime() < startTime or i.startTime() > endTime)]
+            endTime = self.endTime or None
+            l = [IListRow(i).prepare(self.l) for i in self.getEntries() if not (i.endTime() < startTime or (endTime and i.startTime() > endTime))]
             for i in l:
                 self.l.addRow(i)
             self.loaded = True
@@ -113,7 +113,8 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
         totals = defaultdict(datetime.timedelta)
         total = datetime.timedelta()
         for s in lst:
-            totals[s.type.getTypeName()] += s.duration()
+            if s.type:
+                totals[s.type.getTypeName()] += s.duration()
             total += s.duration()
         for typ in totals:
             ts = totals[typ].total_seconds()

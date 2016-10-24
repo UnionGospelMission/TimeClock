@@ -72,10 +72,11 @@ class ClockInOut(AbstractRenderer, AbstractHideable):
     def clockIn(self, empRenderer: int, passwd: str):
         emp = self.page.getWidget(empRenderer).getEmployee()
         if emp.alternate_authentication and emp.alternate_authentication.expired:
-            raise PermissionDenied("Your password is expired, please log in and reset your password")
-        PublicAPI.login(emp, emp.employee_id, passwd)
-        ise = ISolomonEmployee(emp)
-        emp.clockIn(ise.defaultSubAccount, ise.defaultWorkLocation)
+            self.callRemote('alert', "<div>Your password is expired, please log in and reset your password</div>")
+        else:
+            PublicAPI.login(emp, emp.employee_id, passwd)
+            ise = ISolomonEmployee(emp)
+            emp.clockIn(ise.defaultSubAccount, ise.defaultWorkLocation)
 
     @expose
     @Transaction

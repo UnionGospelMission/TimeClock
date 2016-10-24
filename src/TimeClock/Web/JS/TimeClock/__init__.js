@@ -92,6 +92,9 @@ TimeClock.methods(
             dialogClass: "no-close",
             buttons: buttons
         });
+    },
+    function alert(self, msg) {
+        self.dialog(msg, true);
     }
 
 

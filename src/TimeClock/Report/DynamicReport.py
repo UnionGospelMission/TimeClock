@@ -134,13 +134,14 @@ class DynamicReport(Item):
             tbody=AFunction(tags.tbody),
             IDateTime=AFunction(IDateTime),
             divmod=AFunction(divmod),
-            len=AFunction(len)
+            len=AFunction(len),
+            iter=AFunction(iter)
         )
         globs.update(
             {i.getName(): i
              for i in interfaces})
 
-        exc = Sandbox(None, function,
+        DynamicReport.exc = exc = Sandbox(None, function,
                       parameters,
                       globals_=globs,
                       interfaces=a_report.getInterfaces()

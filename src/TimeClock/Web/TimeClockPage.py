@@ -3,6 +3,7 @@ import base64
 import time
 
 from TimeClock.Web.AthenaRenderers.Commands.SetPassword import SetPassword
+from nevow import tags
 from twisted.internet import reactor
 from zope.interface import implementer
 
@@ -145,6 +146,15 @@ class TimeClockPage(LivePage):
             reactor.callLater(delay, self.updateTime)
             return "%i:%02i" % (o // 3600, o // 60 % 60)
 
+        def render_showRemainingTime(self, ctx):
+            ise = ISolomonEmployee(self.employee, None)
+            if ise:
+                pg = ise.payGrpId
+                if pg in ['REGHR', 'REGFT']:
+                    return 'display: inline;'
+            return 'display: none;'
+
+
         def render_remainingThisWeek(self, ctx):
             today = DateTime.today()
             first_day_of_this_week = today.replace(days=-((today.weekday() + 1) % 7))
@@ -177,7 +187,7 @@ class TimeClockPage(LivePage):
                     style = "display:none"
                 else:
                     style = ""
-                o.append(tag.clone()(id='athenaid:1-' + formatShortName(d), name=formatShortName(d), style=style)[d])
+                o.append(tag.clone()(id='athenaid:1-' + formatShortName(d), name=formatShortName(d), style=style)[tags.div()[d]])
             return o
 
         def render_clockedInOut(self, ctx):

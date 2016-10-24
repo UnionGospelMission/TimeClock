@@ -4,6 +4,7 @@ from TimeClock.Database.Commands.CommandEvent import CommandEvent
 from TimeClock.ITimeClock.ICommand import ICommand
 from TimeClock.ITimeClock.IDatabase.IAdministrator import IAdministrator
 from TimeClock.ITimeClock.IDatabase.IItem import IItem
+from TimeClock.ITimeClock.IDatabase.ISupervisedBy import ISupervisedBy
 from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.Utils import overload
@@ -28,24 +29,32 @@ class SetSupervisor(Item):
     @overload
     def hasPermission(self, permissions: [IPermission]) -> bool:
         return True
+
     @overload
     def execute(self, caller: IAdministrator, employee: IEmployee, supervisor: ISupervisor):
         c = CommandEvent(caller, self, employee, supervisor)
         IEventBus("Commands").postEvent(c)
-        if employee.supervisor:
-            employee.supervisor.powerDown(employee, ISupervisee)
-        employee.supervisor = supervisor
-        if supervisor:
+
+        if not supervisor:
+            for sup in employee.getSupervisors():
+                sup.powerDown(employee, ISupervisee)
+                employee.powerDown(sup, ISupervisedBy)
+        else:
             supervisor.powerUp(employee, ISupervisee)
+            employee.powerUp(supervisor, ISupervisedBy)
+
     @overload
     def execute(self, caller: IAdministrator, employee: IEmployee, supervisor: type(None)):
         c = CommandEvent(caller, self, employee, supervisor)
         IEventBus("Commands").postEvent(c)
-        if employee.supervisor:
-            employee.supervisor.powerDown(employee, ISupervisee)
-        employee.supervisor = supervisor
-        if supervisor:
+        if not supervisor:
+            for sup in employee.getSupervisors():
+                sup.powerDown(employee, ISupervisee)
+                employee.powerDown(sup, ISupervisedBy)
+        else:
             supervisor.powerUp(employee, ISupervisee)
+            employee.powerUp(supervisor, ISupervisedBy)
+
     @overload
     def execute(self, caller: IPerson, *parameters: object):
         print(44, caller, parameters)

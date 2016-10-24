@@ -24,3 +24,4 @@ from . import CheckForNewEmployees
 from . import SetPassword
 # from . import ApproveTimeOff
 from . import ViewBenefits
+from . import SetSupervisorSubAccounts

@@ -35,5 +35,8 @@ class ISupervisor(IPerson):
 
     employee = Attribute("Employee")
 
+    def getSubAccounts():
+        pass
+
 
 

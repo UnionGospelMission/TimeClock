@@ -1,12 +1,16 @@
 from zope.interface import implementer
 
+from TimeClock import Utils
 from TimeClock.Axiom import Transaction
 from TimeClock.Database.Event.ClockInOutEvent import ClockInOutEvent
 from TimeClock.ITimeClock.IDatabase.IAssignedTask import IAssignedTask
+from TimeClock.ITimeClock.IDatabase.IPerson import IPerson
+from TimeClock.ITimeClock.IDatabase.ISupervisedBy import ISupervisedBy
 from TimeClock.ITimeClock.IDatabase.IWorkLocation import IWorkLocation
 from TimeClock.ITimeClock.IEvent.IEventBus import IEventBus
 from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Util.InMemoryTimePeriod import InMemoryTimePeriod
+from axiom.upgrade import registerAttributeCopyingUpgrader, registerUpgrader
 from ..ITimeClock.IDateTime import IDateTime
 
 from TimeClock import API
@@ -34,12 +38,13 @@ TASK = 4
 
 @implementer(IEmployee, ISupervisee)
 class Employee(Item):
+    schemaVersion = 2
     emergency_contact_name = text()
     emergency_contact_phone = text()
     active_directory_name = text()
     employee_id = integer()
     alternate_authentication = reference()
-    supervisor = reference()
+
     timeEntry = reference()
     hourly_by_task = boolean(default=False)
 
@@ -108,7 +113,7 @@ class Employee(Item):
     @Transaction
     def clockOut(self) -> ITimeEntry:
         timeEntry = self.timeEntry
-        if (not timeEntry) or timeEntry.period._endTime!=None:
+        if (not timeEntry) or timeEntry.period._endTime != None:
             raise InvalidTransformation("User not currently clocked in")
         timeEntry.period.end()
         self.timeEntry = None
@@ -126,7 +131,8 @@ class Employee(Item):
 
     @overload
     def getEntries(self, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
-        return [e for e in self.powerupsFor(ITimeEntry) if e.period.startTime() < endTime and e.period.endTime() > startTime]
+        return [e for e in self.powerupsFor(ITimeEntry) if
+                e.period.startTime() < endTime and e.period.endTime() > startTime]
 
     @overload
     def getEntries(self, area: ISubAccount, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
@@ -147,18 +153,22 @@ class Employee(Item):
         return [e for e in self.getEntries(area) if e.type == entryType]
 
     @overload
-    def getEntries(self, area: ISubAccount, loc: IWorkLocation, approved: bool, entryType: IEntryType, startTime: IDateTime,
+    def getEntries(self, area: ISubAccount, loc: IWorkLocation, approved: bool, entryType: IEntryType,
+                   startTime: IDateTime,
                    endTime: IDateTime) -> [
         ITimeEntry]:
-        return [e for e in self.getEntries(area, startTime, endTime) if e.type == entryType and e.workLocation == loc and e.approved == approved]
+        return [e for e in self.getEntries(area, startTime, endTime) if
+                e.type == entryType and e.workLocation == loc and e.approved == approved]
 
     @overload
-    def getEntries(self, area: ISubAccount, loc: IWorkLocation, entryType: IEntryType, startTime: IDateTime, endTime: IDateTime) -> [
+    def getEntries(self, area: ISubAccount, loc: IWorkLocation, entryType: IEntryType, startTime: IDateTime,
+                   endTime: IDateTime) -> [
         ITimeEntry]:
         return [e for e in self.getEntries(area, startTime, endTime) if e.type == entryType and e.workLocation == loc]
 
     @overload
-    def getEntries(self, area: ISubAccount, entryType: IEntryType, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
+    def getEntries(self, area: ISubAccount, entryType: IEntryType, startTime: IDateTime, endTime: IDateTime) -> [
+        ITimeEntry]:
         return [e for e in self.getEntries(area, startTime, endTime) if e.type == entryType]
 
     @overload
@@ -192,13 +202,19 @@ class Employee(Item):
         return cd.between(start, end)
 
     @overload
-    def viewHours(self, area: ISubAccount, loc: IWorkLocation, approved: bool, entryType: IEntryType, start: IDateTime, end: IDateTime) -> ICalendarData:
+    def viewHours(self, start: IDateTime, end: IDateTime, approved: bool) -> ICalendarData:
+        cd = ICalendarData([i for i in self.getEntries(entryType="Work") if i.approved == approved])
+        return cd.between(start, end)
+
+    @overload
+    def viewHours(self, area: ISubAccount, loc: IWorkLocation, approved: bool, entryType: IEntryType, start: IDateTime,
+                  end: IDateTime) -> ICalendarData:
         from TimeClock.Database.TimeEntry import TimeEntry
         entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry,), comparison=AND(
-            TimeEntry.approved==approved,
-            TimeEntry.employee==self,
-            TimeEntry.workLocation==loc,
-            TimeEntry.subAccount==area
+            TimeEntry.approved == approved,
+            TimeEntry.employee == self,
+            TimeEntry.workLocation == loc,
+            TimeEntry.subAccount == area
         ))
         return ICalendarData(list(entries)).between(start, end)
 
@@ -218,5 +234,17 @@ class Employee(Item):
             outdata.addTime(InMemoryTimePeriod(day, day + total / 90))
         return outdata
 
+    def getSupervisors(self):
+        return self.powerupsFor(ISupervisedBy)
 
 
+def upgrade_1_2(old: Employee):
+    supervisor = old.supervisor
+    keys = dict((str(name), getattr(old, name))
+                for (name, _) in old.getSchema())
+    keys.pop('supervisor')
+    newitem = old.upgradeVersion(Employee.typeName, 1, 2, **keys)
+    if supervisor:
+        newitem.powerUp(supervisor, ISupervisedBy)
+
+registerUpgrader(upgrade_1_2, Employee.typeName, 1, 2)
