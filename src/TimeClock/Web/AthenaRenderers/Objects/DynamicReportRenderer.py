@@ -1,3 +1,4 @@
+from TimeClock.Axiom.Store import Store
 from TimeClock.Report.Log import Log
 from twisted.python.components import registerAdapter
 from zope.component import getUtilitiesFor, getUtility
@@ -46,18 +47,40 @@ class _RenderListRowMixin(AbstractExpandable):
 
     def getArgs(self):
         args = []
-        for argName, argType in self._report.getArgs():
-            arg = T.input(id=argName, placeholder=argName, title=argName)
+        for arg_t_n_d in self._report.getArgs():
+            argName = arg_t_n_d[0]
+            argType = arg_t_n_d[1]
+            if len(arg_t_n_d) == 3:
+                argDefault = arg_t_n_d[2]
+            else:
+                argDefault = ''
+            arg = T.input(name=argName, placeholder=argName, title=argName, class_='Argument')
             if argType == 'int':
-                arg(type='number', step=1)
+                arg(type='number', step=1, value=argDefault or 0)
             elif argType == 'float':
-                arg(type='number', step=0.001)
+                arg(type='number', step=0.001, value=argDefault or 0)
             elif argType == 'str':
-                arg(type='text')
+                arg(type='text', value=argDefault)
             elif argType == 'IDateTime':
-                arg(type='text', class_='IDateTime')
+                arg(type='text', class_='IDateTime Argument', value=argDefault)
+            elif argType == 'bool':
+                arg(type='checkbox')
+                if argDefault:
+                    arg(checked=True)
+                arg = T.label()[arg, argName]
+            elif argType == 'IAWorkLocation':
+                from TimeClock.Database.WorkLocation import WorkLocation
+                l = [T.option(value='None', selected=True)['None']] + [T.option(value=i.workLocationID)[i.description] for i in
+                                                                     list(Store.query(WorkLocation)) if i.active]
+                arg = T.select(name=argName, placeholder=argName, title=argName, value='None', class_='Argument')[l]
+            elif argType == 'IASubAccount':
+                from TimeClock.Database.SubAccount import SubAccount
+                l = [T.option(value='None', selected=True)['None']] + [T.option(value=i.name)[i.name] for i in
+                                                                     list(Store.query(SubAccount)) if i.active]
+                arg = T.select(name=argName, placeholder=argName, title=argName, value='None', class_='Argument')[l]
+
             args.append(arg)
-        return args
+        return self.preprocess(args)
 
     def render_listRow(self, ctx: WovenContext, data=None):
         IEventBus("Web").register(self, IReportChangedEvent)
@@ -226,6 +249,8 @@ class DynamicReportRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMi
         IEventBus("Web").postEvent(e)
         args = list(args)
         params = self._report.getArgs()
+        print(252, params)
+        print(253, args)
         for idx, param in enumerate(params):
             if isinstance(param, tuple) and len(param) == 2:
                 ptype = param[1]

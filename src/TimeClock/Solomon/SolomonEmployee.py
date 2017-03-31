@@ -1,3 +1,4 @@
+from TimeClock import Exceptions
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
@@ -31,7 +32,13 @@ class SolomonEmployee(object):
     @property
     @coerce
     def defaultSubAccount(self) -> ISubAccount:
-        area = ISubAccount(int(self.dfltExpSub), None)
+        if not Solomon.pymssql:
+            wl = self.employee.getSubAccounts()
+            if not wl:
+                raise Exceptions.DatabasException("Solomon unavailable and no cached sub account")
+            return wl[0]
+        else:
+            area = ISubAccount(int(self.dfltExpSub), None)
         if not area:
             area = ISubAccount(NULL)
             s_area = Solomon.getSubAccount(self.dfltExpSub)
@@ -42,7 +49,13 @@ class SolomonEmployee(object):
     @property
     @coerce
     def defaultWorkLocation(self) -> IWorkLocation:
-        wl = IWorkLocation(self.dfltWrkloc, None)
+        if not Solomon.pymssql:
+            wl = self.employee.getWorkLocations()
+            if not wl:
+                raise Exceptions.DatabasException("Solomon unavailable and no cached work location")
+            return wl[0]
+        else:
+            wl = IWorkLocation(self.dfltWrkloc, None)
         if not wl:
             wl = IWorkLocation(NULL)
             wl.workLocationID = self.dfltWrkloc

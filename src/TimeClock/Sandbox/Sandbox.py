@@ -106,7 +106,7 @@ class Sandbox(object):
         self.counter = 0
         self.iterlimit = iterlimit
         self.timelimit = timelimit
-        if len(self.arguments) != len(self.function.arguments):
+        if hasattr(self.function, 'arguments') and len(self.arguments) != len(self.function.arguments):
             raise TypeError("%r expects %i arguments, got %i" % (
                 self.function,
                 len(self.function.arguments),
@@ -114,9 +114,13 @@ class Sandbox(object):
         for idx, i in enumerate(self.function.arguments):
             v = self.arguments[idx]
             if isinstance(i, tuple):
-                i, t = i
+                t = i[1]
+                i = i[0]
                 i = i.title().replace(' ', '')
                 i = i[0].lower() + i[1:]
+                if v == 'None':
+                    self.local_variables[i] = None
+                    continue
                 t = self.loadName(t)
                 v = self.callFunction(t, [v])
                 v = v[1](*v[2], **v[3])

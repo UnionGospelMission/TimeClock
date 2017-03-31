@@ -12,7 +12,9 @@ TimeClock.Commands.ScheduleTimeOff.methods(
         var options = {
             timeFormat: 'HH:mm:ss z',
             dateFormat: 'yy-mm-dd',
+            timezone: 'AUTO',
             showTimezone: true,
+            showTimepicker: false,
             timezoneList: [
                 { value: "AUTO",  label: 'AUTO' },
                 { value: 'PDT', label: 'PDT'},

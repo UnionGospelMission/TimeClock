@@ -62,10 +62,10 @@ TimeClock.Objects.DynamicReportRenderer.methods(
     },
     function runReport(self, node, evt) {
         var args = [];
-        var e = self.nodeById('arguments').getElementsByTagName('input');
+        var e = self.nodeById('arguments').getElementsByClassName('Argument');
         for (var idx = 0; idx < e.length; idx++) {
             var ele = e[idx];
-            if (ele.id != '') {
+            if (ele.name != '') {
                 if (ele.type != 'checkbox') {
                     args.push(ele.value);
                 }

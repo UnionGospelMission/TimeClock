@@ -1,3 +1,4 @@
+
 from twisted.python.components import registerAdapter
 from zope.interface import implementer, directlyProvides
 
@@ -33,7 +34,6 @@ from nevow import tags as T
 from nevow.stan import Tag
 
 
-instances = []
 
 
 class _RenderListRowMixin(AbstractExpandable):
@@ -116,7 +116,6 @@ class EmployeeRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin):
 
     def __init__(self, person: IPerson):
         super().__init__()
-        instances.append(self)
         self._employee = IEmployee(person)
         self.powerups = {}
 
@@ -179,19 +178,29 @@ class EmployeeRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin):
         o.append(save)
 
         return self.preprocess(o)
-    def render_employeeActions(self, ctx, data):
-        if IAdministrator(self.employee, None) and not self._employee.active_directory_name:
+
+    def render_employeeActions(self, ctx: WovenContext, data):
+        import TimeClock.API.Commands
+        from ..Commands.SetPassword import SetPassword
+        from ..Commands.ClockInOut import ClockInOut
+
+        if IAdministrator(self.employee, None):
+            ret = []
             row = inevow.IQ(ctx).patternGenerator('employeeActionPattern')
-            import TimeClock.API.Commands
-            from ..Commands.SetPassword import SetPassword
-            sp = SetPassword(TimeClock.API.Commands.ChangePassword)
-            sp.prepare(self)
-            sp._employee = self._employee
-            sp.currentPW = []
-            sp.visible = True
-            ctx.fillSlots('rowName', 'Set Password')
-            ctx.fillSlots('rowValue', sp)
-            return row(data={})
+            if not self._employee.active_directory_name:
+                sp = SetPassword(TimeClock.API.Commands.ChangePassword)
+                sp.prepare(self)
+                sp._employee = self._employee
+                sp.currentPW = []
+                sp.visible = True
+                ret.append(row(data=dict(rowName="Set Password", rowValue=sp)))
+            clockInOut = ClockInOut(TimeClock.API.Commands.ClockIn)
+            clockInOut.prepare(self)
+            clockInOut._employee = self._employee
+            clockInOut.visible = True
+
+            ret.append(row(data=dict(rowName="Clock In/Out", rowValue=clockInOut)))
+            return self.preprocess(ret)
         else:
             return ""
 

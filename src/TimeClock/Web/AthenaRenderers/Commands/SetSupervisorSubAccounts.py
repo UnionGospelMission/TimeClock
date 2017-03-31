@@ -56,7 +56,7 @@ class SetSupervisorSubAccounts(AbstractCommandRenderer, AbstractHideable):
 
     @overload
     def handleEvent(self, event: SubAccountAssignmentChangedEvent):
-        if event.employee is self.selected.employee:
+        if self.selected and event.employee is self.selected.employee:
             self.ltl.callRemote("refresh")
 
     @overload

@@ -65,19 +65,20 @@ class ScheduleTimeOff(AbstractCommandRenderer, AbstractHideable):
         typ = tags.select(id='type')[
             tags.option(value='Vacation')['Vacation'],
             tags.option(value='Illness')['Sick Leave'],
-            tags.option(value='Personal')['Personal']
+            #tags.option(value='Personal')['Personal']
         ]
-        submit = tags.input(type='button', value='Schedule Vacation')[tags.Tag('athena:handler')(event='onclick', handler='scheduleTimeOff')]
+        submit = tags.input(type='button', value='Schedule Time Off')[tags.Tag('athena:handler')(event='onclick', handler='scheduleTimeOff')]
         return self.preprocess([startTime, endTime, s, w, typ, submit])
 
     @expose
     @Transaction
-    def scheduleTimeOff(self, startTime: IDateTime, duration: float, typ: IEntryType, sub: ISubAccount, wloc: IWorkLocation):
+    def scheduleTimeOff(self, startTime: str, duration: float, typ: IEntryType, sub: ISubAccount, wloc: IWorkLocation):
         duration = float(duration)
         if duration > 10:
             self.callRemote("alert", '<div>Please submit a separate time off request for each day you plan to be gone.</div>')
             return False
         else:
+            startTime = startTime + ' 00:00:00 AUTO'
             entry = self.cmd.execute(self.employee, self.employee, IDateTime(startTime), float(duration), IEntryType(typ), ISubAccount(sub), IWorkLocation(wloc))
             c = TimeEntryCreatedEvent(entry)
             IEventBus("Web").postEvent(c)

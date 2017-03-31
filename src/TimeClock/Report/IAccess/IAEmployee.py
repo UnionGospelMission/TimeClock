@@ -8,6 +8,7 @@ from TimeClock.Report.IAccess.IAbstractAccessible import IAbstractAccessible
 SLRY = 1
 HRLY = 2
 
+
 class IAEmployee(IAbstractAccessible):
     employee_id = Attribute('employee_id')
     name = Attribute('name')
@@ -16,10 +17,12 @@ class IAEmployee(IAbstractAccessible):
     phone = Attribute("Phone")
     defaultWorkLocation = Attribute("defaultWorkLocation")
     stdSlry = Attribute("Standard Salary")
+    payGrpId = Attribute("Pay group Id (PT/REGHR)")
     status = Attribute("Status")
     hourly_by_task = Attribute('hourly_by_task')
     emergency_contact_name = Attribute('emergency_contact_name')
     emergency_contact_phone = Attribute('emergency_contact_phone')
+
 
     def getCompensationType() -> [float]:
         """

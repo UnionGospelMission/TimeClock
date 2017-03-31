@@ -15,6 +15,7 @@ TimeClock.Commands.ViewShifts.methods(
         var options = {
             timeFormat: 'HH:mm:ss z',
             dateFormat: 'yy-mm-dd',
+            timezone: 'AUTO',
             showTimezone: true,
             timezoneList: [
                 { value: 'PDT', label: 'PDT'},
@@ -24,6 +25,9 @@ TimeClock.Commands.ViewShifts.methods(
             onSelect: function(){self.timeWindowChanged();}
         };
         $(self.nodeById('startTime')).datetimepicker(options);
+        options.hour = 23;
+        options.minute = 59;
+        options.second = 59;
         $(self.nodeById('endTime')).datetimepicker(options);
     },
     function timeWindowChanged(self, node) {

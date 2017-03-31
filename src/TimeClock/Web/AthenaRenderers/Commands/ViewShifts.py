@@ -51,7 +51,9 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
             self.loaded = True
             startTime = self.startTime or IDateTime(0)
             endTime = self.endTime or None
-            l = [IListRow(i).prepare(self.l) for i in self.getEntries() if not (i.endTime() < startTime or (endTime and i.startTime() > endTime))]
+            entries = [i for i in self.getEntries() if not (i.endTime() < startTime or (endTime and i.startTime() > endTime))]
+            self.addTotals(entries)
+            l = [IListRow(i).prepare(self.l) for i in entries]
             for i in l:
                 self.l.addRow(i)
             self.loaded = True
@@ -59,7 +61,7 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
 
     @overload
     def handleEvent(self, evt: TimeEntryCreatedEvent):
-        if evt.timeEntry.employee is self.employee and evt.timeEntry.type == IEntryType("Work"):
+        if evt.timeEntry.employee is self.employee:
             self.l.addRow(evt.timeEntry)
 
     @overload
@@ -68,7 +70,7 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
 
     def render_genericCommand(self, ctx: WovenContext, data):
         IEventBus("Web").register(self, ITimeEntryChangedEvent)
-        self.l = l = List([], ["Entry Type", "Work Location", "Sub Account", "Start Time", "End Time", "Duration", "Approved", "Denied"])
+        self.l = l = List([], ["Entry Type", "Work Location", "Sub Account", "Start Time", "End Time", "Shift Duration", "Daily Total", "Approved", "Denied"])
         l.closeable = False
         l.prepare(self)
         l.visible = True
@@ -83,7 +85,6 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
 
     def getEntries(self):
         l = sorted(list(i for i in self.employee.powerupsFor(ITimeEntry)), key=(lambda p: p.period._startTime if p.period else TimeClock.Util.DateTime.DateTime.fromtimestamp(0)))
-        self.addTotals(l)
         return l
 
     @expose
@@ -91,12 +92,15 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
         if startTime:
             self.startTime = startTime = IDateTime(startTime)
         else:
-            self.startTime = startTime = IDateTime(0)
+            self.startTime = DateTime.today().replace(day=1).replace(months=-1)
         if endTime:
             self.endTime = endTime = IDateTime(endTime)
         else:
             self.endTime = None
-        entries = [IListRow(i).prepare(self.l) for i in self.getEntries() if not (i.endTime() < startTime or (endTime is not None and i.startTime() > endTime))]
+        entries = [i for i in self.getEntries() if not (i.endTime() < startTime or (endTime and i.startTime() > endTime))]
+        self.addTotals(entries)
+        entries = [IListRow(i).prepare(self.l) for i in entries]
+
         self.l.list = entries
         return entries
 
@@ -107,18 +111,20 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
             r[2](style='opacity: 0')
             r[3](style='opacity: 0')
             r[4](style='opacity: 0')
-            r[6](style='opacity: 0')
             r[7](style='opacity: 0')
+            r[8](style='opacity: 0')
             return r
         totals = defaultdict(datetime.timedelta)
         total = datetime.timedelta()
         for s in lst:
+            if s.denied:
+                continue
             if s.type:
                 totals[s.type.getTypeName()] += s.duration()
             total += s.duration()
         for typ in totals:
             ts = totals[typ].total_seconds()
-            subtotal_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Subtotal: %s' % typ), period=TimePeriod(_startTime=IDateTime(self.startTime or 0), _endTime=IDateTime(self.startTime or 0).replace(seconds=ts))))
+            subtotal_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Subtotal: %s' % typ), period=TimePeriod(_startTime=IDateTime(0), _endTime=IDateTime(0).replace(seconds=ts))))
             lst.append(subtotal_row)
             subtotal_row.prepare(self.l)
             subtotal_row.old_render_listRow = subtotal_row.render_listRow
@@ -127,7 +133,7 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
             subtotal_row.startTime = subtotal_row._timeEntry.startTime
 
         ts = total.total_seconds()
-        te = TimeEntry(employee=Employee(), type=EntryType(name='Total'), period=TimePeriod(_startTime=IDateTime(self.startTime or 0), _endTime=IDateTime(self.startTime or 0).replace(seconds=ts)))
+        te = TimeEntry(employee=Employee(), type=EntryType(name='Total'), period=TimePeriod(_startTime=IDateTime(0), _endTime=IDateTime(0).replace(seconds=ts)))
         total_row = IListRow(te)
         total_row.old_render_listRow = total_row.render_listRow
         total_row.render_listRow = types.MethodType(render_listRow, total_row)

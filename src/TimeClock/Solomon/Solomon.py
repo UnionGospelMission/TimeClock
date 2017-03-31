@@ -6,6 +6,8 @@ from TimeClock.ITimeClock.IDatabase.IEmployee import IEmployee
 from TimeClock.ITimeClock.IDatabase.IEntryType import IEntryType
 from TimeClock.Utils import coerce, overload
 
+from collections import defaultdict
+
 
 try:
     import pymssql
@@ -17,6 +19,7 @@ except ImportError:
     pymssql = None
 
 import os
+import time
 
 user = os.environ.get('SOLOMONUSER')
 host = os.environ.get('SOLOMONHOST')
@@ -27,6 +30,7 @@ ACTIVE = 'A'
 INACTIVE = 'I'
 HOLD = 'H'
 
+last_error_time = 0
 
 if not user:
     warnings.warn("Solomon environment variables undefined, Solomon database access unavailable")
@@ -56,21 +60,28 @@ def context():
 
 @coerce
 def getEmployee(eid: str) -> dict:
-    if not pymssql or eid == '1':
-        return dummyEntry
-    with context() as cur:
-        cur.execute("SELECT * FROM employee WHERE EmpId=%s", (eid,))
-        return fetchone(cur)
+    global last_error_time
+    if time.time() < last_error_time + 60:
+        return dummyEntries[eid]
+    if not pymssql or int(eid) < 1000:
+        return dummyEntries[eid]
+    try:
+        with context() as cur:
+            cur.execute("SELECT * FROM employee WHERE EmpId=%s", (eid,))
+            return fetchone(cur)
+    except pymssql.OperationalError as e:
+        last_error_time = time.time()
+        print(68, e)
+        return dummyEntries[eid]
 
 
 def getEmployees() -> [dict]:
     if not pymssql:
         yield dummyEntry
         return
-    else:
-        with context() as cur:
-            cur.execute("SELECT * FROM employee")
-            yield from fetchall(cur)
+    with context() as cur:
+        cur.execute("SELECT * FROM employee")
+        yield from fetchall(cur)
 
 
 def getSubAccounts() -> [dict]:
@@ -170,10 +181,7 @@ def getBenefitAvailable(eid: IEmployee, bid: str) -> float:
 
 
 
-if pymssql:
-    pseudoname = 'Administrator'
-else:
-    pseudoname = 'Solomon Database Unavailable'
+pseudoname = 'Solomon Database Unavailable'
 
 dummyEntry = {'DfltWrkloc': 'OFF   ',
               'StrtDate': datetime.datetime(2016, 6, 25, 0, 0),
@@ -196,3 +204,10 @@ dummyEntry = {'DfltWrkloc': 'OFF   ',
               'stdUnitRate': 9,
               'payGrpId': 'REGHR'
               }
+
+dummyEntries = defaultdict(dummyEntry.copy)
+dummyEntries['1']['Name'] = 'Administrator'
+
+dummyEntries['100']['Name'] = 'Remington Steele'
+dummyEntries['101']['Name'] = 'Laura Holt'
+dummyEntries['102']['Name'] = 'Mildred Krebs'

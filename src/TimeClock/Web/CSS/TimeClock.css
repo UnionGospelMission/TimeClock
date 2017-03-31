@@ -44,3 +44,12 @@ input[disabled] {
 	text-indent: -9999px;
 	font-size: -9999px;
 }
+
+.timeEntry-6 input,
+.timeEntry-5 input {
+	width: 85px;
+}
+
+.timeEntry-0 input {
+	width: 150px;
+}

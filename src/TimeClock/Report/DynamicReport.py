@@ -19,7 +19,7 @@ from zope.interface import implementer
 
 from TimeClock.ITimeClock.IReport.IReport import IReport
 from nevow import tags
-from TimeClock.Report.IAccess import interfaces
+from TimeClock.Report.IAccess import interfaces, IAWorkLocation, IASubAccount
 from twisted.internet import reactor
 
 sampleReport = """
@@ -101,7 +101,7 @@ class DynamicReport(Item):
             if not isinstance(arguments, tuple):
                 arguments = ()
             for arg in arguments:
-                if isinstance(arg, tuple) and len(arg) == 2:
+                if isinstance(arg, tuple) and len(arg) > 1:
                     continue
                 if not isinstance(arg, str):
                     arguments = ()
@@ -133,9 +133,13 @@ class DynamicReport(Item):
             td=AFunction(tags.td),
             tbody=AFunction(tags.tbody),
             IDateTime=AFunction(IDateTime),
+            IAWorkLocation=AFunction(IAWorkLocation),
+            IASubAccount=AFunction(IASubAccount),
             divmod=AFunction(divmod),
             len=AFunction(len),
-            iter=AFunction(iter)
+            iter=AFunction(iter),
+            bool=AFunction(bool)
+
         )
         globs.update(
             {i.getName(): i

@@ -22,7 +22,8 @@ from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderers.Commands.SetSupervisees import SetSupervisees
 
 from TimeClock.Web.LiveFragment import LiveFragment
-from TimeClock.Web.MappingResource import MappingResource
+#from TimeClock.Web.MappingResource import MappingResource
+from nevow.athena import MappingResource
 from TimeClock.Web.Utils import formatShortName
 from nevow.athena import LivePage, expose, AutoJSPackage, AutoCSSPackage, _collectPackageBelow
 from nevow.context import WovenContext
@@ -108,10 +109,11 @@ class TimeClockPage(LivePage):
 
         def handleEvent(self, event: IEvent):
             if isinstance(event, ClockInOutEvent):
-                if event.clockedIn:
-                    self.callRemote('clockedIn')
-                else:
-                    self.callRemote('clockedOut')
+                if event.employee is self.employee:
+                    if event.clockedIn:
+                        self.callRemote('clockedIn')
+                    else:
+                        self.callRemote('clockedOut')
 
         def __init__(self, parent, ctx: WovenContext):
             super().__init__()

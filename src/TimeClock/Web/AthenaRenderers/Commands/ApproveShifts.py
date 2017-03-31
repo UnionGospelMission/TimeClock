@@ -109,7 +109,7 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
 
         employees = []
         self.l1 = l1 = List(employees, ["Employee ID", "Name"])
-        self.l2 = l2 = List([], ["Entry Type", "Work Location", "Sub Account", "Start Time", "End Time", "Duration", "Approved", "Denied"])
+        self.l2 = l2 = List([], ["Entry Type", "Work Location", "Sub Account", "Start Time", "End Time", "Shift Duration", "Daily Total", "Approved", "Denied"])
         self.ltl = ltl = ListToListSelector(l1, l2)
         ltl.mappingReturnsNewElements = True
         ltl.prepare(self)
@@ -168,8 +168,8 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
             r[2](style='opacity: 0')
             r[3](style='opacity: 0')
             r[4](style='opacity: 0')
-            r[6](style='opacity: 0')
             r[7](style='opacity: 0')
+            r[8](style='opacity: 0')
             return r
         totals = defaultdict(datetime.timedelta)
         total = datetime.timedelta()
@@ -179,14 +179,14 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
             total += s.duration()
         for typ in totals:
             ts = totals[typ].total_seconds()
-            subtotal_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Subtotal: %s' % typ), period=TimePeriod(_startTime=IDateTime(self.startTime or 0), _endTime=IDateTime(self.startTime or 0).replace(seconds=ts))))
+            subtotal_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Subtotal: %s' % typ), period=TimePeriod(_startTime=IDateTime(0), _endTime=IDateTime(0).replace(seconds=ts))))
             lst.append(subtotal_row)
             subtotal_row.prepare(self.l2)
             subtotal_row.old_render_listRow = subtotal_row.render_listRow
             subtotal_row.render_listRow = types.MethodType(render_listRow, subtotal_row)
 
         ts = total.total_seconds()
-        total_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Total'), period=TimePeriod(_startTime=IDateTime(self.startTime or 0), _endTime=IDateTime(self.startTime or 0).replace(seconds=ts))))
+        total_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Total'), period=TimePeriod(_startTime=IDateTime(0), _endTime=IDateTime(0).replace(seconds=ts))))
         total_row.old_render_listRow = total_row.render_listRow
         total_row.render_listRow = types.MethodType(render_listRow, total_row)
         total_row.prepare(self.l2)
@@ -200,8 +200,8 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         else:
             return []
         o = []
-
-        shifts = sorted(list(i for i in self.selected.powerupsFor(ITimeEntry) if i.type in self.entryTypes and not i.denied), key=lambda p: p.period._startTime if p.period else TimeClock.Util.DateTime.DateTime.fromtimestamp(0))
+        isAdm = self.employee.isAdministrator()
+        shifts = sorted(list(i for i in self.selected.powerupsFor(ITimeEntry) if i.type in self.entryTypes and (isAdm or not i.denied)), key=lambda p: p.period._startTime if p.period else TimeClock.Util.DateTime.DateTime.fromtimestamp(0))
         if self.startTime:
             startTime = IDateTime(self.startTime)
         else:

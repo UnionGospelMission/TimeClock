@@ -130,6 +130,10 @@ class Employee(Item):
         return ISupervisor(self, False)
 
     @overload
+    def getEntries(self):
+        return list(self.powerupsFor(ITimeEntry))
+
+    @overload
     def getEntries(self, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
         return [e for e in self.powerupsFor(ITimeEntry) if
                 e.period.startTime() < endTime and e.period.endTime() > startTime]

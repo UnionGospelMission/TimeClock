@@ -12,6 +12,9 @@ from TimeClock.Report.IAccess.IASubAccount import IASubAccount
 class ASubAccount(object):
     __slots__ = ['_subAccount']
 
+    def __eq__(self, other) -> bool:
+        return isinstance(other, self.__class__) and self._subAccount is other._subAccount
+
     @coerce
     def __init__(self, sa: ISubAccount):
         self._subAccount = sa
@@ -28,3 +31,10 @@ class ASubAccount(object):
     def sub(self):
         return self._subAccount.sub
 
+    @staticmethod
+    def fromID(sid: str):
+        if sid.isdigit():
+            sid = int(sid)
+        return IASubAccount(ISubAccount(sid))
+
+registerAdapter(ASubAccount.fromID, str, IASubAccount)

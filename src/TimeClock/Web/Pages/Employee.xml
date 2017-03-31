@@ -30,7 +30,7 @@
                     <td colspan="2">Employee Actions</td>
                     </tr>
                     <invisible n:render="employeeActions">
-                        <tr n:pattern="employeeActionPattern">
+                        <tr n:pattern="employeeActionPattern" n:render="mapping">
                             <td><n:slot name="rowName"/></td>
                             <td><n:slot name="rowValue"/></td>
                         </tr>

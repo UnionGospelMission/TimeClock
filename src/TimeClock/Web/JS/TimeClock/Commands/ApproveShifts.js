@@ -13,6 +13,7 @@ TimeClock.Commands.ApproveShifts.methods(
         var options = {
             timeFormat: 'HH:mm:ss z',
             dateFormat: 'yy-mm-dd',
+            timezone: 'AUTO',
             showTimezone: true,
             timezoneList: [
                 { value: 'PDT', label: 'PDT'},
@@ -23,6 +24,9 @@ TimeClock.Commands.ApproveShifts.methods(
         };
         self.nodeByAttribute("name", "save").style.display='none';
         $(self.nodeById('startTime')).datetimepicker(options);
+        options.hour = 23;
+        options.minute = 59;
+        options.second = 59;
         $(self.nodeById('endTime')).datetimepicker(options);
         self.timer = 0;
     },

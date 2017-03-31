@@ -17,6 +17,9 @@ from TimeClock.Report.IAccess.IAEmployee import IAEmployee
 class AEmployee(object):
     __slots__ = ['_employee']
 
+    def __eq__(self, other) -> bool:
+        return isinstance(other, self.__class__) and self._employee is other._employee
+
     @coerce
     def __init__(self, emp: IEmployee):
         self._employee = emp
@@ -46,6 +49,10 @@ class AEmployee(object):
     @coerce
     def defaultWorkLocation(self) -> IAWorkLocation:
         return ISolomonEmployee(self._employee).defaultWorkLocation
+
+    @property
+    def payGrpId(self):
+        return ISolomonEmployee(self._employee).payGrpId
 
     @property
     def stdSlry(self):

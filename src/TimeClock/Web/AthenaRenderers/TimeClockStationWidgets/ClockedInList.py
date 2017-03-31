@@ -27,8 +27,10 @@ class ClockedInList(AbstractRenderer, AbstractHideable):
     visible = True
     wloc = None
     sub = None
+
     def powerUp(self, obj, iface):
         pass
+
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
@@ -42,6 +44,8 @@ class ClockedInList(AbstractRenderer, AbstractHideable):
         if self.sub:
             if event.employee not in self.sub.getEmployees():
                 return
+        if not self.lst:
+            return
         if not event.clockedIn:
             self.lst.removeRow(event.employee)
         else:
@@ -50,8 +54,10 @@ class ClockedInList(AbstractRenderer, AbstractHideable):
     @overload
     def handleEvent(self, event: IEvent):
         pass
+
     def render_class(self, *a):
         return 'ClockedIn'
+
     def getEmpList(self, wloc=None, sub=None):
         self.wloc = wloc
         self.sub = sub
@@ -66,6 +72,7 @@ class ClockedInList(AbstractRenderer, AbstractHideable):
             semployees = sub.getEmployees()
             return [i for i in semployees if i.timeEntry]
         return [i for i in getAllEmployees() if ISolomonEmployee(i).status == Solomon.ACTIVE and i.timeEntry]
+
     def render_genericCommand(self, ctx: WovenContext, data):
         IEventBus("Database").register(self, IDatabaseEvent)
         empList = self.getEmpList()

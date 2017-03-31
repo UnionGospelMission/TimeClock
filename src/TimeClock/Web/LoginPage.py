@@ -48,7 +48,13 @@ class LoginPage(LivePage):
                 ise = ISolomonEmployee(employee)
                 if employee.timeEntry:
                     return "Already clocked in"
-                employee.clockIn(ise.defaultSubAccount, ise.defaultWorkLocation)
+                dsa = ise.defaultSubAccount
+                dwl = ise.defaultWorkLocation
+                if not dsa.active:
+                    return "Default sub account is disabled, please log in to clock in"
+                if not dwl.active:
+                    return "Default work location is disabled, please log in to clock in"
+                employee.clockIn(dsa, dwl)
 
             elif func == 'clockOut':
                 if not employee.timeEntry:

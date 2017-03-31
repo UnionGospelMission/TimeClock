@@ -5,6 +5,7 @@ import arrow
 import dateutil.parser
 
 from TimeClock import Exceptions
+from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.Web.Utils import formatTimeDelta
 from twisted.python.components import registerAdapter
 from zope.interface import implementer, directlyProvides
@@ -37,7 +38,7 @@ from nevow import tags as T
 
 
 class _RenderListRowMixin(AbstractExpandable):
-    length = 8
+    length = 9
     _workLocation = None
     ctr = -1
 
@@ -64,16 +65,30 @@ class _RenderListRowMixin(AbstractExpandable):
         ]
         te_type = T.input(id='entryType', type='text', disabled=True, value=self._timeEntry.type.name)
         if self._timeEntry.workLocation:
+            WLs = self._timeEntry.getEmployee().getWorkLocations()
+            missing = False
+            if self._timeEntry.workLocation not in WLs:
+                WLs.append(self._timeEntry.workLocation)
+                missing = True
             workLocationID = T.select(id='workLocation', value=self._timeEntry.workLocation.workLocationID)[
                 [T.option(value=i.workLocationID, selected=self._timeEntry.workLocation == i)[i.description] for i in
-                 self._timeEntry.getEmployee().getWorkLocations()]
+                 WLs]
             ]
+            if missing:
+                workLocationID(style='background-color:red')
         else:
             workLocationID = T.input(id='workLocation', disabled=True, value='None')
         if self._timeEntry.subAccount:
+            SAs = list(self._timeEntry.getEmployee().getSubAccounts())
+            missing = False
+            if self._timeEntry.subAccount not in SAs:
+                SAs.append(self._timeEntry.subAccount)
+                missing = True
             subAccount = T.select(id='subAccount', value=self._timeEntry.subAccount.sub)[
-                [T.option(value=i.sub, selected=self._timeEntry.subAccount==i)[i.name] for i in self._timeEntry.getEmployee().getSubAccounts()]
+                [T.option(value=i.sub, selected=self._timeEntry.subAccount==i)[i.name] for i in SAs]
             ]
+            if missing:
+                subAccount(style='background-color:red')
         else:
             subAccount = T.input(id='subAccount', disabled=True, value="None")
         duration = T.input(id='duration', value=formatTimeDelta(self._timeEntry.period.duration()))
@@ -113,13 +128,25 @@ class _RenderListRowMixin(AbstractExpandable):
                 reject(disabled=True)
                 approved(disabled=True)
 
-        self.preprocess([approved, workLocationID, subAccount, startTime, ET, duration, reject])
+        startday = self._timeEntry.startTime().date()
+        endday = startday.replace(hours=23, minutes=59, seconds=59)
+        entries = ICalendarData([i for i in self._timeEntry.employee.powerupsFor(ITimeEntry) if not i.denied]).between(startday, endday)
+        lastEntryOfDay = entries.entries and entries.entries[-1].startTime() == self._timeEntry.startTime()
+        if lastEntryOfDay:
+            total = T.input(id='total', value=formatTimeDelta(entries.sumBetween(startday, endday)))
+            total(disabled=True)
+            total = listCell(data=dict(listItem=total))
+        else:
+            total = listCell(data=dict(listItem=""))(style='opacity: 0')
+
+        self.preprocess([approved, workLocationID, subAccount, startTime, ET, duration, reject, total])
         r = [listCell(data=dict(listItem=te_type)),
              listCell(data=dict(listItem=workLocationID)),
              listCell(data=dict(listItem=subAccount)),
              listCell(data=dict(listItem=startTime)),
              et,
              listCell(data=dict(listItem=duration)),
+             total,
              listCell(data=dict(listItem=approved)),
              rj]
         if original and original.period:
@@ -249,7 +276,7 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
                 hour, minute, second = vals['duration'].split(':')
                 vals[key] = vals[key].replace(hours=int(hour), minutes=int(minute), seconds=int(second))
                 val = self._timeEntry.endTime(False)
-                if val != vals[key]:
+                if val.replace(microsecond=0) != vals[key].replace(microsecond=0):
                     oldVals[key] = val
                     self._timeEntry.period.end(vals[key])
                 continue
@@ -266,15 +293,15 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
             elif key == 'startTime':
                 oldv = self._timeEntry.period.startTime()
                 val = (Utils.getIDateTime(vals[key]))
-                if oldv.strftime('%Y-%m-%d %H:%M:%S %Z') != val.strftime('%Y-%m-%d %H:%M:%S %Z'):
+                if oldv.replace(microsecond=0) != val.replace(microsecond=0):
                     self._timeEntry.period.start(val)
                     oldVals[key] = oldv
                 continue
             elif key == 'endTime':
                 oldv = self._timeEntry.period.endTime(False)
                 val = (Utils.getIDateTime(vals[key]))
-
-                if oldv.strftime('%Y-%m-%d %H:%M:%S %Z') != val.strftime('%Y-%m-%d %H:%M:%S %Z'):
+                if oldv.replace(microsecond=0) != val.replace(microsecond=0):
+                    print(290, oldv, val)
                     self._timeEntry.period.end(val)
                     oldVals[key] = oldv
                 continue
@@ -307,6 +334,8 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
                 keys.remove('approved')
             if 'endTime' in keys:
                 keys.remove('endTime')
+            if 'denied' in keys:
+                keys.remove('denied')
         oldVals.update(self.doCompare(keys, args))
         if oldVals:
             ov = oldVals.copy()

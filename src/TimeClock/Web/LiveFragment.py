@@ -8,16 +8,20 @@ EventBus = None
 
 class LiveFragment(LF, metaclass=LiveFragmentMeta):
     parent = None
+
     def detached(self):
         if self in self.instances:
             self.instances.remove(self)
+
         EventBus.unregister(self)
+
     def connectionLost(self, reason):
         self.detached()
 
     def child(self, ctx, idata):
         d = super().child(ctx, idata)
         return ctx, ctx.tag, d(ctx, idata)
+
     def locateMethod(self, ctx, methodName):
         try:
             method = super().locateMethod(ctx, methodName)
@@ -26,13 +30,18 @@ class LiveFragment(LF, metaclass=LiveFragmentMeta):
             if methodName in self.api.getCommandShortNames():
                 return getattr(self.api, methodName)
             raise e
+
     def __init__(self, *args, **kw):
         global EventBus
         EventBus = IEventBus("Web")
         super().__init__(*args, **kw)
         if self.fixCheckboxes not in self.preprocessors:
             self.preprocessors.append(self.fixCheckboxes)
+
+    def setFragmentParent(self, parent):
+        super().setFragmentParent(parent)
         self.instances.append(self)
+
     @staticmethod
     def fixCheckboxes(root: Tag):
         if not isinstance(root, (Tag, list, tuple)):
