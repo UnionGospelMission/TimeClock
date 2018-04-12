@@ -22,7 +22,7 @@ from TimeClock.ITimeClock.IDatabase.ISupervisee import ISupervisee
 from TimeClock.ITimeClock.IDatabase.ISupervisor import ISupervisor
 from TimeClock.ITimeClock.IDatabase.ITimePeriod import ITimePeriod
 from TimeClock.Util import NULL
-from axiom.attributes import text, integer, reference, boolean, AND
+from axiom.attributes import text, integer, reference, boolean, AND, OR
 from axiom.item import Item
 from ..Exceptions import InvalidTransformation
 from ..ITimeClock.IDatabase.ISubAccount import ISubAccount, IAbstractSubAccount
@@ -135,62 +135,193 @@ class Employee(Item):
 
     @overload
     def getEntries(self, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
-        return [e for e in self.powerupsFor(ITimeEntry) if
+        from TimeClock.Database.TimePeriod import TimePeriod
+        from TimeClock.Database.TimeEntry import TimeEntry
+        return [e for e in self.powerupsFor(ITimeEntry, tables=(TimeEntry, TimePeriod),
+                                            comparison=AND(
+                                                TimeEntry.period==TimePeriod.storeID,
+                                                TimeEntry.employee==self,
+                                                TimePeriod._startTime<=endTime,
+                                                OR(
+                                                    TimePeriod._endTime >= startTime,
+                                                    TimePeriod._endTime == None
+                                                )
+
+                                            )) if
                 e.period.startTime() < endTime and e.period.endTime() > startTime]
 
     @overload
     def getEntries(self, area: ISubAccount, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
-        return [e for e in self.getEntries(area) if e.period.startTime() < endTime and e.period.endTime() > startTime]
+        return [e for e in self.getEntries(startTime, endTime) if e.subAccount == area]
 
     @overload
     def getEntries(self, entryType: IEntryType) -> [ITimeEntry]:
-        entries = self.powerupsFor(ITimeEntry)
-        return [e for e in entries if e.type == entryType]
+        from TimeClock.Database.TimeEntry import TimeEntry
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry,), comparison=AND(
+            TimeEntry.employee==self,
+            TimeEntry.type==entryType
+        ))
+        return list(entries)
 
     @overload
     def getEntries(self, area: ISubAccount) -> [ITimeEntry]:
-        entries = self.powerupsFor(ITimeEntry)
-        return [e for e in entries if e.subAccount == area and not e.denied]
+        from TimeClock.Database.TimeEntry import TimeEntry
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry,), comparison=AND(
+            TimeEntry.employee==self,
+            TimeEntry.subAccount==area,
+            TimeEntry.denied==False
+        ))
+        return list(entries)
 
     @overload
     def getEntries(self, area: ISubAccount, entryType: IEntryType) -> [ITimeEntry]:
-        return [e for e in self.getEntries(area) if e.type == entryType]
+        from TimeClock.Database.TimeEntry import TimeEntry
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry,), comparison=AND(
+            TimeEntry.employee == self,
+            TimeEntry.subAccount == area,
+            TimeEntry.denied==False,
+            TimeEntry.type==entryType
+        ))
+        return entries
 
     @overload
     def getEntries(self, area: ISubAccount, loc: IWorkLocation, approved: bool, entryType: IEntryType,
                    startTime: IDateTime,
-                   endTime: IDateTime) -> [
-        ITimeEntry]:
-        return [e for e in self.getEntries(area, startTime, endTime) if
-                e.type == entryType and e.workLocation == loc and e.approved == approved]
+                   endTime: IDateTime) -> [ITimeEntry]:
+        from TimeClock.Database.TimeEntry import TimeEntry
+        from TimeClock.Database.TimePeriod import TimePeriod
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry, TimePeriod), comparison=AND(
+            TimeEntry.employee == self,
+            TimeEntry.subAccount == area,
+            TimeEntry.workLocation == loc,
+            TimeEntry.approved == approved,
+            TimeEntry.type == entryType,
+            TimeEntry.period==TimePeriod.storeID,
+            TimePeriod._startTime >= endTime,
+            OR(
+                TimePeriod._endTime >= startTime,
+                TimePeriod._endTime == None
+            )
+        ))
+
+        return entries
 
     @overload
     def getEntries(self, area: ISubAccount, loc: IWorkLocation, entryType: IEntryType, startTime: IDateTime,
                    endTime: IDateTime) -> [
         ITimeEntry]:
-        return [e for e in self.getEntries(area, startTime, endTime) if e.type == entryType and e.workLocation == loc]
+
+        from TimeClock.Database.TimeEntry import TimeEntry
+        from TimeClock.Database.TimePeriod import TimePeriod
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry, TimePeriod), comparison=AND(
+            TimeEntry.employee == self,
+            TimeEntry.subAccount == area,
+            TimeEntry.workLocation == loc,
+            TimeEntry.type == entryType,
+            TimeEntry.period == TimePeriod.storeID,
+            TimePeriod._startTime >= endTime,
+            OR(
+                TimePeriod._endTime >= startTime,
+                TimePeriod._endTime == None
+            )
+        ))
+
+        return entries
 
     @overload
     def getEntries(self, area: ISubAccount, entryType: IEntryType, startTime: IDateTime, endTime: IDateTime) -> [
         ITimeEntry]:
-        return [e for e in self.getEntries(area, startTime, endTime) if e.type == entryType]
+
+        from TimeClock.Database.TimeEntry import TimeEntry
+        from TimeClock.Database.TimePeriod import TimePeriod
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry, TimePeriod), comparison=AND(
+            TimeEntry.employee == self,
+            TimeEntry.subAccount == area,
+            TimeEntry.type == entryType,
+            TimeEntry.period == TimePeriod.storeID,
+            TimePeriod._startTime >= endTime,
+            OR(
+                TimePeriod._endTime >= startTime,
+                TimePeriod._endTime == None
+            )
+        ))
+        return entries
 
     @overload
     def getEntries(self, area: ISubAccount, approved: bool, entryType: IEntryType,
                    startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
-        return [e for e in self.getEntries(area, entryType, startTime, endTime) if e.approved == approved]
+
+        from TimeClock.Database.TimeEntry import TimeEntry
+        from TimeClock.Database.TimePeriod import TimePeriod
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry, TimePeriod), comparison=AND(
+            TimeEntry.employee == self,
+            TimeEntry.subAccount == area,
+            TimeEntry.approved == approved,
+            TimeEntry.type == entryType,
+            TimeEntry.period == TimePeriod.storeID,
+            TimePeriod._startTime >= endTime,
+            OR(
+                TimePeriod._endTime >= startTime,
+                TimePeriod._endTime == None
+            )
+        ))
+        return entries
 
     @overload
     def getEntries(self, area: ISubAccount, approved: bool, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
-        return [e for e in self.getEntries(area, startTime, endTime) if e.approved == approved]
+        from TimeClock.Database.TimeEntry import TimeEntry
+        from TimeClock.Database.TimePeriod import TimePeriod
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry, TimePeriod), comparison=AND(
+            TimeEntry.employee == self,
+            TimeEntry.subAccount == area,
+            TimeEntry.approved == approved,
+            TimeEntry.period == TimePeriod.storeID,
+            TimePeriod._startTime >= endTime,
+            OR(
+                TimePeriod._endTime >= startTime,
+                TimePeriod._endTime == None
+            )
+        ))
+
+        return entries
 
     @overload
     def getEntries(self, area: ISubAccount, approved: bool) -> [ITimeEntry]:
-        return [e for e in self.getEntries(area) if e.approved == approved]
+        from TimeClock.Database.TimeEntry import TimeEntry
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry), comparison=AND(
+            TimeEntry.employee == self,
+            TimeEntry.subAccount == area,
+            TimeEntry.approved == approved,
+        ))
+        return entries
 
     @overload
     def getEntries(self, area: ISubAccount, approved: bool, entryType: IEntryType) -> [ITimeEntry]:
-        return [e for e in self.getEntries(area, entryType) if e.approved == approved]
+        from TimeClock.Database.TimeEntry import TimeEntry
+        entries = self.powerupsFor(ITimeEntry, tables=(TimeEntry), comparison=AND(
+            TimeEntry.employee == self,
+            TimeEntry.subAccount == area,
+            TimeEntry.approved == approved,
+            TimeEntry.type == entryType,
+        ))
+        return entries
+
+    @coerce
+    def getApprovedEntries(self, startTime: IDateTime, endTime: IDateTime) -> [ITimeEntry]:
+        from TimeClock.Database.TimeEntry import TimeEntry
+        from TimeClock.Database.TimePeriod import TimePeriod
+        return self.powerupsFor(ITimeEntry,
+                                tables=(TimeEntry, TimePeriod),
+                                comparison=AND(
+                                    TimeEntry.approved==True,
+                                    TimeEntry.employee==self,
+                                    TimeEntry.period==TimePeriod.storeID,
+                                    TimePeriod._startTime<=endTime,
+                                    OR(
+                                        TimePeriod._endTime >= startTime,
+                                        TimePeriod._endTime == None
+                                    )
+                                ))
 
     @overload
     def viewHours(self, area: IAbstractSubAccount) -> ICalendarData:
@@ -202,12 +333,14 @@ class Employee(Item):
 
     @overload
     def viewHours(self, start: IDateTime, end: IDateTime) -> ICalendarData:
-        cd = ICalendarData(self.getEntries(entryType="Work"))
+        work = IEntryType("Work")
+        cd = ICalendarData([i for i in self.getEntries(start, end) if i.type==work])
         return cd.between(start, end)
 
     @overload
     def viewHours(self, start: IDateTime, end: IDateTime, approved: bool) -> ICalendarData:
-        cd = ICalendarData([i for i in self.getEntries(entryType="Work") if i.approved == approved])
+        work = IEntryType("Work")
+        cd = ICalendarData([i for i in self.getEntries(start, end) if i.approved == approved and i.type==work])
         return cd.between(start, end)
 
     @overload

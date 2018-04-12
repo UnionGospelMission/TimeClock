@@ -2,6 +2,10 @@ import base64
 
 import time
 
+from TimeClock.Web.AthenaRenderers.Commands.ApproveDepartmentTime import ApproveDepartmentTime
+from TimeClock.Web.AthenaRenderers.Commands.ApproveShifts import ApproveShifts
+from twisted.internet.defer import Deferred
+
 from TimeClock.Web.AthenaRenderers.Commands.SetPassword import SetPassword
 from nevow import tags
 from twisted.internet import reactor
@@ -22,8 +26,7 @@ from TimeClock.Util.DateTime import DateTime
 from TimeClock.Web.AthenaRenderers.Commands.SetSupervisees import SetSupervisees
 
 from TimeClock.Web.LiveFragment import LiveFragment
-#from TimeClock.Web.MappingResource import MappingResource
-from nevow.athena import MappingResource
+from .MappingResource import MappingResource
 from TimeClock.Web.Utils import formatShortName
 from nevow.athena import LivePage, expose, AutoJSPackage, AutoCSSPackage, _collectPackageBelow
 from nevow.context import WovenContext
@@ -52,18 +55,21 @@ def getActionItems(self, ctx):
     p = self.employee.getPermissions()
     for i in self.api.getCommands(self.employee):
         if i.hasPermission(p) or IAdministrator(self.employee, None):
-            if isinstance(i, SetSupervisor):
-                o.append(SetSupervisees(i))
             iar = IAthenaRenderable(i, None)
             if iar:
-                if not self.employee.active_directory_name and self.employee.alternate_authentication and self.employee.alternate_authentication.expired:
+                if self.employee.alternate_authentication and self.employee.alternate_authentication.expired:
                     if not isinstance(iar, SetPassword):
                         continue
                     else:
+                        o = []
                         iar.visible = True
+                if isinstance(iar, SetPassword) and self.employee.active_directory_name and not self.employee.alternate_authentication.expired:
+                    iar.visible = True
                 o.append(iar)
-    # if IAdministrator(self.employee, None):
-    #     o.append()
+            if isinstance(i, SetSupervisor):
+                o.append(SetSupervisees(i))
+            if isinstance(iar, ApproveShifts):
+                o.append(ApproveDepartmentTime(i))
     from TimeClock.Web.AthenaRenderers.Widgets.TimeClockStation import TimeClockStation
     o.append(TimeClockStation())
     return o
@@ -73,6 +79,18 @@ class TimeClockPage(LivePage):
     cssModule = 'TimeClock'
     docFactory = xmlfile(path + "/Pages/TimeClock.html")
     pages = {}
+    LONG_CALL_TIME = 1
+
+    def action_call(self, ctx, requestId, method, objectID, args, kwargs):
+        startTime = time.time()
+        try:
+            return super().action_call(ctx, requestId, method, objectID, args, kwargs)
+        finally:
+            endTime = time.time()
+            if endTime - startTime > self.LONG_CALL_TIME:
+                print("extremely long remote call: %2f seconds" % (endTime-startTime))
+                print(method, self._localObjects[objectID], args, kwargs)
+
 
     def renderHTTP(self, ctx):
         resp = super().renderHTTP(ctx)
@@ -156,7 +174,6 @@ class TimeClockPage(LivePage):
                     return 'display: inline;'
             return 'display: none;'
 
-
         def render_remainingThisWeek(self, ctx):
             today = DateTime.today()
             first_day_of_this_week = today.replace(days=-((today.weekday() + 1) % 7))
@@ -215,12 +232,15 @@ class TimeClockPage(LivePage):
             self.parent.action.navigate(element)
 
     render_MenuPane = Renderer(MenuPane)
+
     class ActionPane(LiveFragment):
         docFactory = xmlfile(path + "/Pages/TimeClock.html", "ActionPattern")
         jsClass = "TimeClock.ActionPane"
+
         @property
         def employee(self):
             return self.parent.employee
+
         def __init__(self, parent, ctx):
             super().__init__()
             self.parent = parent
@@ -229,6 +249,7 @@ class TimeClockPage(LivePage):
             self.selectedElement = None
             self.setFragmentParent(parent)
             self.elements = {}
+
         def render_ActionItems(self, ctx):
             o = []
             for iar in getActionItems(self, ctx):
@@ -246,11 +267,20 @@ class TimeClockPage(LivePage):
                 o.append(iar)
             if not self.selectedElement:
                 self.selectedElement = list(self.elements.values())[-1]
-            if self.employee.alternate_authentication and not self.employee.active_directory_name and self.employee.alternate_authentication.expired:
+            if self.employee.alternate_authentication and self.employee.alternate_authentication.expired:
                 for ele in self.elements:
                     if isinstance(self.elements[ele], SetPassword):
                         self.selectedElement = self.elements[ele]
+                        self.selectedElement.visible = True
+                        break
             self.selectedElement.visible = True
+            d = [Deferred().addCallback(lambda v: o.pop(0)) for i in o]
+
+            def cb():
+                if d:
+                    d.pop(0).callback(None)
+                    reactor.callLater(0.001, cb)
+            reactor.callLater(0.001, cb)
             return o
 
         @expose

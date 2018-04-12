@@ -21,11 +21,11 @@ TimeClock.Commands.ClockInOut.methods(
             else{
                 TimeClock.MenuPane.fromAthenaID(1).nodeById('clockInOut').innerHTML = 'Clock In';
             }
-
+            setTimeout(function(){
+                self.show();
+            }, 200);
         }
-        setTimeout(function(){
-            self.show();
-        }, 200);
+
     },
     function refresh(self, subs, locs) {
         console.log(29, subs, locs);

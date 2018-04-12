@@ -37,6 +37,7 @@ class CheckForNewEmployees(Item):
         c = CommandEvent(caller, self)
         IEventBus("Commands").postEvent(c)
         return self.store.transact(self.doCheckForEmployees)
+
     def doCheckForEmployees(self):
         o = []
         for emp in getEmployees():

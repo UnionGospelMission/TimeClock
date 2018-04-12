@@ -10,24 +10,48 @@ from TimeClock.ITimeClock.ISolomonEmployee import ISolomonEmployee
 from TimeClock.Util import NULL
 from TimeClock.Utils import coerce, overload
 from . import Solomon
+import time
 
 
 @implementer(ISolomonEmployee)
 class SolomonEmployee(object):
+    __cache__ = {}
+
     @overload
     def __init__(self, employee_id: int):
         self.employee = IEmployee(employee_id)
-        self.record = Solomon.getEmployee(employee_id)
+        record = Solomon.getEmployee(str(employee_id))
+        if not record:
+            record = Solomon.dummyEntries[str(employee_id)]
+            record['Name'] = 'Employee Missing'
+        self.record = record
 
     @overload
     def __init__(self, employee: IEmployee):
         self.employee = employee
-        self.record = Solomon.getEmployee(employee.employee_id)
+        record = Solomon.getEmployee(employee.employee_id)
+        if not record:
+            record = Solomon.dummyEntries[str(employee.employee_id)]
+            record['Name'] = 'Employee Missing'
+        self.record = record
 
     @overload
     def __init__(self, employee: IEmployee, record: dict):
         self.employee = employee
         self.record = record
+
+    @classmethod
+    def fromIEmployee(cls, employee: IEmployee):
+        cached = cls.__cache__.get(employee)
+        if not cached or cached[1] < time.time():
+            ise = cls(employee)
+            cls.__cache__[employee] = [ise, time.time()+600]
+            return ise
+        return cached[0]
+
+    @classmethod
+    def fromInt(cls, eid: int):
+        return cls.fromIEmployee(IEmployee(eid))
 
     @property
     @coerce
@@ -84,5 +108,6 @@ class SolomonEmployee(object):
         return 0
 
 
-registerAdapter(SolomonEmployee, IEmployee, ISolomonEmployee)
-registerAdapter(SolomonEmployee, int, ISolomonEmployee)
+registerAdapter(SolomonEmployee.fromIEmployee, IEmployee, ISolomonEmployee)
+registerAdapter(SolomonEmployee.fromInt, int, ISolomonEmployee)
+

@@ -1,3 +1,8 @@
+from TimeClock.Util.IterateInReactor import IterateInReactor
+from twisted.internet import defer
+
+from twisted.internet.defer import Deferred, succeed
+
 from TimeClock.ITimeClock.IWeb.IListRow import IListRow
 from TimeClock.Utils import coerce, overload
 from TimeClock.Web.AthenaRenderers.Abstract.AbstractExpandable import AbstractExpandable
@@ -55,7 +60,21 @@ class ListToListSelector(AbstractRenderer, AbstractExpandable, AbstractHideable)
     def targetChanged(self, ID):
         self.element = element = self.page.getWidget(ID)
         m = self.getMappingFor(element)
+        if not isinstance(m, Deferred):
+            m = defer.succeed(m)
+
+        d = Deferred()
+
+        m.addCallback(d.callback)
+
+        d.addCallback(self._targetChanged)
+
+        return d
+
+    def _targetChanged(self, m):
         if self.mappingReturnsNewElements:
+            #IterateInReactor(self._setMapping(m), delay=0.0)
+            #return m, True
             return m, True
         o = []
         for i in m:
@@ -63,6 +82,11 @@ class ListToListSelector(AbstractRenderer, AbstractExpandable, AbstractHideable)
                 i = i._athenaID
             o.append(i)
         return o, self.mappingReturnsNewElements
+
+    # def _setMapping(self, m):
+    #     for i in m:
+    #         self.l2.addRow(i)
+    #         yield
 
     @expose
     def doSave(self, elements: [int]):

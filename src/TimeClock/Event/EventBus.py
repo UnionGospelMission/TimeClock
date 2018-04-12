@@ -15,6 +15,7 @@ from axiom.item import Item
 @implementer(IEventBus)
 class EventBus(Item):
     name = text()
+
     def postEvent(self, event: IEvent) -> bool:
         handlers = self.getEventHandlers(event)
         for handler in handlers:
@@ -40,11 +41,6 @@ class EventBus(Item):
                     toProcess.append(i)
         for b in bases:
             yield from self.powerupsFor(b)
-
-
-
-
-
 
     @coerce
     def register(self, handler: IEventHandler, eventType: Subclass[IEvent]) -> bool:

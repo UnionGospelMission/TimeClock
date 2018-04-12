@@ -62,6 +62,7 @@ class ViewEmployees(AbstractCommandRenderer, AbstractHideable):
         if not self.loaded:
             self.reload(active, inactive)
             self.loaded = True
+
     @expose
     def reload(self, active, inactive):
         self.l.list = [IListRow(i) for i in self.getEmployees(active, inactive)]

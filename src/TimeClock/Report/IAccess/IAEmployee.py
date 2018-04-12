@@ -49,7 +49,11 @@ class IAEmployee(IAbstractAccessible):
         Returns all IEntryType("Work") time entries between startTime and endTime
         """
 
+    def getApprovedTimeEntries(startTime, endTime) -> IACalendarData:
+        "Returns a list of time entries which have been approved, between startTime and endTime"
+
     def getSupervisors():
         """
         Returns list of this employees supervisors
         """
+

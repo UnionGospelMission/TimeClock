@@ -25,12 +25,16 @@ class Logger(Item):
     name = text()
     flags = integer()
     file = reference()
+
     @coerce
     def log(self, level: int, message: str):
-        if level & self.flags and self.file:
-            with self.file.open('a') as f:
-                print(str(DateTime.now()), message, file=self.file, flush=True)
-        self.powerUp(LogEntry(store=self.store, level=level, message=message, logger=self), ILogEntry)
+        if level & self.flags:
+            if self.file:
+                with self.file.open('a'):
+                    print(str(DateTime.now()), message, file=self.file, flush=True)
+            else:
+                self.powerUp(LogEntry(store=self.store, level=level, message=message, logger=self), ILogEntry)
+
     def warn(self, message: str):
         self.log(WARN, message)
 

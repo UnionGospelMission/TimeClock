@@ -74,19 +74,31 @@ class ClockInOut(AbstractRenderer, AbstractHideable):
         if emp.alternate_authentication and emp.alternate_authentication.expired:
             self.callRemote('alert', "<div>Your password is expired, please log in and reset your password</div>")
         else:
-            PublicAPI.login(emp, emp.employee_id, passwd)
-            ise = ISolomonEmployee(emp)
-            dsa = ise.defaultSubAccount
-            dwl = ise.defaultWorkLocation
-            if not dsa.active:
-                return "Default sub account is disabled, please log in to clock in"
-            if not dwl.active:
-                return "Default work location is disabled, please log in to clock in"
-            emp.clockIn(dsa, dwl)
-
+            def clockIn(valid):
+                if valid:
+                    ise = ISolomonEmployee(emp)
+                    dsa = ise.defaultSubAccount
+                    dwl = ise.defaultWorkLocation
+                    if not dsa.active:
+                        self.callRemote('alert', "<div>Default sub account is disabled, please log in to clock in</div>")
+                        return
+                    if not dwl.active:
+                        self.callRemote('alert', "<div>Default work location is disabled, please log in to clock in</div>")
+                        return
+                    emp.clockIn(dsa, dwl)
+                else:
+                    self.callRemote('alert', "<div>Invalid username or password</div>")
+            return PublicAPI.asyncLogin(emp, emp.employee_id, passwd).addCallback(clockIn).addErrback(
+                lambda *_: self.callRemote('alert', "<div>Invalid username or password</div>"))
     @expose
     @Transaction
     def clockOut(self, empRenderer: int, passwd: str):
         emp = self.page.getWidget(empRenderer).getEmployee()
-        PublicAPI.login(emp, emp.employee_id, passwd)
-        emp.clockOut()
+
+        def clockOut(valid):
+            if valid:
+                emp.clockOut()
+            else:
+                self.callRemote('alert', "<div>Invalid username or password</div>")
+        return PublicAPI.asyncLogin(emp, emp, passwd).addCallback(clockOut).addErrback(
+            lambda *_: self.callRemote('alert', "<div>Invalid username or password</div>"))

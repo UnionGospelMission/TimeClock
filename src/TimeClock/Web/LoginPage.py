@@ -40,27 +40,39 @@ class LoginPage(LivePage):
                 return "access denied"
             if employee.alternate_authentication and employee.alternate_authentication.expired:
                 return "Please login to enable quick actions"
-            try:
-                PublicAPI.login(employee, username, password)
-            except PermissionDenied as e:
-                return "access denied"
-            if func == 'clockIn':
-                ise = ISolomonEmployee(employee)
-                if employee.timeEntry:
-                    return "Already clocked in"
-                dsa = ise.defaultSubAccount
-                dwl = ise.defaultWorkLocation
-                if not dsa.active:
-                    return "Default sub account is disabled, please log in to clock in"
-                if not dwl.active:
-                    return "Default work location is disabled, please log in to clock in"
-                employee.clockIn(dsa, dwl)
+            login = PublicAPI.asyncLogin(employee, employee, password)
+            def success(valid):
+                if valid:
+                    if func == 'clockIn':
+                        ise = ISolomonEmployee(employee)
+                        if employee.timeEntry:
+                            raise Exception("Already clocked in")
+                        dsa = ise.defaultSubAccount
+                        dwl = ise.defaultWorkLocation
+                        if not dsa.active:
+                            raise Exception("Default sub account is disabled, please log in to clock in")
+                        if not dwl.active:
+                            raise Exception("Default work location is disabled, please log in to clock in")
+                        employee.clockIn(dsa, dwl)
+                    elif func == 'clockOut':
+                        if not employee.timeEntry:
+                            raise Exception("Already clocked out")
+                        employee.clockOut()
+                    return 'access granted'
+                else:
+                    raise Exception("access denied")
 
-            elif func == 'clockOut':
-                if not employee.timeEntry:
-                    return "Already clocked out"
-                employee.clockOut()
-            return 'access granted'
+            def failure(value):
+                return value
+
+            login.addCallback(
+                success
+            )
+            login.addErrback(
+                failure
+            )
+            return login
+
         @expose
         def tcs(self, username, password):
             if username.isdigit():
@@ -68,12 +80,22 @@ class LoginPage(LivePage):
             employee = IEmployee(username, None)
             if employee is None:
                 return "access denied"
-            try:
-                PublicAPI.login(employee, username, password)
-            except PermissionDenied as e:
+
+            login = PublicAPI.asyncLogin(employee, employee, password)
+
+            def newPage(valid):
+                if valid:
+                    newPage = TimeClockStationPage()
+                    return newPage.pageId
                 return "access denied"
-            newPage = TimeClockStationPage()
-            return newPage.pageId
+
+            def denied(valid):
+                return "access denied"
+
+            login.addCallback(newPage)
+            login.addErrback(denied)
+            return login
+
         @expose
         def validate(self, username, password):
             if username.isdigit():
@@ -81,11 +103,20 @@ class LoginPage(LivePage):
             employee = IEmployee(username, None)
             if employee is None:
                 return "access denied"
-            try:
-                PublicAPI.login(employee, username, password)
-            except PermissionDenied as e:
+
+            login = PublicAPI.asyncLogin(employee, employee, password)
+
+            def newPage(valid):
+                if valid:
+                    newPage = TimeClockPage(employee)
+                    return newPage.pageId
                 return "access denied"
-            newPage = TimeClockPage(employee)
-            return newPage.pageId
+
+            def denied(valid):
+                return "access denied"
+
+            login.addCallback(newPage)
+            login.addErrback(denied)
+            return login
 
     render_LoginPage = lambda self, *x: self.LoginFragment(self, *x)

@@ -12,6 +12,7 @@ from twisted.python.filepath import FilePath as FP
 @implementer(inevow.IResource)
 class GZFile(static.File):
     encoding = None
+
     @staticmethod
     def canCompress(req):
         value = req.getHeader('accept-encoding')
@@ -78,7 +79,6 @@ class GZFile(static.File):
 
         if request.setLastModified(self.fp.getmtime()) is static.http.CACHED:
             return ''
-
 
         if request.method == 'HEAD':
             return ''

@@ -41,6 +41,7 @@ from .Database.Commands.ViewAverageHours import ViewAverageHours
 from .Database.Commands.ApproveTime import ApproveTime
 from .Database.Commands.EditTime import EditTime
 from .Database.Commands.Login import Login
+from .Database.Commands.AsyncLogin import AsyncLogin
 from .Database.Commands.MakeSupervisor import MakeSupervisor
 from .Database.Commands.AddToArea import AddToArea
 from .Database.Commands.MakeAdministrator import MakeAdministrator
@@ -65,6 +66,7 @@ def initializeCommands(Store: store.Store):
     Store.powerUp(Store.findOrCreate(ClockOut, name="Clock Out"), ICommand)
     Store.powerUp(Store.findOrCreate(ApproveTime, name="Approve Time"), ICommand)
     Store.powerUp(Store.findOrCreate(Login, name="Login"), ICommand)
+    Store.powerUp(Store.findOrCreate(AsyncLogin), ICommand)
     Store.powerUp(Store.findOrCreate(EditTime, name="Edit Time"), ICommand)
     Store.powerUp(Store.findOrCreate(ViewHours, name="View Hours"), ICommand)
     Store.powerUp(Store.findOrCreate(ViewAverageHours, name="View Average Hours"), ICommand)
@@ -107,6 +109,7 @@ def initializeAPIs(Store: store.Store):
     Store.powerUp(AdministratorAPI, IAPI)
     findCommand = commandFinder(Store)
     PublicAPI.powerUp(findCommand("Login"), ICommand)
+    PublicAPI.powerUp(findCommand("AsyncLogin"), ICommand)
 
     AdministratorAPI.powerUp(findCommand("MakeAdministrator"), ICommand)
     AdministratorAPI.powerUp(findCommand("MakeSupervisor"), ICommand)

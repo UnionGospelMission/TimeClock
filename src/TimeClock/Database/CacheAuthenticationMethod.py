@@ -26,15 +26,17 @@ class CacheAuthenticationMethod(Item):
 
     def authenticate(self, employee: IEmployee, password: str) -> bool:
         if employee.active_directory_name:
-            try:
-                valid = AD.authenticate(employee.active_directory_name, password)
-                if valid:
-                    newpw = str(sha512((password + self.salt).encode('charmap')).hexdigest())
-                    if self.password != newpw:
-                        self.password = newpw
-                return valid
-            except ldap3.core.exceptions.LDAPException:
-                return str(sha512((password + self.salt).encode('charmap')).hexdigest()) == self.password
+            from TimeClock.Database.LDAPBackedAuthenticationMethod import LDAPBackedAuthenticationMethod
+            return LDAPBackedAuthenticationMethod.fromCacheAuthenticationMethod(employee, self).authenticate(employee, password)
+            # try:
+            #     valid = AD.authenticate(employee.active_directory_name, password)
+            #     if valid:
+            #         newpw = str(sha512((password + self.salt).encode('charmap')).hexdigest())
+            #         if self.password != newpw:
+            #             self.password = newpw
+            #     return valid
+            # except ldap3.core.exceptions.LDAPException:
+            #     return str(sha512((password + self.salt).encode('charmap')).hexdigest()) == self.password
         else:
             return str(sha512((password + self.salt).encode('charmap')).hexdigest()) == self.password
 

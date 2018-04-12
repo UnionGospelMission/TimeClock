@@ -27,21 +27,28 @@ class SetPassword(AbstractCommandRenderer, AbstractHideable):
         self._employee = self.employee
 
     def render_genericCommand(self, ctx: WovenContext, data):
-        t = [
-            self.currentPW,
+        t = []
+        if self.employee is self._employee and self.employee.alternate_authentication and self.employee.alternate_authentication.expired:
+            if not self.employee.active_directory_name:
+                t.insert(0, tags.h3(name='expired')['Your password is expired'])
+                t.append(self.currentPW)
+            else:
+                t.insert(0, tags.h3(name='expired')['Your Active Directory password has changed, please enter the new password'])
+
+        t.extend([
             tags.input(id="newPassword", type="password", placeholder="New Password"),
             tags.br(),
             tags.input(id="newPasswordAgain", type="password", placeholder="New Password Again"),
             tags.br(),
             tags.input(value='Set Password', type='button')[tags.Tag('athena:handler')(event='onclick', handler='setPassword')]
-        ]
-        if self.employee is self._employee and self.employee.alternate_authentication and self.employee.alternate_authentication.expired and not self.employee.active_directory_name:
-            t.insert(0, tags.h3(name='expired')['Your password is expired'])
+        ])
+
         return self.preprocess(t)
+
     @expose
     @Transaction
     def setPassword(self, oldpassword, newpassword, newpassworda):
-        if self._employee is self.employee and oldpassword is not None:
+        if self._employee is self.employee and ((oldpassword is not None) or self.employee.active_directory_name):
             expired = self._employee.alternate_authentication.expired
             self.args[0].execute(self._employee, oldpassword, newpassword, newpassworda)
             if expired:

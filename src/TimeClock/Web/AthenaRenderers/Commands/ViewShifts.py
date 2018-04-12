@@ -10,6 +10,7 @@ from TimeClock.Database.EntryType import EntryType
 from TimeClock.Database.TimeEntry import TimeEntry
 from TimeClock.Database.TimePeriod import TimePeriod
 from TimeClock.Util.DateTime import DateTime
+from axiom.attributes import AND, OR
 from twisted.python.components import registerAdapter
 from zope.interface import implementer
 
@@ -43,6 +44,11 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
     name = 'View Shifts'
     loaded = False
     startTime = DateTime.today().replace(day=1).replace(months=-1)
+
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.startTime = DateTime.today().replace(day=1).replace(months=-1)
+
     endTime = None
 
     @expose
@@ -51,7 +57,7 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
             self.loaded = True
             startTime = self.startTime or IDateTime(0)
             endTime = self.endTime or None
-            entries = [i for i in self.getEntries() if not (i.endTime() < startTime or (endTime and i.startTime() > endTime))]
+            entries = self.getEntries(startTime, endTime)
             self.addTotals(entries)
             l = [IListRow(i).prepare(self.l) for i in entries]
             for i in l:
@@ -83,9 +89,34 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
         self.preprocess([startTime, endTime])
         return [startTime, endTime, l]
 
-    def getEntries(self):
-        l = sorted(list(i for i in self.employee.powerupsFor(ITimeEntry)), key=(lambda p: p.period._startTime if p.period else TimeClock.Util.DateTime.DateTime.fromtimestamp(0)))
-        return l
+    def getEntries(self, startTime=None, endTime=None):
+        store = self.employee.store
+
+        q = AND(
+            TimeEntry.employee == self.employee,
+            TimeEntry.type == EntryType.storeID,
+            EntryType.active == True,
+            TimeEntry.period == TimePeriod.storeID,
+
+        )
+        q.conditions = list(q.conditions)
+
+        if not startTime:
+            startTime = self.startTime
+
+        if not endTime:
+            endTime = self.endTime
+
+        if endTime:
+            q.conditions.append(TimePeriod._startTime <= IDateTime(endTime))
+
+        if startTime:
+            q.conditions.append(OR(
+                TimePeriod._endTime >= IDateTime(startTime),
+                TimePeriod._endTime==None
+            ))
+
+        return [i[0] for i in store.query((TimeEntry, EntryType, TimePeriod), q, sort=TimePeriod._startTime.asc)]
 
     @expose
     def timeWindowChanged(self, startTime, endTime):
@@ -97,7 +128,7 @@ class ViewHours(AbstractCommandRenderer, AbstractHideable):
             self.endTime = endTime = IDateTime(endTime)
         else:
             self.endTime = None
-        entries = [i for i in self.getEntries() if not (i.endTime() < startTime or (endTime and i.startTime() > endTime))]
+        entries = self.getEntries(startTime, endTime)
         self.addTotals(entries)
         entries = [IListRow(i).prepare(self.l) for i in entries]
 

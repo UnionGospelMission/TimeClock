@@ -4,8 +4,13 @@ from collections import defaultdict
 
 import datetime
 
+from TimeClock.ITimeClock.IDatabase.ISupervisedBy import ISupervisedBy
+from twisted.python.reflect import qual
+
 import twisted.internet.threads
 from TimeClock.Util.IterateInReactor import IterateInReactor
+from TimeClock.Web.AthenaRenderers.Objects.WorkLocationRenderer import WorkLocationRenderer
+from axiom.item import _PowerupConnector
 
 from twisted.internet import reactor
 
@@ -55,114 +60,18 @@ from nevow.loaders import xmlfile
 
 
 @implementer(IEventHandler)
-class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
+class ApproveDepartmentTime(AbstractCommandRenderer, AbstractHideable):
     docFactory = xmlfile(path + "/Pages/GenericCommand.xml", "GenericCommandPattern")
-    jsClass = 'TimeClock.Commands.ApproveShifts'
+    jsClass = 'TimeClock.Commands.ApproveDepartmentTime'
     workLocations = None
-    name = 'Approve Shifts'
+    name = 'Approve Department Time'
     selected = None
     ltl = None
     l1 = None
     l2 = None
-    startTime = DateTime.today().replace(day=1).replace(months=-1)
+    startTime = DateTime.today().replace(weeks=-1)
     endTime = None
     loaded = False
-
-    def getEmployees(self):
-        if self.employee.isAdministrator():
-            employees = [i for i in list(Store.query(Employee)) if ISolomonEmployee(i).status == Solomon.ACTIVE]
-        elif self.employee.isSupervisor():
-            sup = ISupervisor(self.employee)
-            employees = [i for i in sup.getEmployees() if ISolomonEmployee(i).status == Solomon.ACTIVE]
-        else:
-            employees = []
-        return employees
-
-    @expose
-    def load(self, active: bool = True, inactive: bool = False):
-        if not self.loaded:
-            self.ltl.l1.list = [IListRow(i).prepare(self.ltl.l1) for i in self.getEmployees()]
-            self.ltl.l1.callRemote('select', self.ltl.l1.list, True)
-            self.loaded = True
-
-    def __init__(self, cmd):
-        super().__init__(cmd)
-        self.name = cmd.name
-        if isinstance(cmd, ApproveTime):
-            self.entryType = IEntryType("Work")
-            self.entryTypes = self.entryTypes = tuple(
-                self.args[0].store.query(EntryType, EntryType.active == True)
-            )
-        self.startTime = DateTime.today().replace(day=1).replace(months=-1)
-
-    @overload
-    def handleEvent(self, evt: TimeEntryCreatedEvent):
-        if evt.timeEntry.employee is self.selected:
-            self.l2.addRow(evt.timeEntry)
-
-    @overload
-    def handleEvent(self, evt: TimeEntryChangedEvent):
-        if evt.timeEntry.denied:
-            self.l2.removeRow(evt.timeEntry)
-
-    @overload
-    def handleEvent(self, event: IEvent):
-        pass
-
-    def render_class(self, ctx: WovenContext, data):
-        IEventBus("Web").register(self, ITimeEntryChangedEvent)
-        return "ApproveShifts"
-
-    def render_genericCommand(self, ctx: WovenContext, data):
-
-        employees = []
-        self.l1 = l1 = List(employees, ["Employee ID", "Name"])
-        self.l2 = l2 = List([], ["Entry Type", "Work Location", "Sub Account", "Start Time", "End Time", "Shift Duration", "Daily Total", "Approved", "Denied"])
-        self.ltl = ltl = ListToListSelector(l1, l2)
-        ltl.mappingReturnsNewElements = True
-        ltl.prepare(self)
-        ltl.visible = True
-        ltl.closeable = False
-        ltl.getMappingFor = self.getMappingFor
-        ltl.setMappingFor = self.setMappingFor
-        l2.setSelectable(False)
-
-        startTime = tags.input(id='startTime', placeholder='Start Time')#[tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
-        endTime = tags.input(id='endTime', placeholder='End Time')
-        addTime = [
-            tags.input(id='addTime', type='button', value='Add Time Entry')[
-                tags.Tag('athena:handler')(event='onclick', handler='addTime')],
-            tags.select(id='newTimeType')[
-                [tags.option(id=et.getTypeName())[et.getTypeName()] for et in self.entryTypes]
-                ]
-            ]
-        if not IAdministrator(self.employee, None):
-            addTime = ''
-
-        self.preprocess([startTime, endTime, addTime])
-        return [startTime, endTime, tags.br(), addTime, ltl]
-
-    @expose
-    @Transaction
-    def addTime(self, typ):
-        typ = IEntryType(typ)
-        if IAdministrator(self.employee) and self.selected is not self.employee:
-            if self.selected:
-                ise = ISolomonEmployee(self.selected)
-                a = ITimeEntry(NULL)
-                a.subAccount = ise.defaultSubAccount
-                a.workLocation = ise.defaultWorkLocation
-                a.employee = self.selected
-                a.period = ITimePeriod(NULL)
-                a.type = typ
-                a.period.end(a.period.startTime())
-                self.selected.powerUp(a, ITimeEntry)
-                e = TimeEntryCreatedEvent(a)
-                IEventBus("Web").postEvent(e)
-            else:
-                raise Exception("No Employee Selected")
-        else:
-            raise Exception("Permission Denied")
 
     @expose
     def startTimeChanged(self, startTime):
@@ -177,56 +86,90 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         self.startTime = startTime
         self.endTime = endTime
 
-    def addTotals(self, lst):
-        out = []
-        def render_listRow(self, ctx: WovenContext, data=None):
-            r = self.old_render_listRow(ctx, data)
-            r[1](style='opacity: 0')
-            r[2](style='opacity: 0')
-            r[3](style='opacity: 0')
-            r[4](style='opacity: 0')
-            r[7](style='opacity: 0')
-            r[8](style='opacity: 0')
-            return r
-        totals = defaultdict(datetime.timedelta)
-        total = datetime.timedelta()
-        for s in lst:
-            s = s.getEntry()
-            totals[s.type.getTypeName()] += s.duration()
-            total += s.duration()
-        for typ in totals:
-            ts = totals[typ].total_seconds()
-            subtotal_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Subtotal: %s' % typ), period=TimePeriod(_startTime=IDateTime(0), _endTime=IDateTime(0).replace(seconds=ts))))
-            out.append(subtotal_row)
-            subtotal_row.prepare(self.l2)
-            subtotal_row.old_render_listRow = subtotal_row.render_listRow
-            subtotal_row.render_listRow = types.MethodType(render_listRow, subtotal_row)
+    def getEmployees(self):
+        if self.employee.isAdministrator():
+            employees = [i for i in list(Store.query(Employee)) if ISolomonEmployee(i).status == Solomon.ACTIVE]
+        elif self.employee.isSupervisor():
+            sup = ISupervisor(self.employee)
+            employees = [i for i in sup.getEmployees() if ISolomonEmployee(i).status == Solomon.ACTIVE]
+        else:
+            employees = []
+        return employees
 
-        ts = total.total_seconds()
-        total_row = IListRow(TimeEntry(employee=Employee(), type=EntryType(name='Total'), period=TimePeriod(_startTime=IDateTime(0), _endTime=IDateTime(0).replace(seconds=ts))))
-        total_row.old_render_listRow = total_row.render_listRow
-        total_row.render_listRow = types.MethodType(render_listRow, total_row)
-        total_row.prepare(self.l2)
-        TimeClock.total_row = total_row
-        out.append(total_row)
-        return out
+    def getLocations(self):
+        locations = set()
+        for emp in self.getEmployees():
+            locations.update(list(emp.getWorkLocations()))
+        return locations
+
+    @expose
+    def load(self, active: bool = True, inactive: bool = False):
+        if not self.loaded:
+            self.ltl.l1.list = [IListRow(i).prepare(self.ltl.l1) for i in self.getLocations()]
+            self.ltl.l1.callRemote('select', self.ltl.l1.list, True)
+            self.loaded = True
+
+    def __init__(self, cmd):
+        super().__init__(cmd)
+        self.startTime = DateTime.today().replace(weeks=-1)
+        self.endTime = DateTime.today().replace(days=1)
+
+    @overload
+    def handleEvent(self, evt: TimeEntryCreatedEvent):
+        if evt.timeEntry.workLocation is self.selected:
+            self.l2.addRow(evt.timeEntry)
+
+    @overload
+    def handleEvent(self, evt: TimeEntryChangedEvent):
+        if evt.timeEntry.denied:
+            self.l2.removeRow(evt.timeEntry)
+
+    @overload
+    def handleEvent(self, event: IEvent):
+        pass
+
+    def render_class(self, ctx: WovenContext, data):
+        IEventBus("Web").register(self, ITimeEntryChangedEvent)
+        return "ApproveDepartmentTime"
+
+    def render_genericCommand(self, ctx: WovenContext, data):
+
+        locations = []
+        self.l1 = l1 = List(locations, ["Work Location"])
+        self.l2 = l2 = List([], ["Entry Type", "Employee", "Sub Account", "Start Time", "End Time", "Shift Duration", "Daily Total", "Approved", "Denied"])
+        self.ltl = ltl = ListToListSelector(l1, l2)
+        ltl.mappingReturnsNewElements = True
+        ltl.prepare(self)
+        ltl.visible = True
+        ltl.closeable = False
+        ltl.getMappingFor = self.getMappingFor
+        ltl.setMappingFor = self.setMappingFor
+        l2.setSelectable(False)
+
+        startTime = tags.input(id='startTime', placeholder='Start Time')#[tags.Tag('athena:handler')(event='onchange', handler='timeWindowChanged')]
+        endTime = tags.input(id='endTime', placeholder='End Time')
+
+        self.preprocess([startTime, endTime])
+        return [startTime, endTime, tags.br(), ltl]
 
     @coerce
-    def getMappingFor(self, e: EmployeeRenderer):
-        if self.employee.isAdministrator() or e.getEmployee() in ISupervisor(self.employee).getEmployees():
-            self.selected = e.getEmployee()
-        else:
-            return []
+    def getMappingFor(self, e: WorkLocationRenderer):
+        self.selected = e._workLocation
 
         isAdm = self.employee.isAdministrator()
 
         store = self.employee.store
 
         q = AND(
-            TimeEntry.employee==self.selected,
+            TimeEntry.workLocation==self.selected,
             TimeEntry.type==EntryType.storeID,
             EntryType.active==True,
             TimeEntry.period==TimePeriod.storeID,
+            TimeEntry.employee==Employee.storeID,
+            _PowerupConnector.interface==str(qual(ISupervisedBy)),
+            _PowerupConnector.item==Employee.storeID,
+            TimeEntry.approved==False,
+            TimeEntry.denied==False
 
         )
         q.conditions = list(q.conditions)
@@ -246,8 +189,11 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
 
         if not isAdm:
             q.conditions.append(TimeEntry.denied==False)
+            q.conditions.append(_PowerupConnector.powerup == ISupervisor(self.employee))
 
-        shifts = (i[0] for i in store.query((TimeEntry, TimePeriod, EntryType), q, sort=TimePeriod._startTime.asc))
+        self.__class__.q = q
+
+        shifts = (i[0] for i in store.query((TimeEntry, TimePeriod, EntryType, Employee, _PowerupConnector), q, sort=TimePeriod._startTime.asc))
         return IterateInReactor(self.prepareShifts(shifts))
 
     def prepareShifts(self, shifts):
@@ -255,15 +201,12 @@ class ApproveShifts(AbstractCommandRenderer, AbstractHideable):
         for shift in shifts:
             # if not ((startTime and shift.endTime() < startTime) or (endTime and shift.startTime() > endTime)):
             s = IListRow(shift)
+            s.showEmployee()
             s.prepare(self.l2)
             o.append(s)
             yield s
-        yield from self.addTotals(o)
         yield SaveList(8).prepare(self.l2)
 
     @Transaction
     def setMappingFor(self, s: EmployeeRenderer, accounts: [EmployeeRenderer]):
         pass
-
-
-registerAdapter(ApproveShifts, ApproveTime, IAthenaRenderable)

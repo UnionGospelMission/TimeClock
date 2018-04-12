@@ -49,6 +49,7 @@ class Login(Item):
                 allowed = AD.authenticate(e, pw)
             if not allowed:
                 raise PermissionDenied("Incorrect Username or Password")
-    @overload
+    #@overload
     def execute(self, caller: IEmployee, *parameters: object):
-        raise NotImplementedError("%s called with invalid parameters" % self.name)
+        raise Exception("This Login method is deprecated")
+        #raise NotImplementedError("%s called with invalid parameters" % self.name)

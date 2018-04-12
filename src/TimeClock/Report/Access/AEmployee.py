@@ -98,6 +98,10 @@ class AEmployee(object):
     def getTimeEntries(self, startTime: IDateTime, endTime: IDateTime) -> IACalendarData:
         return self._employee.getEntries(startTime=startTime, endTime=endTime)
 
+    @coerce
+    def getApprovedTimeEntries(self, startTime, endTime) -> IACalendarData:
+        return self._employee.getApprovedEntries(startTime, endTime)
+
     @overload
     def viewHours(self, startTime: IDateTime, endTime: IDateTime) -> IACalendarData:
         return self._employee.viewHours(startTime, endTime)

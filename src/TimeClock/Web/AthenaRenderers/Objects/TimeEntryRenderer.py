@@ -5,8 +5,11 @@ import arrow
 import dateutil.parser
 
 from TimeClock import Exceptions
+from TimeClock.Database.TimeEntry import TimeEntry
+from TimeClock.Database.TimePeriod import TimePeriod
 from TimeClock.ITimeClock.IDatabase.ICalendarData import ICalendarData
 from TimeClock.Web.Utils import formatTimeDelta
+from axiom.attributes import AND, OR
 from twisted.python.components import registerAdapter
 from zope.interface import implementer, directlyProvides
 
@@ -40,6 +43,7 @@ from nevow import tags as T
 class _RenderListRowMixin(AbstractExpandable):
     length = 9
     _workLocation = None
+    _showEmployee = False
     ctr = -1
 
     def render_searchclass(self, ctx, data):
@@ -51,6 +55,9 @@ class _RenderListRowMixin(AbstractExpandable):
         if self._timeEntry.original:
             return 'te-modified'
         return ''
+
+    def showEmployee(self):
+        self._showEmployee = True
 
     def render_listRow(self, ctx: WovenContext, data=None):
         IEventBus("Web").register(self, ITimeEntryChangedEvent)
@@ -108,7 +115,6 @@ class _RenderListRowMixin(AbstractExpandable):
             rj = listCell(data=dict(listItem=reject))
 
         startTime = T.input(id='startTime', value=st.strftime('%Y-%m-%d %H:%M:%S %Z') if st else 'None')
-
         if self._timeEntry.employee.timeEntry is self._timeEntry:
             ET(disabled=True)
         if not self.employee.isAdministrator() or self.parent.selectable or self.employee is self._timeEntry.employee:
@@ -127,10 +133,24 @@ class _RenderListRowMixin(AbstractExpandable):
                     self.employee is self._timeEntry.employee:
                 reject(disabled=True)
                 approved(disabled=True)
-
         startday = self._timeEntry.startTime().date()
         endday = startday.replace(hours=23, minutes=59, seconds=59)
-        entries = ICalendarData([i for i in self._timeEntry.employee.powerupsFor(ITimeEntry) if not i.denied]).between(startday, endday)
+
+        store = self._timeEntry.store
+        q = AND(
+            TimeEntry.period==TimePeriod.storeID,
+            TimeEntry.employee==self._timeEntry.employee,
+            TimeEntry.denied==False,
+            TimePeriod._startTime <= endday,
+            OR(TimePeriod._endTime >= startday,
+               TimePeriod._endTime==None
+            )
+        )
+        if store:
+            entries = ICalendarData([i[0] for i in store.query((TimeEntry, TimePeriod), q)]).between(startday, endday)
+        else:
+            entries = ICalendarData([])
+
         lastEntryOfDay = entries.entries and entries.entries[-1].startTime() == self._timeEntry.startTime()
         if lastEntryOfDay:
             total = T.input(id='total', value=formatTimeDelta(entries.sumBetween(startday, endday)))
@@ -138,10 +158,9 @@ class _RenderListRowMixin(AbstractExpandable):
             total = listCell(data=dict(listItem=total))
         else:
             total = listCell(data=dict(listItem=""))(style='opacity: 0')
-
         self.preprocess([approved, workLocationID, subAccount, startTime, ET, duration, reject, total])
         r = [listCell(data=dict(listItem=te_type)),
-             listCell(data=dict(listItem=workLocationID)),
+             listCell(data=dict(listItem=workLocationID if not self._showEmployee else T.input(disabled=True, value=self._timeEntry.employee.name))),
              listCell(data=dict(listItem=subAccount)),
              listCell(data=dict(listItem=startTime)),
              et,
@@ -301,7 +320,6 @@ class TimeEntryRenderer(AbstractRenderer, AbstractHideable, _RenderListRowMixin)
                 oldv = self._timeEntry.period.endTime(False)
                 val = (Utils.getIDateTime(vals[key]))
                 if oldv.replace(microsecond=0) != val.replace(microsecond=0):
-                    print(290, oldv, val)
                     self._timeEntry.period.end(val)
                     oldVals[key] = oldv
                 continue

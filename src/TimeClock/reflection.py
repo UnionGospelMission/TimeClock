@@ -64,3 +64,26 @@ from TimeClock.Report.Format import Widget
 from TimeClock.Database.CacheAuthenticationMethod import CacheAuthenticationMethod
 
 from TimeClock.Database.Benefit import Benefit
+
+import os
+if os.environ.get('DEBUG_STACK'):
+    import stack_tracer
+    stack_tracer.trace_start('/home/timeclock/stack.html')
+
+    from TimeClock.Util.DateTime import DateTime
+    from TimeClock.ITimeClock.IEvent.IEvent import IEvent
+    from TimeClock.ITimeClock.IEvent.IEventHandler import IEventHandler
+
+
+    @implementer(IEventHandler)
+    class Logger(object):
+        f = open('/tmp/webevent.log', 'a')
+
+        def handleEvent(self, event: IEvent):
+            print(str(DateTime.now()), event, vars(event), file=self.f, flush=True)
+            print(str(DateTime.now()), event)
+
+        def powerUp(self, *a):
+            pass
+
+    IEventBus("Web").register(Logger(), IEvent)

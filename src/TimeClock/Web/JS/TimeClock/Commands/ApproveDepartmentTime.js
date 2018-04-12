@@ -6,8 +6,8 @@
 // import jquery.ui.datetimepicker
 
 "use strict";
-TimeClock.Commands.ApproveShifts = TimeClock.Commands.subclass("TimeClock.Commands.ApproveShifts");
-TimeClock.Commands.ApproveShifts.methods(
+TimeClock.Commands.ApproveDepartmentTime = TimeClock.Commands.subclass("TimeClock.Commands.ApproveDepartmentTime");
+TimeClock.Commands.ApproveDepartmentTime.methods(
     function __init__(self, node){
         TimeClock.Commands.ApproveShifts.upcall(self, '__init__', node);
         var options = {
@@ -36,9 +36,6 @@ TimeClock.Commands.ApproveShifts.methods(
     },
     function endTimeChanged(self, node) {
         self.busyCallRemote("endTimeChanged", self.nodeById('endTime').value);
-    },
-    function addTime(self, node) {
-        self.busyCallRemote('addTime', self.nodeById('newTimeType').value);
     }
 );
 

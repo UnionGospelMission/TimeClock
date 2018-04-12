@@ -25,6 +25,7 @@ from .PageFactory import PageFactory
 
 ports = {}
 
+
 @implementer(twisted.application.service.IService)
 class AthenaService(Item):
     schemaVersion = 4
@@ -61,12 +62,12 @@ class AthenaService(Item):
         if pkey:
             self.privkey = pkey
         self.iajs_fqpn = options['iajs']
-        self.addCipherEntry('DEFAULT')
         return self
 
     def installOn(self, store):
         self.store = store
         store.powerUp(self, twisted.application.service.IService)
+        self.addCipherEntry('DEFAULT')
 
     def setName(self, name):
         if self.parent:
@@ -88,10 +89,10 @@ class AthenaService(Item):
         pf = PageFactory(self.iajs, self.port, self.protocol)
         for i in pf.iajs.Ports:
             if i[0] == 'TCP':
-                ports[self.storeID] = reactor.listenTCP(i[1], NevowSite(pf))
+                ports[self.storeID] = [reactor.listenTCP(i[1], NevowSite(pf))]
                 continue
             if i[0] == 'UDP':
-                ports[self.storeID] = reactor.listenUDP(i[1], NevowSite(pf))
+                ports[self.storeID] = [reactor.listenUDP(i[1], NevowSite(pf))]
                 continue
             if i[0] == 'SSL':
                 ctx = ssl.DefaultOpenSSLContextFactory(
